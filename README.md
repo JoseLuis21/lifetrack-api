@@ -1,5 +1,5 @@
 # Life Tracker API
-Life Tracker API written in Go.
+Life Track is a platform where you can track habits and get useful insights from them.
 
 ## Technology Stack
 - Go 1.15
