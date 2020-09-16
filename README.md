@@ -13,3 +13,4 @@ Life Tracker API written in Go.
   - DynamoDB
   - S3 Intelligent Tier
   - CLI v2
+  - IAM
