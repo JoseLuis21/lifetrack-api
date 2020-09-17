@@ -29,9 +29,9 @@ Run the following command into your favorite terminal.
 
 `aws s3api create-bucket --bucket=life-track-serverless --region=us-east-1`
 
-You may change either the bucket's name or region, but have in mind you would need to modify the 
+_You may change either the bucket's name or region, but have in mind you would need to modify the 
 `deploy-to-s3.sh` script to match your new bucket name. Also, you would need to modify your AWS CLI 
-default region (at `~/.aws/config`).
+default region (at `~/.aws/config`)._
 
 ## Requirements
 
