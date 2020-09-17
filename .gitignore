@@ -17,6 +17,12 @@
 # Terraform
 .terraform/
 terraform.tfstate
+deployments/.terraform/
+deployments/terraform.tfstate
 
 # IDEA
 .idea/
+
+# Builds
+build/release/*.zip
+build/bin/
