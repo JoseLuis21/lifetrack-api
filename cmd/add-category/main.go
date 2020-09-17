@@ -9,8 +9,7 @@ import (
 	"github.com/awslabs/aws-lambda-go-api-proxy/gorillamux"
 	"github.com/gorilla/mux"
 	"github.com/neutrinocorp/life-track-api/internal/application/command"
-	"github.com/neutrinocorp/life-track-api/internal/infrastructure"
-	"github.com/neutrinocorp/life-track-api/internal/infrastructure/persistence"
+	"github.com/neutrinocorp/life-track-api/pkg/dep"
 	"log"
 	"net/http"
 )
@@ -21,12 +20,12 @@ func init() {
 	log.Print("mux cold start")
 	r := mux.NewRouter()
 	r.Path("/category").Methods(http.MethodPost).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		cfg, err := infrastructure.NewConfiguration()
+		cmd, err := dep.InjectAddCategoryHandler()
 		if err != nil {
-			panic(err)
+			httputil.RespondErrorJSON(err, w)
+			return
 		}
 
-		cmd := command.NewAddCategoryHandler(persistence.NewCategoryDynamoRepository(cfg))
 		err = cmd.Handle(command.AddCategory{
 			Ctx:         r.Context(),
 			Title:       r.PostForm.Get("title"),
