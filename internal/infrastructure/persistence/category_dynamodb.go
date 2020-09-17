@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/alexandria-oss/common-go/exception"
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
@@ -16,12 +17,17 @@ import (
 )
 
 type CategoryDynamoRepository struct {
-	cfg infrastructure.Configuration
-	mu  *sync.RWMutex
+	sess *session.Session
+	cfg  infrastructure.Configuration
+	mu   *sync.RWMutex
 }
 
-func NewCategoryDynamoRepository(cfg *infrastructure.Configuration) *CategoryDynamoRepository {
-	return &CategoryDynamoRepository{cfg: *cfg, mu: new(sync.RWMutex)}
+func NewCategoryDynamoRepository(s *session.Session, cfg *infrastructure.Configuration) *CategoryDynamoRepository {
+	return &CategoryDynamoRepository{
+		sess: s,
+		cfg:  *cfg,
+		mu:   new(sync.RWMutex),
+	}
 }
 
 func (r CategoryDynamoRepository) Save(ctx context.Context, c *aggregate.Category) error {
@@ -35,7 +41,7 @@ func (r CategoryDynamoRepository) Save(ctx context.Context, c *aggregate.Categor
 	}
 	r.mu.Lock()
 
-	svc := NewDynamoConn(r.cfg.Table.Region)
+	svc := NewDynamoConn(r.sess, r.cfg.Table.Region)
 	_, err := svc.PutItemWithContext(ctx, &dynamodb.PutItemInput{
 		Item: map[string]*dynamodb.AttributeValue{
 			"category_id": {
@@ -71,7 +77,7 @@ func (r *CategoryDynamoRepository) FetchByID(ctx context.Context, id *value.UUID
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
-	svc := NewDynamoConn(r.cfg.Table.Region)
+	svc := NewDynamoConn(r.sess, r.cfg.Table.Region)
 
 	res, err := svc.GetItemWithContext(ctx, &dynamodb.GetItemInput{
 		Key: map[string]*dynamodb.AttributeValue{
@@ -102,7 +108,7 @@ func (r CategoryDynamoRepository) Exists(ctx context.Context, title value.Title,
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
-	svc := NewDynamoConn(r.cfg.Table.Region)
+	svc := NewDynamoConn(r.sess, r.cfg.Table.Region)
 
 	exp, err := expression.NewBuilder().WithFilter(
 		expression.And(expression.Name("title").Equal(expression.Value(title.Get())),
