@@ -121,7 +121,7 @@ func (r CategoryDynamoRepository) Exists(ctx context.Context, title value.Title,
 	res, err := svc.ScanWithContext(ctx, &dynamodb.ScanInput{
 		AttributesToGet:           nil,
 		ConditionalOperator:       nil,
-		ConsistentRead:            nil,
+		ConsistentRead:            aws.Bool(true),
 		ExclusiveStartKey:         nil,
 		ExpressionAttributeNames:  exp.Names(),
 		ExpressionAttributeValues: exp.Values(),
