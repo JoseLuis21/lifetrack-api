@@ -10,8 +10,8 @@ resource "aws_dynamodb_table" "lt-category" {
   }
 
   tags = {
-    Name = "life-track"
-    Environment = "production"
+    Environment: "prod",
+    Name: "neutrino-lifetrack"
   }
 }
 
