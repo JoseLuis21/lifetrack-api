@@ -61,6 +61,10 @@ resource "aws_iam_role" "category-lambda-exec-write-db" {
   description = "Allows Neutrino's LifeTrack lambda functions to call DynamoDB write operations."
   path = "/"
   assume_role_policy = data.aws_iam_policy_document.lambda-exec.json
+  tags = {
+    Environment: "prod",
+    Name: "neutrino-lifetrack"
+  }
 }
 
 resource "aws_iam_role" "category-lambda-exec-read-db" {
@@ -68,6 +72,10 @@ resource "aws_iam_role" "category-lambda-exec-read-db" {
   description = "Allows Neutrino's LifeTrack lambda functions to call DynamoDB read operations."
   path = "/"
   assume_role_policy = data.aws_iam_policy_document.lambda-exec.json
+  tags = {
+    Environment: "prod",
+    Name: "neutrino-lifetrack"
+  }
 }
 
 resource "aws_iam_role" "category-lambda-exec-full-db" {
@@ -75,6 +83,10 @@ resource "aws_iam_role" "category-lambda-exec-full-db" {
   description = "Allows Neutrino's LifeTrack lambda functions to call DynamoDB read-write operations."
   path = "/"
   assume_role_policy = data.aws_iam_policy_document.lambda-exec.json
+  tags = {
+    Environment: "prod",
+    Name: "neutrino-lifetrack"
+  }
 }
 
 // -- IAM Policy attachment --
