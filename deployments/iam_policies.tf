@@ -92,13 +92,23 @@ resource "aws_iam_role" "category-lambda-exec-full-db" {
 // -- IAM Policy attachment --
 
 resource "aws_iam_role_policy_attachment" "category-write-role-policy-attachment" {
-  role = aws_iam_role.category-lambda-exec-full-db.name
+  role = aws_iam_role.category-lambda-exec-write-db.name
   policy_arn = aws_iam_policy.dynamo-category-write.arn
 }
 
+resource "aws_iam_role_policy_attachment" "category-write-xray-write-only-access" {
+  role       = aws_iam_role.category-lambda-exec-write-db.name
+  policy_arn = "arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess"
+}
+
 resource "aws_iam_role_policy_attachment" "category-read-role-policy-attachment" {
-  role = aws_iam_role.category-lambda-exec-write-db.name
+  role = aws_iam_role.category-lambda-exec-read-db.name
   policy_arn = aws_iam_policy.dynamo-category-read.arn
+}
+
+resource "aws_iam_role_policy_attachment" "category-read-xray-write-only-access" {
+  role       = aws_iam_role.category-lambda-exec-read-db.name
+  policy_arn = "arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess"
 }
 
 resource "aws_iam_role_policy_attachment" "category-full-read-role-policy-attachment" {
@@ -111,3 +121,7 @@ resource "aws_iam_role_policy_attachment" "category-full-write-role-policy-attac
   policy_arn = aws_iam_policy.dynamo-category-write.arn
 }
 
+resource "aws_iam_role_policy_attachment" "category-full-xray-write-only-access" {
+  role       = aws_iam_role.category-lambda-exec-full-db.name
+  policy_arn = "arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess"
+}

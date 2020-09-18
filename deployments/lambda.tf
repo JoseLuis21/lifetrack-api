@@ -1,5 +1,6 @@
 resource "aws_lambda_function" "add-category" {
   function_name = "lt-add-category"
+  description = "Neutrino LifeTrack - Add category command"
   s3_bucket = "life-track-serverless"
   s3_key = "v${var.app_version}/add-category.zip"
   handler = "add-category"
@@ -15,6 +16,9 @@ resource "aws_lambda_function" "add-category" {
   tags = {
     Environment: "prod",
     Name: "neutrino-lifetrack"
+  }
+  tracing_config {
+    mode = "Active"
   }
 }
 
