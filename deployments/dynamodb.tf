@@ -9,11 +9,6 @@ resource "aws_dynamodb_table" "lt-category" {
     type = "S"
   }
 
-  ttl {
-    attribute_name = "TimeToExist"
-    enabled = false
-  }
-
   tags = {
     Name = "life-track"
     Environment = "production"
