@@ -19,6 +19,7 @@
 terraform.tfstate
 deployments/.terraform/
 deployments/terraform.tfstate
+deployments/terraform.tfstate.backup
 
 # IDEA
 .idea/
