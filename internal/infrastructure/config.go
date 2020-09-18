@@ -10,7 +10,7 @@ type Configuration struct {
 }
 
 func NewConfiguration() (*Configuration, error) {
-	viper.SetDefault("table_name", "lt-category-dev")
+	viper.SetDefault("table_name", "lt-category")
 	viper.SetDefault("table_region", "us-east-1")
 
 	if err := SetOSEnv(); err != nil {
