@@ -19,7 +19,7 @@ var muxLambda *gorillamux.GorillaMuxAdapter
 func init() {
 	log.Print("mux cold start")
 	r := mux.NewRouter()
-	r.Path("/category").Methods(http.MethodPost).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	r.Path("/live/category").Methods(http.MethodPost).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		cmd, err := dep.InjectAddCategoryHandler()
 		if err != nil {
 			httputil.RespondErrorJSON(err, w)
@@ -28,9 +28,9 @@ func init() {
 
 		err = cmd.Handle(command.AddCategory{
 			Ctx:         r.Context(),
-			Title:       r.PostForm.Get("title"),
-			User:        r.PostForm.Get("user"),
-			Description: r.PostForm.Get("description"),
+			Title:       r.PostFormValue("title"),
+			User:        r.PostFormValue("user"),
+			Description: r.PostFormValue("description"),
 		})
 
 		if err != nil {
@@ -38,6 +38,7 @@ func init() {
 			return
 		}
 
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(httputil.Response{
 			Message: "successfully created category",
 			Code:    http.StatusOK,
