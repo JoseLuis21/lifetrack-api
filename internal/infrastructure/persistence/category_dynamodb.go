@@ -99,7 +99,7 @@ func (r *CategoryDynamoRepository) FetchByID(ctx context.Context, id string) (*m
 		return nil, exception.NewNotFound("category")
 	}
 
-	m := &model.Category{}
+	m := new(model.Category)
 	err = dynamodbattribute.UnmarshalMap(res.Item, m)
 	if err != nil {
 		return nil, err
@@ -108,7 +108,63 @@ func (r *CategoryDynamoRepository) FetchByID(ctx context.Context, id string) (*m
 	return m, nil
 }
 
-func (r CategoryDynamoRepository) Exists(ctx context.Context, title string, user string) (bool, error) {
+func (r *CategoryDynamoRepository) Fetch(ctx context.Context, token string, limit int) ([]*model.Category, string, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	svc := NewDynamoConn(r.sess, r.cfg.Table.Region)
+
+	var nextTokenMap map[string]*dynamodb.AttributeValue
+	nextTokenMap = nil
+	if token != "" {
+		nextTokenMap = map[string]*dynamodb.AttributeValue{
+			"category_id": {
+				S: aws.String(token),
+			},
+		}
+	}
+
+	res, err := svc.ScanWithContext(ctx, &dynamodb.ScanInput{
+		AttributesToGet:           nil,
+		ConditionalOperator:       nil,
+		ConsistentRead:            nil,
+		ExclusiveStartKey:         nextTokenMap,
+		ExpressionAttributeNames:  nil,
+		ExpressionAttributeValues: nil,
+		FilterExpression:          nil,
+		IndexName:                 nil,
+		Limit:                     aws.Int64(int64(limit)),
+		ProjectionExpression:      nil,
+		ReturnConsumedCapacity:    nil,
+		ScanFilter:                nil,
+		Segment:                   nil,
+		Select:                    nil,
+		TableName:                 aws.String(r.cfg.Table.Name),
+		TotalSegments:             nil,
+	})
+	if err != nil {
+		return nil, "", err
+	}
+
+	if len(res.Items) == 0 {
+		return nil, "", exception.NewNotFound("category")
+	}
+
+	categories := make([]*model.Category, 0)
+	err = dynamodbattribute.UnmarshalListOfMaps(res.Items, &categories)
+	if err != nil {
+		return nil, "", err
+	}
+
+	nextToken := ""
+	if t := res.LastEvaluatedKey["category_id"]; t != nil {
+		nextToken = *t.S
+	}
+
+	return categories, nextToken, nil
+}
+
+func (r *CategoryDynamoRepository) Exists(ctx context.Context, title string, user string) (bool, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
@@ -143,9 +199,7 @@ func (r CategoryDynamoRepository) Exists(ctx context.Context, title string, user
 	})
 	if err != nil {
 		return false, err
-	}
-
-	if res != nil && len(res.Items) >= 1 {
+	} else if res != nil && len(res.Items) >= 1 {
 		return true, nil
 	}
 

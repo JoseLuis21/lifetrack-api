@@ -9,4 +9,5 @@ import (
 type Category interface {
 	Save(ctx context.Context, c *aggregate.Category) error
 	FetchByID(ctx context.Context, id string) (*model.Category, error)
+	Fetch(ctx context.Context, token string, limit int) ([]*model.Category, string, error)
 }
