@@ -53,27 +53,52 @@ resource "aws_route53_record" "domain-53" {
 
 // -- API Gateway Proxy config --
 
+// Category (GET, POST)
 resource "aws_api_gateway_resource" "category" {
   rest_api_id = aws_api_gateway_rest_api.lifeTrack.id
   parent_id = aws_api_gateway_rest_api.lifeTrack.root_resource_id
   path_part = "category"
 }
 
-resource "aws_api_gateway_method" "category_post" {
+resource "aws_api_gateway_method" "add-category" {
   rest_api_id = aws_api_gateway_rest_api.lifeTrack.id
   resource_id = aws_api_gateway_resource.category.id
   http_method = "POST"
   authorization = "NONE"
 }
 
-resource "aws_api_gateway_integration" "lambda" {
+resource "aws_api_gateway_integration" "lambda-add-category" {
   rest_api_id = aws_api_gateway_rest_api.lifeTrack.id
-  resource_id = aws_api_gateway_method.category_post.resource_id
-  http_method = aws_api_gateway_method.category_post.http_method
+  resource_id = aws_api_gateway_method.add-category.resource_id
+  http_method = aws_api_gateway_method.add-category.http_method
 
   integration_http_method = "POST"
   type = "AWS_PROXY"
   uri = aws_lambda_function.add-category.invoke_arn
+}
+
+// Category -> detail (GET, PATCH, DELETE)
+resource "aws_api_gateway_resource" "category-detail" {
+  rest_api_id = aws_api_gateway_rest_api.lifeTrack.id
+  parent_id = aws_api_gateway_resource.category.id
+  path_part = "{id}"
+}
+
+resource "aws_api_gateway_method" "category-get" {
+  rest_api_id = aws_api_gateway_rest_api.lifeTrack.id
+  resource_id = aws_api_gateway_resource.category-detail.id
+  http_method = "GET"
+  authorization = "NONE"
+}
+
+resource "aws_api_gateway_integration" "lambda-get-category" {
+  rest_api_id = aws_api_gateway_rest_api.lifeTrack.id
+  resource_id = aws_api_gateway_method.category-get.resource_id
+  http_method = aws_api_gateway_method.category-get.http_method
+
+  integration_http_method = "POST"
+  type = "AWS_PROXY"
+  uri = aws_lambda_function.get-category.invoke_arn
 }
 
 /*
@@ -106,11 +131,13 @@ resource "aws_api_gateway_integration" "lambda_root" {
 */
 resource "aws_api_gateway_deployment" "deploy" {
   depends_on = [
-    aws_api_gateway_integration.lambda
+    aws_api_gateway_integration.lambda-add-category,
+    aws_api_gateway_integration.lambda-get-category
   ]
   rest_api_id = aws_api_gateway_rest_api.lifeTrack.id
   stage_name = "live"
   stage_description = "Production stage"
+
 }
 
 output "base_url" {
