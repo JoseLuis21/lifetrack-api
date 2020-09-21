@@ -5,6 +5,7 @@ package dep
 import (
 	"github.com/google/wire"
 	"github.com/neutrinocorp/life-track-api/internal/application/command"
+	"github.com/neutrinocorp/life-track-api/internal/application/query"
 	"github.com/neutrinocorp/life-track-api/internal/domain/repository"
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure"
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure/persistence"
@@ -21,4 +22,10 @@ func InjectAddCategoryHandler() (*command.AddCategoryHandler, error) {
 	wire.Build(dynamoSet, command.NewAddCategoryHandler)
 
 	return &command.AddCategoryHandler{}, nil
+}
+
+func InjectGetCategoryQuery() (*query.GetCategory, error) {
+	wire.Build(dynamoSet, query.NewGetCategory)
+
+	return &query.GetCategory{}, nil
 }

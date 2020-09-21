@@ -8,6 +8,7 @@ package dep
 import (
 	"github.com/google/wire"
 	"github.com/neutrinocorp/life-track-api/internal/application/command"
+	"github.com/neutrinocorp/life-track-api/internal/application/query"
 	"github.com/neutrinocorp/life-track-api/internal/domain/repository"
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure"
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure/persistence"
@@ -24,6 +25,17 @@ func InjectAddCategoryHandler() (*command.AddCategoryHandler, error) {
 	categoryDynamoRepository := persistence.NewCategoryDynamoRepository(session, configuration)
 	addCategoryHandler := command.NewAddCategoryHandler(categoryDynamoRepository)
 	return addCategoryHandler, nil
+}
+
+func InjectGetCategoryQuery() (*query.GetCategory, error) {
+	session := infrastructure.NewSession()
+	configuration, err := infrastructure.NewConfiguration()
+	if err != nil {
+		return nil, err
+	}
+	categoryDynamoRepository := persistence.NewCategoryDynamoRepository(session, configuration)
+	getCategory := query.NewGetCategory(categoryDynamoRepository)
+	return getCategory, nil
 }
 
 // wire.go:
