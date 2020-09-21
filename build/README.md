@@ -14,7 +14,7 @@ _E.g._ `/bin/bash ./build.sh add-category`
 
 # Deploy to AWS S3
 If you need to deploy to AWS S3 Life Track with a single command, you may run the `deploy-to-s3.sh` file with 
-a single argument as the name of the Lambda function.
+two arguments as the name of the Lambda function and desired version (_using [Semantic Versioning](https://semver.org)_).
 
 Likewise, the `deploy-to-s3.sh` shell script will use your `GOPATH` _environment variable_ to lookup for 
 required path(s).
