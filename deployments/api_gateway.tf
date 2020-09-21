@@ -77,6 +77,24 @@ resource "aws_api_gateway_integration" "lambda-add-category" {
   uri = aws_lambda_function.add-category.invoke_arn
 }
 
+resource "aws_api_gateway_method" "list-category" {
+  rest_api_id = aws_api_gateway_rest_api.lifeTrack.id
+  resource_id = aws_api_gateway_resource.category.id
+  http_method = "GET"
+  authorization = "NONE"
+}
+
+resource "aws_api_gateway_integration" "lambda-list-category" {
+  rest_api_id = aws_api_gateway_rest_api.lifeTrack.id
+  resource_id = aws_api_gateway_method.list-category.resource_id
+  http_method = aws_api_gateway_method.list-category.http_method
+
+  integration_http_method = "POST"
+  type = "AWS_PROXY"
+  uri = aws_lambda_function.list-category.invoke_arn
+  // cache_key_parameters = ["page_size", "next_token"]
+}
+
 // Category -> detail (GET, PATCH, DELETE)
 resource "aws_api_gateway_resource" "category-detail" {
   rest_api_id = aws_api_gateway_rest_api.lifeTrack.id
@@ -132,6 +150,7 @@ resource "aws_api_gateway_integration" "lambda_root" {
 resource "aws_api_gateway_deployment" "deploy" {
   depends_on = [
     aws_api_gateway_integration.lambda-add-category,
+    aws_api_gateway_integration.lambda-list-category,
     aws_api_gateway_integration.lambda-get-category
   ]
   rest_api_id = aws_api_gateway_rest_api.lifeTrack.id
