@@ -12,6 +12,7 @@ import (
 	"github.com/neutrinocorp/life-track-api/internal/domain/model"
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure"
 	"strconv"
+	"strings"
 	"sync"
 )
 
@@ -34,14 +35,18 @@ func (r CategoryDynamoRepository) Save(ctx context.Context, c *aggregate.Categor
 	defer r.mu.Unlock()
 
 	r.mu.Unlock()
-	if exists, _ := r.Exists(ctx, c.Title.Get(), c.User); exists {
+	exists, err := r.Exists(ctx, c.Title.Get(), c.User)
+	if err != nil {
+		r.mu.Lock()
+		return err
+	} else if exists {
 		r.mu.Lock()
 		return exception.NewAlreadyExists("category")
 	}
 	r.mu.Lock()
 
 	svc := NewDynamoConn(r.sess, r.cfg.Table.Region)
-	_, err := svc.PutItemWithContext(ctx, &dynamodb.PutItemInput{
+	_, err = svc.PutItemWithContext(ctx, &dynamodb.PutItemInput{
 		Item: map[string]*dynamodb.AttributeValue{
 			"category_id": {
 				S: aws.String(c.ID.Get()),
@@ -109,10 +114,11 @@ func (r CategoryDynamoRepository) Exists(ctx context.Context, title string, user
 
 	svc := NewDynamoConn(r.sess, r.cfg.Table.Region)
 
-	exp, err := expression.NewBuilder().WithFilter(
-		expression.And(expression.Name("title").Equal(expression.Value(title)),
-			expression.Name("user").Equal(expression.Value(user))),
-	).WithProjection(expression.NamesList(expression.Name("category_id"))).Build()
+	exp, err := expression.NewBuilder().
+		WithFilter(
+			expression.And(expression.Name("title").Equal(expression.Value(strings.Title(title))),
+				expression.Name("user").Equal(expression.Value(user)))).
+		WithProjection(expression.NamesList(expression.Name("category_id"))).Build()
 	if err != nil {
 		return false, err
 	}
@@ -126,7 +132,7 @@ func (r CategoryDynamoRepository) Exists(ctx context.Context, title string, user
 		ExpressionAttributeValues: exp.Values(),
 		FilterExpression:          exp.Filter(),
 		IndexName:                 nil,
-		Limit:                     aws.Int64(1),
+		Limit:                     nil,
 		ProjectionExpression:      exp.Projection(),
 		ReturnConsumedCapacity:    nil,
 		ScanFilter:                nil,
@@ -139,7 +145,7 @@ func (r CategoryDynamoRepository) Exists(ctx context.Context, title string, user
 		return false, err
 	}
 
-	if res != nil && *res.Count >= 1 {
+	if res != nil && len(res.Items) >= 1 {
 		return true, nil
 	}
 
