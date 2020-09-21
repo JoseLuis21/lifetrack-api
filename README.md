@@ -8,9 +8,12 @@ Life Track is a platform where you can track habits and get useful insights from
 - AWS
   - Route53
   - API Gateway
-  - Cognito
   - Lambda
   - DynamoDB
   - S3 Intelligent Tier
   - CLI v2
   - IAM
+
+- Firebase
+  - Authentication
+  - Crashlytics
