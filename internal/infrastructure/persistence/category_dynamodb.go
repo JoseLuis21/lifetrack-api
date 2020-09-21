@@ -10,7 +10,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
 	"github.com/neutrinocorp/life-track-api/internal/domain/aggregate"
 	"github.com/neutrinocorp/life-track-api/internal/domain/model"
-	"github.com/neutrinocorp/life-track-api/internal/domain/value"
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure"
 	"strconv"
 	"sync"
@@ -35,7 +34,7 @@ func (r CategoryDynamoRepository) Save(ctx context.Context, c *aggregate.Categor
 	defer r.mu.Unlock()
 
 	r.mu.Unlock()
-	if exists, _ := r.Exists(ctx, *c.Title, c.User); exists {
+	if exists, _ := r.Exists(ctx, c.Title.Get(), c.User); exists {
 		r.mu.Lock()
 		return exception.NewAlreadyExists("category")
 	}
@@ -73,7 +72,7 @@ func (r CategoryDynamoRepository) Save(ctx context.Context, c *aggregate.Categor
 	return nil
 }
 
-func (r *CategoryDynamoRepository) FetchByID(ctx context.Context, id *value.UUID) (*model.Category, error) {
+func (r *CategoryDynamoRepository) FetchByID(ctx context.Context, id string) (*model.Category, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
@@ -82,7 +81,7 @@ func (r *CategoryDynamoRepository) FetchByID(ctx context.Context, id *value.UUID
 	res, err := svc.GetItemWithContext(ctx, &dynamodb.GetItemInput{
 		Key: map[string]*dynamodb.AttributeValue{
 			"category_id": {
-				S: aws.String(id.Get()),
+				S: aws.String(id),
 			},
 		},
 		TableName: aws.String(r.cfg.Table.Name),
@@ -104,14 +103,14 @@ func (r *CategoryDynamoRepository) FetchByID(ctx context.Context, id *value.UUID
 	return m, nil
 }
 
-func (r CategoryDynamoRepository) Exists(ctx context.Context, title value.Title, user string) (bool, error) {
+func (r CategoryDynamoRepository) Exists(ctx context.Context, title string, user string) (bool, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
 	svc := NewDynamoConn(r.sess, r.cfg.Table.Region)
 
 	exp, err := expression.NewBuilder().WithFilter(
-		expression.And(expression.Name("title").Equal(expression.Value(title.Get())),
+		expression.And(expression.Name("title").Equal(expression.Value(title)),
 			expression.Name("user").Equal(expression.Value(user))),
 	).WithProjection(expression.NamesList(expression.Name("category_id"))).Build()
 	if err != nil {

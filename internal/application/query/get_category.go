@@ -24,5 +24,5 @@ func (q GetCategory) Query(ctx context.Context, id string) (*model.Category, err
 		return nil, err
 	}
 
-	return q.repo.FetchByID(ctx, idUUID)
+	return q.repo.FetchByID(ctx, idUUID.Get())
 }
