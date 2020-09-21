@@ -91,6 +91,7 @@ resource "aws_iam_role" "category-lambda-exec-full-db" {
 
 // -- IAM Policy attachment --
 
+// Write Lambda-Dynamo-XRay-CloudWatch
 resource "aws_iam_role_policy_attachment" "category-write-role-policy-attachment" {
   role = aws_iam_role.category-lambda-exec-write-db.name
   policy_arn = aws_iam_policy.dynamo-category-write.arn
@@ -101,6 +102,12 @@ resource "aws_iam_role_policy_attachment" "category-write-xray-write-only-access
   policy_arn = "arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess"
 }
 
+resource "aws_iam_role_policy_attachment" "category-write-lambda-write-only-access" {
+  role = aws_iam_role.category-lambda-exec-write-db.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+// Read Lambda-Dynamo-XRay-CloudWatch
 resource "aws_iam_role_policy_attachment" "category-read-role-policy-attachment" {
   role = aws_iam_role.category-lambda-exec-read-db.name
   policy_arn = aws_iam_policy.dynamo-category-read.arn
@@ -111,6 +118,12 @@ resource "aws_iam_role_policy_attachment" "category-read-xray-write-only-access"
   policy_arn = "arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess"
 }
 
+resource "aws_iam_role_policy_attachment" "category-read-lambda-write-only-access" {
+  role = aws_iam_role.category-lambda-exec-read-db.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+// Full (Read/Write) Lambda-Dynamo-XRay-CloudWatch
 resource "aws_iam_role_policy_attachment" "category-full-read-role-policy-attachment" {
   role = aws_iam_role.category-lambda-exec-full-db.name
   policy_arn = aws_iam_policy.dynamo-category-read.arn
@@ -124,4 +137,9 @@ resource "aws_iam_role_policy_attachment" "category-full-write-role-policy-attac
 resource "aws_iam_role_policy_attachment" "category-full-xray-write-only-access" {
   role       = aws_iam_role.category-lambda-exec-full-db.name
   policy_arn = "arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess"
+}
+
+resource "aws_iam_role_policy_attachment" "category-full-lambda-write-only-access" {
+  role = aws_iam_role.category-lambda-exec-full-db.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
