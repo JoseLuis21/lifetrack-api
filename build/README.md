@@ -19,7 +19,7 @@ two arguments as the name of the Lambda function and desired version (_using [Se
 Likewise, the `deploy-to-s3.sh` shell script will use your `GOPATH` _environment variable_ to lookup for 
 required path(s).
 
-_E.g._ `/bin/bash ./deploy-to-s3.sh add-category`
+_E.g._ `/bin/bash ./deploy-to-s3.sh add-category 1.0.4`
 
 ## Create target bucket from CLI
 In order to deploy a Lambda function, you must create an S3 bucket first to upload any compiled binary and subsequently, 
