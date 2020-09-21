@@ -38,6 +38,17 @@ func InjectGetCategoryQuery() (*query.GetCategory, error) {
 	return getCategory, nil
 }
 
+func InjectListCategoriesQuery() (*query.ListCategories, error) {
+	session := infrastructure.NewSession()
+	configuration, err := infrastructure.NewConfiguration()
+	if err != nil {
+		return nil, err
+	}
+	categoryDynamoRepository := persistence.NewCategoryDynamoRepository(session, configuration)
+	listCategories := query.NewListCategories(categoryDynamoRepository)
+	return listCategories, nil
+}
+
 // wire.go:
 
 var dynamoSet = wire.NewSet(infrastructure.NewConfiguration, infrastructure.NewSession, wire.Bind(new(repository.Category), new(*persistence.CategoryDynamoRepository)), persistence.NewCategoryDynamoRepository)

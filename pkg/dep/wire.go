@@ -29,3 +29,9 @@ func InjectGetCategoryQuery() (*query.GetCategory, error) {
 
 	return &query.GetCategory{}, nil
 }
+
+func InjectListCategoriesQuery() (*query.ListCategories, error) {
+	wire.Build(dynamoSet, query.NewListCategories)
+
+	return &query.ListCategories{}, nil
+}
