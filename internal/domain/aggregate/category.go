@@ -1,30 +1,25 @@
 package aggregate
 
 import (
-	"github.com/alexandria-oss/common-go/exception"
-	"github.com/neutrinocorp/life-track-api/internal/domain/value"
-	"time"
+	"github.com/neutrinocorp/life-track-api/internal/domain/entity"
 )
 
 type Category struct {
-	ID          *value.UUID
-	Title       *value.Title
-	Description *value.Description
-	User        string
-	CreateTime  time.Time
-	UpdateTime  time.Time
+	root *entity.Category
 }
 
 func (c Category) IsValid() error {
-	// - Required: title, id, user
-
-	if c.ID == nil || c.ID.Get() == "" {
-		return exception.NewRequiredField("id")
-	} else if c.Title == nil || c.Title.Get() == "" {
-		return exception.NewRequiredField("title")
-	} else if c.User == "" {
-		return exception.NewRequiredField("user")
+	if err := c.root.IsValid(); err != nil {
+		return err
 	}
 
 	return nil
+}
+
+func (c *Category) SetRoot(r *entity.Category) {
+	c.root = r
+}
+
+func (c *Category) GetRoot() *entity.Category {
+	return c.root
 }
