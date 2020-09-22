@@ -1,7 +1,7 @@
 resource "aws_lambda_function" "add-category" {
   function_name = "lt-add-category"
   description = "Neutrino LifeTrack - Add category command"
-  s3_bucket = "life-track-serverless"
+  s3_bucket = aws_s3_bucket.category.bucket
   s3_key = "v${var.app_version}/add-category.zip"
   handler = "add-category"
   role = aws_iam_role.category-lambda-exec-full-db.arn
@@ -20,6 +20,9 @@ resource "aws_lambda_function" "add-category" {
   tracing_config {
     mode = "Active"
   }
+  depends_on = [
+    null_resource.add-category-upload
+  ]
 }
 
 resource "aws_lambda_permission" "add-category-apigw" {
@@ -34,7 +37,7 @@ resource "aws_lambda_permission" "add-category-apigw" {
 resource "aws_lambda_function" "list-category" {
   function_name = "lt-list-category"
   description = "Neutrino LifeTrack - List categories query"
-  s3_bucket = "life-track-serverless"
+  s3_bucket = aws_s3_bucket.category.bucket
   s3_key = "v${var.app_version}/list-category.zip"
   handler = "list-category"
   role = aws_iam_role.category-lambda-exec-full-db.arn
@@ -53,6 +56,9 @@ resource "aws_lambda_function" "list-category" {
   tracing_config {
     mode = "Active"
   }
+  depends_on = [
+    null_resource.list-category-upload
+  ]
 }
 
 resource "aws_lambda_permission" "list-category-apigw" {
@@ -67,7 +73,7 @@ resource "aws_lambda_permission" "list-category-apigw" {
 resource "aws_lambda_function" "get-category" {
   function_name = "lt-get-category"
   description = "Neutrino LifeTrack - Get category query"
-  s3_bucket = "life-track-serverless"
+  s3_bucket = aws_s3_bucket.category.bucket
   s3_key = "v${var.app_version}/get-category.zip"
   handler = "get-category"
   role = aws_iam_role.category-lambda-exec-full-db.arn
@@ -86,6 +92,9 @@ resource "aws_lambda_function" "get-category" {
   tracing_config {
     mode = "Active"
   }
+  depends_on = [
+    null_resource.get-category-upload
+  ]
 }
 
 resource "aws_lambda_permission" "get-category-apigw" {
