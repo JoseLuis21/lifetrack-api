@@ -19,11 +19,18 @@ func NewListCategories(r repository.Category) *ListCategories {
 	}
 }
 
-func (q ListCategories) Query(ctx context.Context, token, limit string) ([]*model.Category, string, error) {
-	l, err := strconv.ParseInt(limit, 10, 64)
-	if err != nil {
-		return nil, "", exception.NewFieldFormat("limit", "integer")
+func (q ListCategories) Query(ctx context.Context, token, limit string, filter map[string]string) ([]*model.Category, string, error) {
+	// TODO: Turn token and limit to value objects
+	var limitInt int64
+	limitInt = 100
+
+	if limit != "" {
+		l, err := strconv.ParseInt(limit, 10, 64)
+		if err != nil {
+			return nil, "", exception.NewFieldFormat("limit", "integer")
+		}
+		limitInt = l
 	}
 
-	return q.repo.Fetch(ctx, token, int(l))
+	return q.repo.Fetch(ctx, token, limitInt, filter)
 }

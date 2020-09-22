@@ -9,15 +9,15 @@ type Configuration struct {
 	}
 }
 
-func NewConfiguration() (*Configuration, error) {
+func NewConfiguration() (Configuration, error) {
 	viper.SetDefault("table_name", "lt-category")
 	viper.SetDefault("table_region", "us-east-1")
 
 	if err := SetOSEnv(); err != nil {
-		return nil, err
+		return Configuration{}, err
 	}
 
-	return &Configuration{
+	return Configuration{
 		Table: struct {
 			Name   string
 			Region string

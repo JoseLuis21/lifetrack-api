@@ -31,5 +31,5 @@ func (h AddCategoryHandler) Handle(cmd AddCategory) error {
 		return err
 	}
 
-	return h.repo.Save(cmd.Ctx, c)
+	return h.repo.Save(cmd.Ctx, *c)
 }

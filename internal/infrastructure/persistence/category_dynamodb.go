@@ -8,8 +8,10 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
+	"github.com/neutrinocorp/life-track-api/internal/domain"
 	"github.com/neutrinocorp/life-track-api/internal/domain/aggregate"
 	"github.com/neutrinocorp/life-track-api/internal/domain/model"
+	"github.com/neutrinocorp/life-track-api/internal/domain/value"
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure"
 	"strconv"
 	"strings"
@@ -22,20 +24,23 @@ type CategoryDynamoRepository struct {
 	mu   *sync.RWMutex
 }
 
-func NewCategoryDynamoRepository(s *session.Session, cfg *infrastructure.Configuration) *CategoryDynamoRepository {
+func NewCategoryDynamoRepository(s *session.Session, cfg infrastructure.Configuration) *CategoryDynamoRepository {
 	return &CategoryDynamoRepository{
 		sess: s,
-		cfg:  *cfg,
+		cfg:  cfg,
 		mu:   new(sync.RWMutex),
 	}
 }
 
-func (r CategoryDynamoRepository) Save(ctx context.Context, c *aggregate.Category) error {
+func (r CategoryDynamoRepository) Save(ctx context.Context, c aggregate.Category) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
+	// TODO: Use high-cardinality fields as keys since Dynamo is a key:value storage,
+	// we store them within the same table or in new tables
+	// we must do this using Dynamo Transactions
 	r.mu.Unlock()
-	exists, err := r.Exists(ctx, c.Title.Get(), c.User)
+	exists, err := r.Exists(ctx, *c.GetRoot().Title, c.GetRoot().User)
 	if err != nil {
 		r.mu.Lock()
 		return err
@@ -49,22 +54,22 @@ func (r CategoryDynamoRepository) Save(ctx context.Context, c *aggregate.Categor
 	_, err = svc.PutItemWithContext(ctx, &dynamodb.PutItemInput{
 		Item: map[string]*dynamodb.AttributeValue{
 			"category_id": {
-				S: aws.String(c.ID.Get()),
+				S: aws.String(c.GetRoot().ID.Get()),
 			},
 			"title": {
-				S: aws.String(c.Title.Get()),
+				S: aws.String(c.GetRoot().Title.Get()),
 			},
 			"description": {
-				S: aws.String(c.Description.Get()),
+				S: aws.String(c.GetRoot().Description.Get()),
 			},
 			"user": {
-				S: aws.String(c.User),
+				S: aws.String(c.GetRoot().User),
 			},
 			"create_time": {
-				N: aws.String(strconv.FormatInt(c.CreateTime.Unix(), 10)),
+				N: aws.String(strconv.FormatInt(c.GetRoot().CreateTime.Unix(), 10)),
 			},
 			"update_time": {
-				N: aws.String(strconv.FormatInt(c.UpdateTime.Unix(), 10)),
+				N: aws.String(strconv.FormatInt(c.GetRoot().UpdateTime.Unix(), 10)),
 			},
 		},
 		ReturnValues: aws.String(dynamodb.ReturnValueNone),
@@ -77,16 +82,15 @@ func (r CategoryDynamoRepository) Save(ctx context.Context, c *aggregate.Categor
 	return nil
 }
 
-func (r *CategoryDynamoRepository) FetchByID(ctx context.Context, id string) (*model.Category, error) {
+func (r CategoryDynamoRepository) FetchByID(ctx context.Context, id value.UUID) (*model.Category, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
 	svc := NewDynamoConn(r.sess, r.cfg.Table.Region)
-
 	res, err := svc.GetItemWithContext(ctx, &dynamodb.GetItemInput{
 		Key: map[string]*dynamodb.AttributeValue{
 			"category_id": {
-				S: aws.String(id),
+				S: aws.String(id.Get()),
 			},
 		},
 		TableName: aws.String(r.cfg.Table.Name),
@@ -108,11 +112,9 @@ func (r *CategoryDynamoRepository) FetchByID(ctx context.Context, id string) (*m
 	return m, nil
 }
 
-func (r *CategoryDynamoRepository) Fetch(ctx context.Context, token string, limit int) ([]*model.Category, string, error) {
+func (r CategoryDynamoRepository) Fetch(ctx context.Context, token string, limit int64, filter domain.FilterMap) ([]*model.Category, string, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
-
-	svc := NewDynamoConn(r.sess, r.cfg.Table.Region)
 
 	var nextTokenMap map[string]*dynamodb.AttributeValue
 	nextTokenMap = nil
@@ -124,16 +126,19 @@ func (r *CategoryDynamoRepository) Fetch(ctx context.Context, token string, limi
 		}
 	}
 
+	exp, _ := r.buildFilter(filter)
+
+	svc := NewDynamoConn(r.sess, r.cfg.Table.Region)
 	res, err := svc.ScanWithContext(ctx, &dynamodb.ScanInput{
 		AttributesToGet:           nil,
 		ConditionalOperator:       nil,
-		ConsistentRead:            nil,
+		ConsistentRead:            aws.Bool(false),
 		ExclusiveStartKey:         nextTokenMap,
-		ExpressionAttributeNames:  nil,
-		ExpressionAttributeValues: nil,
-		FilterExpression:          nil,
+		ExpressionAttributeNames:  exp.Names(),
+		ExpressionAttributeValues: exp.Values(),
+		FilterExpression:          exp.Filter(),
 		IndexName:                 nil,
-		Limit:                     aws.Int64(int64(limit)),
+		Limit:                     aws.Int64(limit),
 		ProjectionExpression:      nil,
 		ReturnConsumedCapacity:    nil,
 		ScanFilter:                nil,
@@ -164,7 +169,36 @@ func (r *CategoryDynamoRepository) Fetch(ctx context.Context, token string, limi
 	return categories, nextToken, nil
 }
 
-func (r *CategoryDynamoRepository) Exists(ctx context.Context, title string, user string) (bool, error) {
+func (r CategoryDynamoRepository) buildFilter(filter domain.FilterMap) (expression.Expression, error) {
+	conditions := make([]expression.ConditionBuilder, 0)
+	for k, v := range filter {
+		switch {
+		case k == "user" && v != "":
+			conditions = append(conditions, expression.Equal(expression.Name("user"), expression.Value(v)))
+			continue
+		case k == "title" && v != "":
+			conditions = append(conditions, expression.Equal(expression.Name("title"), expression.Value(v)))
+			continue
+		case k == "query" && v != "":
+			conditions = append(conditions, expression.Contains(expression.Name("title"), v))
+			continue
+		}
+	}
+
+	if cLength := len(conditions); cLength >= 1 {
+		if cLength == 2 {
+			return expression.NewBuilder().WithFilter(expression.And(conditions[0], conditions[1])).Build()
+		} else if cLength >= 3 {
+			return expression.NewBuilder().WithFilter(expression.And(conditions[0], conditions[1], conditions[2:]...)).Build()
+		}
+
+		return expression.NewBuilder().WithFilter(conditions[0]).Build()
+	}
+
+	return expression.NewBuilder().Build()
+}
+
+func (r CategoryDynamoRepository) Exists(ctx context.Context, title value.Title, user string) (bool, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
@@ -172,7 +206,7 @@ func (r *CategoryDynamoRepository) Exists(ctx context.Context, title string, use
 
 	exp, err := expression.NewBuilder().
 		WithFilter(
-			expression.And(expression.Name("title").Equal(expression.Value(strings.Title(title))),
+			expression.And(expression.Name("title").Equal(expression.Value(strings.Title(title.Get()))),
 				expression.Name("user").Equal(expression.Value(user)))).
 		WithProjection(expression.NamesList(expression.Name("category_id"))).Build()
 	if err != nil {
