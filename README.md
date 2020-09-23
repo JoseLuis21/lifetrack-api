@@ -28,7 +28,7 @@ We make use of blazingly fast technology such as Go, AWS DynamoDB, Memcached and
   - **Lambda**: AWS Lambda is a serverless function stored in the cloud.
   - **DynamoDB**: DynamoDB is a Key-Value high-available database which is managed by AWS automatically.
   - **S3** _(Standard/Infrequent Access)_: S3 is the standard file storage of AWS, it is self managed and is high-available.
-  - **CLi** _v2_: The AWS Command-Line Tool
+  - **CLi** _v2_: The AWS Command-Line Tool.
   - **IAM**: Identity Access Manager, manages users and policies to give/restrict access to AWS resources.
   - **SNS**: Simple Notification Service, offers a publish/subscribe mechanism to publish messages to n-consumers.
   - **SQS**: Simple Queue Service, offers a distributed and high-available queue system, works for ETL jobs, Cron Jobs or as a Message Broker with SNS.
