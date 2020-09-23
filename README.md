@@ -31,7 +31,7 @@ We make use of blazingly fast technology such as Go, AWS DynamoDB, Memcached and
   - **CLi** _v2_: The AWS Command-Line Tool.
   - **IAM**: Identity Access Manager, manages users and policies to give/restrict access to AWS resources.
   - **SNS**: Simple Notification Service, offers a publish/subscribe mechanism to publish messages to n-consumers.
-  - **SQS**: Simple Queue Service, offers a distributed and high-available queue system, works for ETL jobs, Cron Jobs or as a Message Broker with SNS.
+  - **SQS**: Simple Queue Service, offers a distributed and high-available queue system that is mainly focused on ETL jobs, Cron Jobs or as a Message Broker when used with SNS.
   - **ElastiCache**: Caching service which offers self-managed computation for either Redis or Memcached systems.
   - **KeySpaces**: Document-oriented service wich offers self-managed computation for Apache Cassandra.
   - **XRay**: AWS XRay is a remote-request distributed tracing mechanism.
