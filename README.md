@@ -34,6 +34,8 @@ We make use of blazingly fast technology such as Go, AWS DynamoDB, Memcached and
   - **SQS**: Simple Queue Service, offers a distributed and high-available queue system, works for ETL jobs, Cron Jobs or as a Message Broker with SNS.
   - **ElastiCache**: Caching service which offers self-managed computation for either Redis or Memcached systems.
   - **KeySpaces**: Document-oriented service wich offers self-managed computation for Apache Cassandra.
+  - **XRay**: AWS XRay is a remote-request distributed tracing mechanism.
+  - **CloudWatch**: CloudWatch is the standard AWS monitoring ecosystem, it offers many functionalities apart from just monitoring such as event triggering straight to SNS to notify specified consumers.
 
 - **Firebase**
   - **Authentication** _OAuth2 (Google, Facebook & Apple)_: OAuth2 is a authentication mechanism using the latest security standards.
