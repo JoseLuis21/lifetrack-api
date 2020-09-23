@@ -37,5 +37,5 @@ We make use of blazingly fast technology such as Go, AWS DynamoDB, Memcached and
   - **XRay**: AWS XRay is a remote-request distributed tracing mechanism.
   - **CloudWatch**: CloudWatch is the standard AWS monitoring ecosystem, it offers many functionalities apart from just monitoring such as event triggering straight to SNS to notify specified consumers.
 
-- **Firebase**
+- **Firebase**: Google's application ecosystem.
   - **Authentication** _OAuth2 (Google, Facebook & Apple)_: OAuth2 is a authentication mechanism using the latest security standards.
