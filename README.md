@@ -28,6 +28,8 @@ We make use of blazingly fast technology such as Go, AWS DynamoDB, Memcached and
   - **Lambda**: AWS Lambda is a serverless function stored in the cloud.
   - **DynamoDB**: DynamoDB is a Key-Value high-available database which is managed by AWS automatically.
   - **S3** _(Standard/Infrequent Access)_: S3 is the standard file storage of AWS, it is self managed and is high-available.
+  - **CloudFront**: CloudFront is a Content Distributed Network or CDN, which propagates static data through edge-points all over the world to reduce latency.
+  - **ACM**: Amazon Certificate Manages is an SSL certification manager which are mainly used to secure connections with the TLS protocol.
   - **CLi** _v2_: The AWS Command-Line Tool.
   - **IAM**: Identity Access Manager, manages users and policies to give/restrict access to AWS resources.
   - **SNS**: Simple Notification Service, offers a publish/subscribe mechanism to publish messages to n-consumers.
