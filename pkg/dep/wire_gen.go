@@ -6,49 +6,74 @@
 package dep
 
 import (
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/google/wire"
 	"github.com/neutrinocorp/life-track-api/internal/application/command"
 	"github.com/neutrinocorp/life-track-api/internal/application/query"
 	"github.com/neutrinocorp/life-track-api/internal/domain/repository"
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure"
+	"github.com/neutrinocorp/life-track-api/internal/infrastructure/logging"
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure/persistence"
+	"go.uber.org/zap"
 )
 
 // Injectors from wire.go:
 
-func InjectAddCategoryHandler() (*command.AddCategoryHandler, error) {
+func InjectAddCategoryHandler() (*command.AddCategoryHandler, func(), error) {
 	session := infrastructure.NewSession()
 	configuration, err := infrastructure.NewConfiguration()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	categoryDynamoRepository := persistence.NewCategoryDynamoRepository(session, configuration)
-	addCategoryHandler := command.NewAddCategoryHandler(categoryDynamoRepository)
-	return addCategoryHandler, nil
+	logger, cleanup, err := logging.NewZapProd()
+	if err != nil {
+		return nil, nil, err
+	}
+	category := provideCategoryRepository(session, configuration, logger)
+	addCategoryHandler := command.NewAddCategoryHandler(category)
+	return addCategoryHandler, func() {
+		cleanup()
+	}, nil
 }
 
-func InjectGetCategoryQuery() (*query.GetCategory, error) {
+func InjectGetCategoryQuery() (*query.GetCategory, func(), error) {
 	session := infrastructure.NewSession()
 	configuration, err := infrastructure.NewConfiguration()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	categoryDynamoRepository := persistence.NewCategoryDynamoRepository(session, configuration)
-	getCategory := query.NewGetCategory(categoryDynamoRepository)
-	return getCategory, nil
+	logger, cleanup, err := logging.NewZapProd()
+	if err != nil {
+		return nil, nil, err
+	}
+	category := provideCategoryRepository(session, configuration, logger)
+	getCategory := query.NewGetCategory(category)
+	return getCategory, func() {
+		cleanup()
+	}, nil
 }
 
-func InjectListCategoriesQuery() (*query.ListCategories, error) {
+func InjectListCategoriesQuery() (*query.ListCategories, func(), error) {
 	session := infrastructure.NewSession()
 	configuration, err := infrastructure.NewConfiguration()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	categoryDynamoRepository := persistence.NewCategoryDynamoRepository(session, configuration)
-	listCategories := query.NewListCategories(categoryDynamoRepository)
-	return listCategories, nil
+	logger, cleanup, err := logging.NewZapProd()
+	if err != nil {
+		return nil, nil, err
+	}
+	category := provideCategoryRepository(session, configuration, logger)
+	listCategories := query.NewListCategories(category)
+	return listCategories, func() {
+		cleanup()
+	}, nil
 }
 
 // wire.go:
 
-var dynamoSet = wire.NewSet(infrastructure.NewConfiguration, infrastructure.NewSession, wire.Bind(new(repository.Category), new(*persistence.CategoryDynamoRepository)), persistence.NewCategoryDynamoRepository)
+var dynamoSet = wire.NewSet(infrastructure.NewConfiguration, infrastructure.NewSession, logging.NewZapProd, provideCategoryRepository)
+
+func provideCategoryRepository(s *session.Session, cfg infrastructure.Configuration, logger *zap.Logger) repository.Category {
+	return persistence.NewCategory(persistence.NewCategoryDynamoRepository(s, cfg), logger)
+}
