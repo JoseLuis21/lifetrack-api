@@ -1,3 +1,3 @@
-package domain
+package shared
 
 type FilterMap map[string]string
