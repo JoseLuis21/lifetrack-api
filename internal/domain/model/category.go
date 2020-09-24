@@ -8,4 +8,5 @@ type Category struct {
 	User        string `json:"user"`
 	CreateTime  int64  `json:"create_time"`
 	UpdateTime  int64  `json:"update_time"`
+	Active      bool   `json:"active"`
 }

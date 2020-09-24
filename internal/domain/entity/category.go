@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+// Category entity used to group n-activities
 type Category struct {
 	ID          *value.UUID
 	Title       *value.Title
@@ -13,8 +14,10 @@ type Category struct {
 	User        string
 	CreateTime  time.Time
 	UpdateTime  time.Time
+	Active      bool
 }
 
+// IsValid validate entity data
 func (c Category) IsValid() error {
 	// - Required: title, id, user
 
