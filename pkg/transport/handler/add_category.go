@@ -33,7 +33,7 @@ func (c AddCategory) GetRouter() *mux.Router {
 }
 
 func (c AddCategory) Handler(w http.ResponseWriter, r *http.Request) {
-	err := c.cmd.Handle(command.AddCategory{
+	err := c.cmd.Invoke(command.AddCategory{
 		Ctx:         r.Context(),
 		Title:       r.PostFormValue("title"),
 		User:        r.PostFormValue("user"),
