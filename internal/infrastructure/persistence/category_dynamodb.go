@@ -4,20 +4,21 @@ import (
 	"context"
 	"github.com/alexandria-oss/common-go/exception"
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
-	"github.com/neutrinocorp/life-track-api/internal/domain"
 	"github.com/neutrinocorp/life-track-api/internal/domain/aggregate"
 	"github.com/neutrinocorp/life-track-api/internal/domain/model"
+	"github.com/neutrinocorp/life-track-api/internal/domain/shared"
 	"github.com/neutrinocorp/life-track-api/internal/domain/value"
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure"
 	"strconv"
-	"strings"
 	"sync"
 )
 
+// CategoryDynamoRepository is the repository.Category implementation using AWS DynamoDB
 type CategoryDynamoRepository struct {
 	sess *session.Session
 	cfg  infrastructure.Configuration
@@ -36,22 +37,8 @@ func (r CategoryDynamoRepository) Save(ctx context.Context, c aggregate.Category
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	// TODO: Use high-cardinality fields as keys since Dynamo is a key:value storage,
-	// we store them within the same table or in new tables
-	// we must do this using Dynamo Transactions
-	r.mu.Unlock()
-	exists, err := r.Exists(ctx, *c.GetRoot().Title, c.GetRoot().User)
-	if err != nil {
-		r.mu.Lock()
-		return err
-	} else if exists {
-		r.mu.Lock()
-		return exception.NewAlreadyExists("category")
-	}
-	r.mu.Lock()
-
-	svc := NewDynamoConn(r.sess, r.cfg.Table.Region)
-	_, err = svc.PutItemWithContext(ctx, &dynamodb.PutItemInput{
+	svc := NewDynamoConn(r.sess, r.cfg.Category.Table.Region)
+	_, err := svc.PutItemWithContext(ctx, &dynamodb.PutItemInput{
 		Item: map[string]*dynamodb.AttributeValue{
 			"category_id": {
 				S: aws.String(c.GetRoot().ID.Get()),
@@ -71,32 +58,32 @@ func (r CategoryDynamoRepository) Save(ctx context.Context, c aggregate.Category
 			"update_time": {
 				N: aws.String(strconv.FormatInt(c.GetRoot().UpdateTime.Unix(), 10)),
 			},
+			"active": {
+				BOOL: aws.Bool(c.GetRoot().Active),
+			},
 		},
 		ReturnValues: aws.String(dynamodb.ReturnValueNone),
-		TableName:    aws.String(r.cfg.Table.Name),
+		TableName:    aws.String(r.cfg.Category.Table.Name),
 	})
-	if err != nil {
-		return err
-	}
 
-	return nil
+	return r.getDomainError(err)
 }
 
 func (r CategoryDynamoRepository) FetchByID(ctx context.Context, id value.UUID) (*model.Category, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
-	svc := NewDynamoConn(r.sess, r.cfg.Table.Region)
+	svc := NewDynamoConn(r.sess, r.cfg.Category.Table.Region)
 	res, err := svc.GetItemWithContext(ctx, &dynamodb.GetItemInput{
 		Key: map[string]*dynamodb.AttributeValue{
 			"category_id": {
 				S: aws.String(id.Get()),
 			},
 		},
-		TableName: aws.String(r.cfg.Table.Name),
+		TableName: aws.String(r.cfg.Category.Table.Name),
 	})
 	if err != nil {
-		return nil, err
+		return nil, r.getDomainError(err)
 	}
 
 	if res.Item == nil {
@@ -112,7 +99,7 @@ func (r CategoryDynamoRepository) FetchByID(ctx context.Context, id value.UUID) 
 	return m, nil
 }
 
-func (r CategoryDynamoRepository) Fetch(ctx context.Context, token string, limit int64, filter domain.FilterMap) ([]*model.Category, string, error) {
+func (r CategoryDynamoRepository) Fetch(ctx context.Context, token string, limit int64, filter shared.FilterMap) ([]*model.Category, string, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
@@ -128,27 +115,18 @@ func (r CategoryDynamoRepository) Fetch(ctx context.Context, token string, limit
 
 	exp, _ := r.buildFilter(filter)
 
-	svc := NewDynamoConn(r.sess, r.cfg.Table.Region)
+	svc := NewDynamoConn(r.sess, r.cfg.Category.Table.Region)
 	res, err := svc.ScanWithContext(ctx, &dynamodb.ScanInput{
-		AttributesToGet:           nil,
-		ConditionalOperator:       nil,
 		ConsistentRead:            aws.Bool(false),
 		ExclusiveStartKey:         nextTokenMap,
 		ExpressionAttributeNames:  exp.Names(),
 		ExpressionAttributeValues: exp.Values(),
 		FilterExpression:          exp.Filter(),
-		IndexName:                 nil,
 		Limit:                     aws.Int64(limit),
-		ProjectionExpression:      nil,
-		ReturnConsumedCapacity:    nil,
-		ScanFilter:                nil,
-		Segment:                   nil,
-		Select:                    nil,
-		TableName:                 aws.String(r.cfg.Table.Name),
-		TotalSegments:             nil,
+		TableName:                 aws.String(r.cfg.Category.Table.Name),
 	})
 	if err != nil {
-		return nil, "", err
+		return nil, "", r.getDomainError(err)
 	}
 
 	if len(res.Items) == 0 {
@@ -169,7 +147,79 @@ func (r CategoryDynamoRepository) Fetch(ctx context.Context, token string, limit
 	return categories, nextToken, nil
 }
 
-func (r CategoryDynamoRepository) buildFilter(filter domain.FilterMap) (expression.Expression, error) {
+func (r *CategoryDynamoRepository) Replace(ctx context.Context, c aggregate.Category) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	svc := NewDynamoConn(r.sess, r.cfg.Category.Table.Region)
+	_, err := svc.UpdateItemWithContext(ctx, &dynamodb.UpdateItemInput{
+		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
+			":t": {
+				S: aws.String(c.GetRoot().Title.Get()),
+			},
+			":d": {
+				S: aws.String(c.GetRoot().Description.Get()),
+			},
+			":u": {
+				N: aws.String(strconv.FormatInt(c.GetRoot().UpdateTime.Unix(), 10)),
+			},
+			":a": {
+				BOOL: aws.Bool(c.GetRoot().Active),
+			},
+		},
+		Key: map[string]*dynamodb.AttributeValue{
+			"category_id": {
+				S: aws.String(c.GetRoot().ID.Get()),
+			},
+		},
+		TableName:        aws.String(r.cfg.Category.Table.Name),
+		UpdateExpression: aws.String("SET title = :t, description = :d, update_time = :u, active = :a"),
+	})
+
+	return r.getDomainError(err)
+}
+
+func (r *CategoryDynamoRepository) HardRemove(ctx context.Context, id value.UUID) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	svc := NewDynamoConn(r.sess, r.cfg.Category.Table.Region)
+	_, err := svc.DeleteItemWithContext(ctx, &dynamodb.DeleteItemInput{
+		Key: map[string]*dynamodb.AttributeValue{
+			"category_id": {
+				S: aws.String(id.Get()),
+			},
+		},
+		TableName: aws.String(r.cfg.Category.Table.Name),
+	})
+
+	return r.getDomainError(err)
+}
+
+// getDomainError returns a valid domain error from awserr dynamodb exceptions
+func (r CategoryDynamoRepository) getDomainError(err error) error {
+	if err != nil {
+		if aerr, ok := err.(awserr.Error); ok {
+			switch aerr.Code() {
+			case dynamodb.ErrCodeResourceNotFoundException:
+				return exception.NewNotFound("category")
+			case dynamodb.ErrCodeIndexNotFoundException:
+				return exception.NewNotFound("category_id")
+			case dynamodb.ErrCodeConditionalCheckFailedException:
+				return exception.NewFieldFormat("category_conditional", "valid query conditional field")
+			case dynamodb.ErrCodeRequestLimitExceeded:
+				return exception.NewNetworkCall("aws dynamodb table "+r.cfg.Category.Table.Name, r.cfg.Category.Table.Region)
+			}
+		}
+
+		return err
+	}
+
+	return nil
+}
+
+// buildFilter constructs category fetch query filter
+func (r CategoryDynamoRepository) buildFilter(filter shared.FilterMap) (expression.Expression, error) {
 	conditions := make([]expression.ConditionBuilder, 0)
 	for k, v := range filter {
 		switch {
@@ -196,46 +246,4 @@ func (r CategoryDynamoRepository) buildFilter(filter domain.FilterMap) (expressi
 	}
 
 	return expression.NewBuilder().Build()
-}
-
-func (r CategoryDynamoRepository) Exists(ctx context.Context, title value.Title, user string) (bool, error) {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
-
-	svc := NewDynamoConn(r.sess, r.cfg.Table.Region)
-
-	exp, err := expression.NewBuilder().
-		WithFilter(
-			expression.And(expression.Name("title").Equal(expression.Value(strings.Title(title.Get()))),
-				expression.Name("user").Equal(expression.Value(user)))).
-		WithProjection(expression.NamesList(expression.Name("category_id"))).Build()
-	if err != nil {
-		return false, err
-	}
-
-	res, err := svc.ScanWithContext(ctx, &dynamodb.ScanInput{
-		AttributesToGet:           nil,
-		ConditionalOperator:       nil,
-		ConsistentRead:            aws.Bool(true),
-		ExclusiveStartKey:         nil,
-		ExpressionAttributeNames:  exp.Names(),
-		ExpressionAttributeValues: exp.Values(),
-		FilterExpression:          exp.Filter(),
-		IndexName:                 nil,
-		Limit:                     nil,
-		ProjectionExpression:      exp.Projection(),
-		ReturnConsumedCapacity:    nil,
-		ScanFilter:                nil,
-		Segment:                   nil,
-		Select:                    nil,
-		TableName:                 aws.String(r.cfg.Table.Name),
-		TotalSegments:             nil,
-	})
-	if err != nil {
-		return false, err
-	} else if res != nil && len(res.Items) >= 1 {
-		return true, nil
-	}
-
-	return false, nil
 }
