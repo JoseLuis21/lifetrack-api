@@ -5,8 +5,6 @@ import (
 	"github.com/alexandria-oss/common-go/exception"
 	"github.com/neutrinocorp/life-track-api/internal/domain/entity"
 	"github.com/neutrinocorp/life-track-api/internal/domain/event"
-	"github.com/neutrinocorp/life-track-api/internal/domain/model"
-	"time"
 )
 
 // Category activity container
@@ -24,32 +22,23 @@ func (c Category) IsValid() error {
 	return nil
 }
 
-// Update triggers updated event.Domain, mutates editable data and sets UpdateTime metadata to current time in UTC
-func (c *Category) Update(title, description string) error {
-	if err := c.root.Title.Set(title); title != "" && err != nil {
-		return err
-	}
-	if err := c.root.Description.Set(description); description != "" && err != nil {
+// Update mutates editable data and sets UpdateTime metadata to current time in UTC
+func (c *Category) Update(title, description, theme string) error {
+	if err := c.root.Update(title, description, theme); err != nil {
 		return err
 	}
 
-	c.root.UpdateTime = time.Now().UTC()
-	c.events = append(c.events, event.NewCategoryUpdated(*c))
 	return nil
 }
 
-// Remove triggers removed event.Domain, sets active flag to false and sets UpdateTime metadata to current time in UTC
+// Remove sets active flag to false and sets UpdateTime metadata to current time in UTC
 func (c *Category) Remove() {
-	c.root.UpdateTime = time.Now().UTC()
-	c.root.Active = false
-	c.events = append(c.events, event.NewCategoryRemoved(*c.root.ID))
+	c.root.Remove()
 }
 
-// Restore triggers restored event.Domain, set active flag to true and sets UpdateTime metadata to current time in UTC
+// Restore set active flag to true and sets UpdateTime metadata to current time in UTC
 func (c *Category) Restore() {
-	c.root.UpdateTime = time.Now().UTC()
-	c.root.Active = true
-	c.events = append(c.events, event.NewCategoryRestored(*c.root.ID))
+	c.root.Restore()
 }
 
 // SetRoot mutates the current aggregate root (category)
@@ -64,15 +53,7 @@ func (c *Category) GetRoot() *entity.Category {
 
 // MarshalBinary converts current aggregate to binary data (JSON)
 func (c Category) MarshalBinary() ([]byte, error) {
-	cJSON, err := json.Marshal(&model.Category{
-		ID:          c.root.ID.Get(),
-		Title:       c.root.Title.Get(),
-		Description: c.root.Description.Get(),
-		User:        c.root.User,
-		CreateTime:  c.root.CreateTime.Unix(),
-		UpdateTime:  c.root.UpdateTime.Unix(),
-		Active:      c.root.Active,
-	})
+	cJSON, err := json.Marshal(c)
 	if err != nil {
 		return nil, exception.NewFieldFormat("category aggregate", "json")
 	}
