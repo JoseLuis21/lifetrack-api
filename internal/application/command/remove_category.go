@@ -10,7 +10,7 @@ import (
 	"github.com/neutrinocorp/life-track-api/internal/domain/value"
 )
 
-// RemoveCategory request a category removal operation
+// RemoveCategory request a category removal operation (hard remove)
 type RemoveCategory struct {
 	Ctx context.Context
 	ID  string
@@ -47,33 +47,28 @@ func (h RemoveCategoryHandler) Invoke(cmd RemoveCategory) error {
 	}
 
 	// Parse primitive struct to domain aggregate
-	category, err := adapter.CategoryAdapter{}.ToAggregate(*c)
+	// Store snapshot if rollback is needed
+	snapshot, err := adapter.CategoryAdapter{}.ToAggregate(*c)
 	if err != nil {
 		return err
 	}
-	// Store snapshot if rollback is needed
-	snapshot := *category
-
-	// Update updateTime field
-	category.Remove()
 
 	// Persist changes
-	err = h.repo.Replace(cmd.Ctx, *category)
+	err = h.repo.HardRemove(cmd.Ctx, *snapshot.GetRoot().ID)
 	if err != nil {
 		return err
 	}
 
 	// Publish events to message broker concurrent-safe
-	category.RecordEvent(event_factory.NewCategoryRemoved(*category.GetRoot().ID))
-	return h.publishEvent(cmd.Ctx, category, snapshot)
+	return h.publishEvent(cmd.Ctx, *snapshot)
 }
 
-func (h RemoveCategoryHandler) publishEvent(ctx context.Context, ag *aggregate.Category, snapshot aggregate.Category) error {
+func (h RemoveCategoryHandler) publishEvent(ctx context.Context, snapshot aggregate.Category) error {
 	errC := make(chan error)
 	go func() {
-		if err := h.bus.Publish(ctx, ag.PullEvents()...); err != nil {
+		if err := h.bus.Publish(ctx, event_factory.NewCategoryHardRemoved(snapshot)); err != nil {
 			// Rollback
-			if errRoll := h.repo.Replace(ctx, snapshot); errRoll != nil {
+			if errRoll := h.repo.Save(ctx, snapshot); errRoll != nil {
 				errC <- errRoll
 				return
 			}
