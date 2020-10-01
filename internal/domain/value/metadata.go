@@ -11,8 +11,8 @@ type Metadata struct {
 
 func NewMetadata() *Metadata {
 	return &Metadata{
-		createTime: time.Now(),
-		updateTime: time.Now(),
+		createTime: time.Now().UTC(),
+		updateTime: time.Now().UTC(),
 		active:     true,
 	}
 }
