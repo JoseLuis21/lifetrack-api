@@ -16,6 +16,33 @@ type Category struct {
 	Metadata    *value.Metadata
 }
 
+// NewCategory creates a category entity receiving primitive-only data
+func NewCategory(title, user, description, theme string) (*Category, error) {
+	titleP, err := value.NewTitle("category_title", title)
+	if err != nil {
+		return nil, err
+	}
+
+	desc, err := value.NewDescription("category_description", description)
+	if err != nil {
+		return nil, err
+	}
+
+	t, err := value.NewTheme(theme)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Category{
+		ID:          value.NewCUID(),
+		Title:       titleP,
+		Description: desc,
+		User:        user,
+		Theme:       t,
+		Metadata:    value.NewMetadata(),
+	}, nil
+}
+
 // IsValid validate entity data
 func (c Category) IsValid() error {
 	// - Required: title, id, user
