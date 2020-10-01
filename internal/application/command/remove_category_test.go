@@ -34,10 +34,10 @@ func TestNewRemoveCategoryHandler(t *testing.T) {
 
 	categories, _, err := r.Fetch(context.Background(), "", 1, shared.CategoryCriteria{})
 	if err != nil {
-		t.Fatal("add category command failed", fmt.Sprintf("err: %v", exception.GetDescription(err)))
+		t.Fatal("list category query failed", fmt.Sprintf("err: %v", exception.GetDescription(err)))
 	}
 
-	t.Logf("add category command succeed")
+	t.Logf("list category query succeed")
 	t.Log(categories[0])
 
 	cmd := NewRemoveCategoryHandler(r, eventbus.NewInMemory(cfg))
@@ -58,7 +58,7 @@ func TestNewRemoveCategoryHandler(t *testing.T) {
 	}
 
 	categories, _, err = r.Fetch(context.Background(), "", 1, shared.CategoryCriteria{})
-	if err != nil && !errors.Is(err, exception.NotFound) {
+	if err == nil || !errors.Is(err, exception.NotFound) {
 		t.Fatal("remove category command failed, expected category not found")
 	}
 

@@ -33,10 +33,10 @@ func TestNewEditCategoryHandler(t *testing.T) {
 
 	categories, _, err := r.Fetch(context.Background(), "", 1, shared.CategoryCriteria{})
 	if err != nil {
-		t.Fatal("add category command failed", fmt.Sprintf("err: %v", exception.GetDescription(err)))
+		t.Fatal("list category query failed", fmt.Sprintf("err: %v", exception.GetDescription(err)))
 	}
 
-	t.Logf("add category command succeed")
+	t.Logf("list category query succeed")
 	t.Log(categories[0])
 
 	cmd := NewEditCategoryHandler(r, eventbus.NewInMemory(cfg))
