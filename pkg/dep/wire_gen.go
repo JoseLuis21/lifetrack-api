@@ -10,8 +10,10 @@ import (
 	"github.com/google/wire"
 	"github.com/neutrinocorp/life-track-api/internal/application/command"
 	"github.com/neutrinocorp/life-track-api/internal/application/query"
+	"github.com/neutrinocorp/life-track-api/internal/domain/event"
 	"github.com/neutrinocorp/life-track-api/internal/domain/repository"
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure"
+	"github.com/neutrinocorp/life-track-api/internal/infrastructure/eventbus"
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure/logging"
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure/persistence"
 	"go.uber.org/zap"
@@ -30,7 +32,8 @@ func InjectAddCategoryHandler() (*command.AddCategoryHandler, func(), error) {
 		return nil, nil, err
 	}
 	category := provideCategoryRepository(session, configuration, logger)
-	addCategoryHandler := command.NewAddCategoryHandler(category)
+	aws := eventbus.NewAWS(session, configuration)
+	addCategoryHandler := command.NewAddCategoryHandler(category, aws)
 	return addCategoryHandler, func() {
 		cleanup()
 	}, nil
@@ -72,7 +75,7 @@ func InjectListCategoriesQuery() (*query.ListCategories, func(), error) {
 
 // wire.go:
 
-var dynamoSet = wire.NewSet(infrastructure.NewConfiguration, infrastructure.NewSession, logging.NewZapProd, provideCategoryRepository)
+var infraSet = wire.NewSet(infrastructure.NewConfiguration, infrastructure.NewSession, logging.NewZapProd, provideCategoryRepository, wire.Bind(new(event.Bus), new(*eventbus.AWS)), eventbus.NewAWS)
 
 func provideCategoryRepository(s *session.Session, cfg infrastructure.Configuration, logger *zap.Logger) repository.Category {
 	return persistence.NewCategory(persistence.NewCategoryDynamoRepository(s, cfg), logger)
