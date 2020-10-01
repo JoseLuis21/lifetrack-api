@@ -5,6 +5,7 @@ import (
 	"github.com/google/uuid"
 )
 
+// UUID unique global identifier
 type UUID struct {
 	value uuid.UUID
 }

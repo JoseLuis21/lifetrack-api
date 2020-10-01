@@ -5,13 +5,16 @@ import (
 	"strings"
 )
 
+// Title is the main text header of an entity
 type Title struct {
-	value string
+	value     string
+	fieldName string
 }
 
 // NewTitle create a new title
-func NewTitle(title string) (*Title, error) {
+func NewTitle(fieldName, title string) (*Title, error) {
 	t := new(Title)
+	t.SetFieldName(fieldName)
 	if err := t.Set(title); err != nil {
 		return nil, err
 	}
@@ -38,8 +41,16 @@ func (t *Title) Set(title string) error {
 func (t Title) IsValid() error {
 	// - Range from 1 to 256
 	if t.value != "" && len(t.value) > 256 {
-		return exception.NewFieldRange("title", "1", "256")
+		return exception.NewFieldRange(t.fieldName, "1", "256")
 	}
 
 	return nil
+}
+
+func (t *Title) SetFieldName(field string) {
+	if field != "" {
+		t.fieldName = strings.ToLower(field)
+	}
+
+	t.fieldName = "title"
 }
