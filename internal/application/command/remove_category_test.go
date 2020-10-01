@@ -37,7 +37,7 @@ func TestNewRemoveCategoryHandler(t *testing.T) {
 		t.Fatal("list category query failed", fmt.Sprintf("err: %v", exception.GetDescription(err)))
 	}
 
-	t.Logf("list category query succeed")
+	t.Log("list category query succeed")
 	t.Log(categories[0])
 
 	cmd := NewRemoveCategoryHandler(r, eventbus.NewInMemory(cfg))
@@ -62,5 +62,5 @@ func TestNewRemoveCategoryHandler(t *testing.T) {
 		t.Fatal("remove category command failed, expected category not found")
 	}
 
-	t.Logf("remove category command succeed")
+	t.Log("remove category command succeed")
 }

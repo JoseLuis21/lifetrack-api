@@ -40,7 +40,7 @@ func TestNewChangeCategoryStateHandler(t *testing.T) {
 		t.Fatal("list category query failed", fmt.Sprintf("err: %v", exception.GetDescription(err)))
 	}
 
-	t.Logf("list category query succeed")
+	t.Log("list category query succeed")
 	t.Log(categories[0])
 
 	cmd := NewChangeCategoryStateHandler(r, b)

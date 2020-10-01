@@ -36,7 +36,7 @@ func TestNewEditCategoryHandler(t *testing.T) {
 		t.Fatal("list category query failed", fmt.Sprintf("err: %v", exception.GetDescription(err)))
 	}
 
-	t.Logf("list category query succeed")
+	t.Log("list category query succeed")
 	t.Log(categories[0])
 
 	cmd := NewEditCategoryHandler(r, eventbus.NewInMemory(cfg))
@@ -63,5 +63,5 @@ func TestNewEditCategoryHandler(t *testing.T) {
 		t.Fatal("edit category command failed", fmt.Sprintf("err: %v", exception.GetDescription(err)))
 	}
 
-	t.Logf("edit category command succeed")
+	t.Log("edit category command succeed")
 }

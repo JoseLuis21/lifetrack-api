@@ -51,5 +51,5 @@ func TestNewAddCategoryHandler(t *testing.T) {
 		t.Fatal("add category command failed", fmt.Sprintf("err: %v", exception.GetDescription(err)))
 	}
 
-	t.Logf("add category command succeed")
+	t.Log("add category command succeed")
 }
