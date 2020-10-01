@@ -11,20 +11,20 @@ import (
 	"sync"
 )
 
-// CategoryMock mocks category repository layer
-type CategoryMock struct {
+// CategoryInMemory in-memory category repository layer
+type CategoryInMemory struct {
 	items map[string]*model.Category
 	mu    *sync.RWMutex
 }
 
-func NewCategoryMock() *CategoryMock {
-	return &CategoryMock{
+func NewCategoryInMemory() *CategoryInMemory {
+	return &CategoryInMemory{
 		items: map[string]*model.Category{},
 		mu:    new(sync.RWMutex),
 	}
 }
 
-func (r *CategoryMock) Save(_ context.Context, c aggregate.Category) error {
+func (r *CategoryInMemory) Save(_ context.Context, c aggregate.Category) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -37,7 +37,7 @@ func (r *CategoryMock) Save(_ context.Context, c aggregate.Category) error {
 	return nil
 }
 
-func (r CategoryMock) FetchByID(_ context.Context, id value.CUID) (*model.Category, error) {
+func (r CategoryInMemory) FetchByID(_ context.Context, id value.CUID) (*model.Category, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
@@ -49,7 +49,7 @@ func (r CategoryMock) FetchByID(_ context.Context, id value.CUID) (*model.Catego
 	return c, nil
 }
 
-func (r CategoryMock) Fetch(_ context.Context, _ string, limit int64, _ shared.CategoryCriteria) ([]*model.Category, string, error) {
+func (r CategoryInMemory) Fetch(_ context.Context, _ string, limit int64, _ shared.CategoryCriteria) ([]*model.Category, string, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
@@ -62,11 +62,14 @@ func (r CategoryMock) Fetch(_ context.Context, _ string, limit int64, _ shared.C
 
 		items = append(items, v)
 	}
+	if len(items) == 0 {
+		return nil, "", exception.NewNotFound("category")
+	}
 
 	return items, "", nil
 }
 
-func (r *CategoryMock) Replace(_ context.Context, c aggregate.Category) error {
+func (r *CategoryInMemory) Replace(_ context.Context, c aggregate.Category) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -79,7 +82,7 @@ func (r *CategoryMock) Replace(_ context.Context, c aggregate.Category) error {
 	return nil
 }
 
-func (r *CategoryMock) HardRemove(_ context.Context, id value.CUID) error {
+func (r *CategoryInMemory) HardRemove(_ context.Context, id value.CUID) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 

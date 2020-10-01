@@ -16,7 +16,7 @@ func TestNewAddCategoryHandler(t *testing.T) {
 		t.Fatal("cannot start configuration")
 	}
 
-	cmd := NewAddCategoryHandler(persistence.NewCategoryMock(), eventbus.NewInMemory(cfg))
+	cmd := NewAddCategoryHandler(persistence.NewCategoryInMemory(), eventbus.NewInMemory(cfg))
 
 	err = cmd.Invoke(AddCategory{
 		Ctx:         context.Background(),

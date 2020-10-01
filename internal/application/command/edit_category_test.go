@@ -17,7 +17,7 @@ func TestNewEditCategoryHandler(t *testing.T) {
 		t.Fatal("cannot start configuration")
 	}
 
-	r := persistence.NewCategoryMock()
+	r := persistence.NewCategoryInMemory()
 
 	cmdAdd := NewAddCategoryHandler(r, eventbus.NewInMemory(cfg))
 	err = cmdAdd.Invoke(AddCategory{
