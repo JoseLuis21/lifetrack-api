@@ -42,7 +42,7 @@ func (r CategoryLog) Save(ctx context.Context, c aggregate.Category) (err error)
 	return
 }
 
-func (r CategoryLog) FetchByID(ctx context.Context, id value.UUID) (category *model.Category, err error) {
+func (r CategoryLog) FetchByID(ctx context.Context, id value.CUID) (category *model.Category, err error) {
 	defer func(init time.Time) {
 		if err != nil {
 			r.Log.Error("failed to fetch category by id",
@@ -67,7 +67,7 @@ func (r CategoryLog) FetchByID(ctx context.Context, id value.UUID) (category *mo
 	return
 }
 
-func (r CategoryLog) Fetch(ctx context.Context, token string, limit int64, filter shared.FilterMap) (
+func (r CategoryLog) Fetch(ctx context.Context, token string, limit int64, criteria shared.CategoryCriteria) (
 	categories []*model.Category, nextToken string, err error) {
 	defer func(init time.Time) {
 		if err != nil {
@@ -91,7 +91,7 @@ func (r CategoryLog) Fetch(ctx context.Context, token string, limit int64, filte
 		)
 	}(time.Now())
 
-	categories, nextToken, err = r.Next.Fetch(ctx, token, limit, filter)
+	categories, nextToken, err = r.Next.Fetch(ctx, token, limit, criteria)
 	return
 }
 
@@ -120,7 +120,7 @@ func (r CategoryLog) Replace(ctx context.Context, c aggregate.Category) (err err
 	return
 }
 
-func (r CategoryLog) HardRemove(ctx context.Context, id value.UUID) (err error) {
+func (r CategoryLog) HardRemove(ctx context.Context, id value.CUID) (err error) {
 	defer func(init time.Time) {
 		if err != nil {
 			r.Log.Error("failed to hard_remove category",

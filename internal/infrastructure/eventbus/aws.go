@@ -14,23 +14,23 @@ import (
 	"sync"
 )
 
-// AWSEventBus is the event.Bus implementation using AWS SNS and SQS
-type AWSEventBus struct {
+// AWS is the event.Bus implementation using AWS SNS and SQS
+type AWS struct {
 	sess *session.Session
 	cfg  infrastructure.Configuration
 	mu   *sync.Mutex
 }
 
-// NewAWSEventBus creates a concrete struct of AWSEventBus
-func NewAWSEventBus(s *session.Session, cfg infrastructure.Configuration) *AWSEventBus {
-	return &AWSEventBus{
+// NewAWS creates a concrete struct of AWS event bus
+func NewAWS(s *session.Session, cfg infrastructure.Configuration) *AWS {
+	return &AWS{
 		sess: s,
 		cfg:  cfg,
 		mu:   new(sync.Mutex),
 	}
 }
 
-func (b *AWSEventBus) Publish(ctx context.Context, e ...event.Domain) error {
+func (b *AWS) Publish(ctx context.Context, e ...event.Domain) error {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 
@@ -78,7 +78,7 @@ func (b *AWSEventBus) Publish(ctx context.Context, e ...event.Domain) error {
 	return nil
 }
 
-func (b *AWSEventBus) SubscribeTo(ctx context.Context, t event.Topic) (*event.Domain, error) {
+func (b *AWS) SubscribeTo(ctx context.Context, t event.Topic) (chan *event.Domain, error) {
 	svc := NewSQSConn(b.sess, b.cfg.Category.Event.Region)
 
 	queueURL, err := b.getQueueURL(ctx, svc, string(t))
@@ -110,16 +110,18 @@ func (b *AWSEventBus) SubscribeTo(ctx context.Context, t event.Topic) (*event.Do
 	}
 
 	// Use adapter func
+	evChan := make(chan *event.Domain)
 	e, err := b.getDomainEvent(o.Messages[0])
 	if err != nil {
 		return nil, err
 	}
+	evChan <- e
 
-	return e, nil
+	return evChan, nil
 }
 
 // getTopicArn returns the given topic ARN from given session's AWS resources
-func (b AWSEventBus) getTopicArn(ctx context.Context, svc *sns.SNS, topic string) (string, error) {
+func (b AWS) getTopicArn(ctx context.Context, svc *sns.SNS, topic string) (string, error) {
 	nextToken := ""
 
 	for {
@@ -151,7 +153,7 @@ func (b AWSEventBus) getTopicArn(ctx context.Context, svc *sns.SNS, topic string
 }
 
 // getQueueURL returns a queue URL for the given queue name
-func (b AWSEventBus) getQueueURL(ctx context.Context, svc *sqs.SQS, queue string) (string, error) {
+func (b AWS) getQueueURL(ctx context.Context, svc *sqs.SQS, queue string) (string, error) {
 	result, err := svc.GetQueueUrlWithContext(ctx, &sqs.GetQueueUrlInput{
 		QueueName: aws.String(queue),
 	})
@@ -172,7 +174,7 @@ func (b AWSEventBus) getQueueURL(ctx context.Context, svc *sqs.SQS, queue string
 }
 
 // getDomainEvent adapts sqs.Message into a domain event
-func (b AWSEventBus) getDomainEvent(msg *sqs.Message) (*event.Domain, error) {
+func (b AWS) getDomainEvent(msg *sqs.Message) (*event.Domain, error) {
 	if msg == nil || msg.Body == nil || msg.ReceiptHandle == nil {
 		return nil, exception.NewRequiredField("message")
 	}

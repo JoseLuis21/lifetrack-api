@@ -53,13 +53,13 @@ func (r CategoryDynamoRepository) Save(ctx context.Context, c aggregate.Category
 				S: aws.String(c.GetRoot().User),
 			},
 			"create_time": {
-				N: aws.String(strconv.FormatInt(c.GetRoot().CreateTime.Unix(), 10)),
+				N: aws.String(strconv.FormatInt(c.GetRoot().Metadata.GetCreateTime().Unix(), 10)),
 			},
 			"update_time": {
-				N: aws.String(strconv.FormatInt(c.GetRoot().UpdateTime.Unix(), 10)),
+				N: aws.String(strconv.FormatInt(c.GetRoot().Metadata.GetUpdateTime().Unix(), 10)),
 			},
 			"active": {
-				BOOL: aws.Bool(c.GetRoot().Active),
+				BOOL: aws.Bool(c.GetRoot().Metadata.GetState()),
 			},
 		},
 		ReturnValues: aws.String(dynamodb.ReturnValueNone),
@@ -69,7 +69,7 @@ func (r CategoryDynamoRepository) Save(ctx context.Context, c aggregate.Category
 	return r.getDomainError(err)
 }
 
-func (r CategoryDynamoRepository) FetchByID(ctx context.Context, id value.UUID) (*model.Category, error) {
+func (r CategoryDynamoRepository) FetchByID(ctx context.Context, id value.CUID) (*model.Category, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
@@ -99,7 +99,7 @@ func (r CategoryDynamoRepository) FetchByID(ctx context.Context, id value.UUID) 
 	return m, nil
 }
 
-func (r CategoryDynamoRepository) Fetch(ctx context.Context, token string, limit int64, filter shared.FilterMap) ([]*model.Category, string, error) {
+func (r CategoryDynamoRepository) Fetch(ctx context.Context, token string, limit int64, criteria shared.CategoryCriteria) ([]*model.Category, string, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
@@ -113,7 +113,7 @@ func (r CategoryDynamoRepository) Fetch(ctx context.Context, token string, limit
 		}
 	}
 
-	exp, _ := r.buildFilter(filter)
+	exp, _ := r.buildFilter(criteria)
 
 	svc := NewDynamoConn(r.sess, r.cfg.Category.Table.Region)
 	res, err := svc.ScanWithContext(ctx, &dynamodb.ScanInput{
@@ -161,10 +161,10 @@ func (r *CategoryDynamoRepository) Replace(ctx context.Context, c aggregate.Cate
 				S: aws.String(c.GetRoot().Description.Get()),
 			},
 			":u": {
-				N: aws.String(strconv.FormatInt(c.GetRoot().UpdateTime.Unix(), 10)),
+				N: aws.String(strconv.FormatInt(c.GetRoot().Metadata.GetUpdateTime().Unix(), 10)),
 			},
 			":a": {
-				BOOL: aws.Bool(c.GetRoot().Active),
+				BOOL: aws.Bool(c.GetRoot().Metadata.GetState()),
 			},
 		},
 		Key: map[string]*dynamodb.AttributeValue{
@@ -179,7 +179,7 @@ func (r *CategoryDynamoRepository) Replace(ctx context.Context, c aggregate.Cate
 	return r.getDomainError(err)
 }
 
-func (r *CategoryDynamoRepository) HardRemove(ctx context.Context, id value.UUID) error {
+func (r *CategoryDynamoRepository) HardRemove(ctx context.Context, id value.CUID) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -218,21 +218,17 @@ func (r CategoryDynamoRepository) getDomainError(err error) error {
 	return nil
 }
 
-// buildFilter constructs category fetch query filter
-func (r CategoryDynamoRepository) buildFilter(filter shared.FilterMap) (expression.Expression, error) {
+// buildFilter constructs category fetch query criteria
+func (r CategoryDynamoRepository) buildFilter(c shared.CategoryCriteria) (expression.Expression, error) {
 	conditions := make([]expression.ConditionBuilder, 0)
-	for k, v := range filter {
-		switch {
-		case k == "user" && v != "":
-			conditions = append(conditions, expression.Equal(expression.Name("user"), expression.Value(v)))
-			continue
-		case k == "title" && v != "":
-			conditions = append(conditions, expression.Equal(expression.Name("title"), expression.Value(v)))
-			continue
-		case k == "query" && v != "":
-			conditions = append(conditions, expression.Contains(expression.Name("title"), v))
-			continue
-		}
+	if c.User != "" {
+		conditions = append(conditions, expression.Equal(expression.Name("user"), expression.Value(c.User)))
+	}
+	if c.Title != "" {
+		conditions = append(conditions, expression.Equal(expression.Name("title"), expression.Value(c.Title)))
+	}
+	if c.Query != "" {
+		conditions = append(conditions, expression.Contains(expression.Name("title"), c.Query))
 	}
 
 	if cLength := len(conditions); cLength >= 1 {
