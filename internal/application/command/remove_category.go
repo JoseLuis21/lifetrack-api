@@ -2,8 +2,9 @@ package command
 
 import (
 	"context"
-	"github.com/neutrinocorp/life-track-api/internal/application/factory"
+	"github.com/neutrinocorp/life-track-api/internal/application/adapter"
 	"github.com/neutrinocorp/life-track-api/internal/domain/event"
+	"github.com/neutrinocorp/life-track-api/internal/domain/event_factory"
 	"github.com/neutrinocorp/life-track-api/internal/domain/repository"
 	"github.com/neutrinocorp/life-track-api/internal/domain/value"
 )
@@ -27,7 +28,7 @@ func NewRemoveCategoryHandler(r repository.Category, b event.Bus) *RemoveCategor
 
 func (h RemoveCategoryHandler) Invoke(cmd RemoveCategory) error {
 	// Business ops
-	id := value.UUID{}
+	id := value.CUID{}
 	err := id.Set(cmd.ID)
 	if err != nil {
 		return err
@@ -45,14 +46,14 @@ func (h RemoveCategoryHandler) Invoke(cmd RemoveCategory) error {
 	}
 
 	// Parse primitive struct to domain aggregate
-	category, err := factory.NewCategoryFromModel(*c)
+	category, err := adapter.CategoryAdapter{}.ToAggregate(*c)
 	if err != nil {
 		return err
 	}
 	// Store snapshot if rollback is needed
 	snapshot := category
 
-	// Trigger event and update updateTime field
+	// Update updateTime field
 	category.Remove()
 
 	// Persist changes
@@ -63,6 +64,7 @@ func (h RemoveCategoryHandler) Invoke(cmd RemoveCategory) error {
 
 	// Publish events to message broker concurrent-safe
 	errC := make(chan error)
+	category.RecordEvent(event_factory.NewCategoryRemoved(*category.GetRoot().ID))
 	go func() {
 		if err = h.bus.Publish(cmd.Ctx, category.PullEvents()...); err != nil {
 			// Rollback

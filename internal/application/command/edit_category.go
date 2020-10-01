@@ -2,8 +2,9 @@ package command
 
 import (
 	"context"
-	"github.com/neutrinocorp/life-track-api/internal/application/factory"
+	"github.com/neutrinocorp/life-track-api/internal/application/adapter"
 	"github.com/neutrinocorp/life-track-api/internal/domain/event"
+	"github.com/neutrinocorp/life-track-api/internal/domain/event_factory"
 	"github.com/neutrinocorp/life-track-api/internal/domain/repository"
 	"github.com/neutrinocorp/life-track-api/internal/domain/value"
 )
@@ -14,6 +15,7 @@ type EditCategory struct {
 	ID          string
 	Title       string
 	Description string
+	Theme       string
 }
 
 // EditCategoryHandler handles EditCategory commands
@@ -29,7 +31,7 @@ func NewEditCategoryHandler(r repository.Category, b event.Bus) *EditCategoryHan
 
 func (h EditCategoryHandler) Invoke(cmd EditCategory) error {
 	// Business ops
-	id := value.UUID{}
+	id := value.CUID{}
 	err := id.Set(cmd.ID)
 	if err != nil {
 		return err
@@ -42,15 +44,15 @@ func (h EditCategoryHandler) Invoke(cmd EditCategory) error {
 	}
 
 	// Parse primitive struct to domain aggregate
-	category, err := factory.NewCategoryFromModel(*c)
+	category, err := adapter.CategoryAdapter{}.ToAggregate(*c)
 	if err != nil {
 		return err
 	}
 	// Store snapshot if rollback is needed
 	snapshot := category
 
-	// Update fields and trigger event
-	if err = category.Update(cmd.Title, cmd.Description); err != nil {
+	// Update fields
+	if err = category.Update(cmd.Title, cmd.Description, cmd.Theme); err != nil {
 		return err
 	}
 
@@ -60,6 +62,7 @@ func (h EditCategoryHandler) Invoke(cmd EditCategory) error {
 	}
 
 	// Publish domain events to message broker concurrent-safe
+	category.RecordEvent(event_factory.NewCategoryUpdated(*category))
 	errC := make(chan error)
 	go func() {
 		if err := h.bus.Publish(cmd.Ctx, category.PullEvents()...); err != nil {

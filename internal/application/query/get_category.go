@@ -19,10 +19,10 @@ func NewGetCategory(r repository.Category) *GetCategory {
 }
 
 func (q GetCategory) Query(ctx context.Context, id string) (*model.Category, error) {
-	idUUID := new(value.UUID)
-	if err := idUUID.Set(id); err != nil {
+	idCUID := new(value.CUID)
+	if err := idCUID.Set(id); err != nil {
 		return nil, err
 	}
 
-	return q.repo.FetchByID(ctx, *idUUID)
+	return q.repo.FetchByID(ctx, *idCUID)
 }

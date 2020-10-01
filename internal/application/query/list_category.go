@@ -5,6 +5,7 @@ import (
 	"github.com/alexandria-oss/common-go/exception"
 	"github.com/neutrinocorp/life-track-api/internal/domain/model"
 	"github.com/neutrinocorp/life-track-api/internal/domain/repository"
+	"github.com/neutrinocorp/life-track-api/internal/domain/shared"
 	"strconv"
 )
 
@@ -32,5 +33,9 @@ func (q ListCategories) Query(ctx context.Context, token, limit string, filter m
 		limitInt = l
 	}
 
-	return q.repo.Fetch(ctx, token, limitInt, filter)
+	return q.repo.Fetch(ctx, token, limitInt, shared.CategoryCriteria{
+		User:  filter["user"],
+		Title: filter["title"],
+		Query: filter["query"],
+	})
 }

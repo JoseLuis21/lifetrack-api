@@ -13,6 +13,7 @@ type AddCategory struct {
 	Title       string
 	User        string
 	Description string
+	Theme       string
 }
 
 // AddCategoryHandler handles AddCategory commands
@@ -28,7 +29,7 @@ func NewAddCategoryHandler(r repository.Category, b event.Bus) *AddCategoryHandl
 
 func (h AddCategoryHandler) Invoke(cmd AddCategory) error {
 	// Business ops
-	c, err := factory.NewCategory(cmd.Title, cmd.User, cmd.Description)
+	c, err := factory.NewCategory(cmd.Title, cmd.User, cmd.Description, cmd.Theme)
 	if err != nil {
 		return err
 	}
