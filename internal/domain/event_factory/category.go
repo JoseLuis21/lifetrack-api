@@ -1,13 +1,14 @@
-package event
+package event_factory
 
 import (
 	"github.com/neutrinocorp/life-track-api/internal/domain/aggregate"
+	"github.com/neutrinocorp/life-track-api/internal/domain/event"
 	"github.com/neutrinocorp/life-track-api/internal/domain/value"
 )
 
 // NewCategoryCreated returns a pre-build Domain event for category creation
-func NewCategoryCreated(ag aggregate.Category) Domain {
-	e, _ := NewDomain(DomainArgsDTO{
+func NewCategoryCreated(ag aggregate.Category) event.Domain {
+	e, _ := event.NewDomain(event.DomainArgsDTO{
 		Service:       "category",
 		Action:        "created",
 		AggregateID:   ag.GetRoot().ID.Get(),
@@ -20,8 +21,8 @@ func NewCategoryCreated(ag aggregate.Category) Domain {
 }
 
 // NewCategoryUpdated returns a pre-build Domain event for category mutations
-func NewCategoryUpdated(ag aggregate.Category) Domain {
-	e, _ := NewDomain(DomainArgsDTO{
+func NewCategoryUpdated(ag aggregate.Category) event.Domain {
+	e, _ := event.NewDomain(event.DomainArgsDTO{
 		Service:       "category",
 		Action:        "updated",
 		AggregateID:   ag.GetRoot().ID.Get(),
@@ -34,8 +35,8 @@ func NewCategoryUpdated(ag aggregate.Category) Domain {
 }
 
 // NewCategoryRemoved returns a pre-build Domain event for category removal
-func NewCategoryRemoved(id value.CUID) Domain {
-	e, _ := NewDomain(DomainArgsDTO{
+func NewCategoryRemoved(id value.CUID) event.Domain {
+	e, _ := event.NewDomain(event.DomainArgsDTO{
 		Service:       "category",
 		Action:        "removed",
 		AggregateID:   id.Get(),
@@ -48,8 +49,8 @@ func NewCategoryRemoved(id value.CUID) Domain {
 }
 
 // NewCategoryRestored returns a pre-build Domain event for category removal
-func NewCategoryRestored(id value.CUID) Domain {
-	e, _ := NewDomain(DomainArgsDTO{
+func NewCategoryRestored(id value.CUID) event.Domain {
+	e, _ := event.NewDomain(event.DomainArgsDTO{
 		Service:       "category",
 		Action:        "restored",
 		AggregateID:   id.Get(),
@@ -62,8 +63,8 @@ func NewCategoryRestored(id value.CUID) Domain {
 }
 
 // NewCategoryHardRemoved returns a pre-build Domain event for category permanently removal
-func NewCategoryHardRemoved(ag aggregate.Category) Domain {
-	e, _ := NewDomain(DomainArgsDTO{
+func NewCategoryHardRemoved(ag aggregate.Category) event.Domain {
+	e, _ := event.NewDomain(event.DomainArgsDTO{
 		Service:       "category",
 		Action:        "hard_removed",
 		AggregateID:   ag.GetRoot().ID.Get(),
