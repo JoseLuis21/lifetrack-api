@@ -3,6 +3,7 @@ package command
 import (
 	"context"
 	"github.com/neutrinocorp/life-track-api/internal/application/adapter"
+	"github.com/neutrinocorp/life-track-api/internal/domain/aggregate"
 	"github.com/neutrinocorp/life-track-api/internal/domain/event"
 	"github.com/neutrinocorp/life-track-api/internal/domain/event_factory"
 	"github.com/neutrinocorp/life-track-api/internal/domain/repository"
@@ -49,7 +50,7 @@ func (h EditCategoryHandler) Invoke(cmd EditCategory) error {
 		return err
 	}
 	// Store snapshot if rollback is needed
-	snapshot := category
+	snapshot := *category
 
 	// Update fields
 	if err = category.Update(cmd.Title, cmd.Description, cmd.Theme); err != nil {
@@ -63,11 +64,15 @@ func (h EditCategoryHandler) Invoke(cmd EditCategory) error {
 
 	// Publish domain events to message broker concurrent-safe
 	category.RecordEvent(event_factory.NewCategoryUpdated(*category))
+	return h.publishEvent(cmd.Ctx, category, snapshot)
+}
+
+func (h EditCategoryHandler) publishEvent(ctx context.Context, ag *aggregate.Category, snapshot aggregate.Category) error {
 	errC := make(chan error)
 	go func() {
-		if err := h.bus.Publish(cmd.Ctx, category.PullEvents()...); err != nil {
+		if err := h.bus.Publish(ctx, ag.PullEvents()...); err != nil {
 			// Rollback
-			if errRoll := h.repo.Replace(cmd.Ctx, *snapshot); errRoll != nil {
+			if errRoll := h.repo.Replace(ctx, snapshot); errRoll != nil {
 				errC <- errRoll
 				return
 			}
@@ -80,7 +85,7 @@ func (h EditCategoryHandler) Invoke(cmd EditCategory) error {
 	}()
 
 	select {
-	case err = <-errC:
+	case err := <-errC:
 		return err
 	}
 }

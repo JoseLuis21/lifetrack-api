@@ -3,6 +3,7 @@ package command
 import (
 	"context"
 	"github.com/neutrinocorp/life-track-api/internal/application/factory"
+	"github.com/neutrinocorp/life-track-api/internal/domain/aggregate"
 	"github.com/neutrinocorp/life-track-api/internal/domain/event"
 	"github.com/neutrinocorp/life-track-api/internal/domain/repository"
 )
@@ -43,11 +44,15 @@ func (h AddCategoryHandler) Invoke(cmd AddCategory) error {
 	}
 
 	// Publish events to message broker concurrent-safe
+	return h.publishEvent(cmd.Ctx, c)
+}
+
+func (h AddCategoryHandler) publishEvent(ctx context.Context, c *aggregate.Category) error {
 	errC := make(chan error)
 	go func() {
-		if err = h.bus.Publish(cmd.Ctx, c.PullEvents()...); err != nil {
+		if err := h.bus.Publish(ctx, c.PullEvents()...); err != nil {
 			// Rollback
-			if errRoll := h.repo.HardRemove(cmd.Ctx, *c.GetRoot().ID); errRoll != nil {
+			if errRoll := h.repo.HardRemove(ctx, *c.GetRoot().ID); errRoll != nil {
 				errC <- errRoll
 				return
 			}
@@ -60,7 +65,7 @@ func (h AddCategoryHandler) Invoke(cmd AddCategory) error {
 	}()
 
 	select {
-	case err = <-errC:
+	case err := <-errC:
 		return err
 	}
 }
