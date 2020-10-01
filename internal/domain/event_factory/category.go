@@ -34,7 +34,7 @@ func NewCategoryUpdated(ag aggregate.Category) Domain {
 }
 
 // NewCategoryRemoved returns a pre-build Domain event for category removal
-func NewCategoryRemoved(id value.UUID) Domain {
+func NewCategoryRemoved(id value.CUID) Domain {
 	e, _ := NewDomain(DomainArgsDTO{
 		Service:       "category",
 		Action:        "removed",
@@ -48,7 +48,7 @@ func NewCategoryRemoved(id value.UUID) Domain {
 }
 
 // NewCategoryRestored returns a pre-build Domain event for category removal
-func NewCategoryRestored(id value.UUID) Domain {
+func NewCategoryRestored(id value.CUID) Domain {
 	e, _ := NewDomain(DomainArgsDTO{
 		Service:       "category",
 		Action:        "restored",
