@@ -7,10 +7,24 @@ This improves your productivity and keeps you on track in case you need some hel
 
 You may group your activities by categories to get aggregated data from related activities, _for example:_
 
-`Category = Science -> Activities = [Physics, Chemistry, Math]`
+`Category = "Science" -> Activities = ["Physics", "Chemistry", "Math"] -> Occrrence = ["01/31/2020", "02/12/2020"]`
+
+_This could also be represented with **LaTeX notation** as_:
+
+![x](https://latex.codecogs.com/gif.latex?%5Calpha%20%3D%20%5Cbegin%7Bpmatrix%7D%20a_%7B1%7D%20%5C%5C%20a_%7B2%7D%20%5C%5C%20a_%7B3%7D%20%5C%5C%20...%20%5C%5C%20a_%7Bn%7D%20%5Cend%7Bpmatrix%7D%20%5Cotimes%20%5Cbegin%7Bpmatrix%7D%20o_%7B1%7D%20%5C%5C%20o_%7B2%7D%20%5C%5C%20o_%7B3%7D%20%5C%5C%20...%20%5C%5C%20o_%7Bn%7D%20%5Cend%7Bpmatrix%7D%3B%20o_%7Bn%7D%20%5Csubset%20a_%7Bn%7D)
+
+**Where**
+- **alpha** = _Category matrix_
+- **a** = _Activity vector_
+- **b** = _Occrrence vector_
+
+**Mathematical Domain**
+- o is a subset of a
+- alpha is the tensor product between a and o vectorial fields
 
 These are the main _features_:
 
+- **Occurrence**: _Event_ that happened inside an activity.
 - **Activity**: _Task you use to do_ every week.
 - **Category**: _Group of activities_.
 - **Insight**: _Track your quantified activities_ every week, month and year.
