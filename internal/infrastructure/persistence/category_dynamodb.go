@@ -99,7 +99,8 @@ func (r CategoryDynamoRepository) FetchByID(ctx context.Context, id value.CUID) 
 	return m, nil
 }
 
-func (r CategoryDynamoRepository) Fetch(ctx context.Context, token string, limit int64, criteria shared.CategoryCriteria) ([]*model.Category, string, error) {
+func (r CategoryDynamoRepository) Fetch(ctx context.Context, token string, limit int64,
+	criteria shared.CategoryCriteria) ([]*model.Category, string, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
