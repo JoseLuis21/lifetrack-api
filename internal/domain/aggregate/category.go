@@ -76,6 +76,6 @@ func (c *Category) RecordEvent(e event.Domain) {
 }
 
 // PullEvents returns all the event.Domain triggered in aggregate Category
-func (c *Category) PullEvents() []event.Domain {
+func (c Category) PullEvents() []event.Domain {
 	return c.events
 }
