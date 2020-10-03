@@ -3,6 +3,7 @@ package entity
 import (
 	"github.com/alexandria-oss/common-go/exception"
 	"github.com/neutrinocorp/life-track-api/internal/domain/value"
+	"time"
 )
 
 // Activity represents a task in a category
@@ -45,4 +46,30 @@ func (a Activity) IsValid() error {
 	}
 
 	return nil
+}
+
+// Update mutates editable data and sets UpdateTime metadata to current time in UTC
+func (a *Activity) Update(title string) error {
+	if err := a.Title.Set(title); title != "" && err != nil {
+		return err
+	}
+	_ = a.Metadata.SetUpdateTime(time.Now().UTC())
+
+	if err := a.IsValid(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// Remove sets active flag to false and sets UpdateTime metadata to current time in UTC
+func (a *Activity) Remove() {
+	_ = a.Metadata.SetUpdateTime(time.Now().UTC())
+	_ = a.Metadata.SetState(false)
+}
+
+// Restore set active flag to true and sets UpdateTime metadata to current time in UTC
+func (a *Activity) Restore() {
+	_ = a.Metadata.SetUpdateTime(time.Now().UTC())
+	_ = a.Metadata.SetState(true)
 }

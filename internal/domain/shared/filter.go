@@ -9,3 +9,10 @@ type CategoryCriteria struct {
 	Title string `json:"title"`
 	Query string `json:"query"`
 }
+
+// ActivityCriteria represents a filter struct to fetch fine-grained activities
+type ActivityCriteria struct {
+	Category string `json:"category"`
+	Title    string `json:"title"`
+	Query    string `json:"query"`
+}
