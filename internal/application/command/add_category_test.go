@@ -8,6 +8,7 @@ import (
 	"github.com/alexandria-oss/common-go/exception"
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure"
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure/eventbus"
+	"github.com/neutrinocorp/life-track-api/internal/infrastructure/logging"
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure/persistence"
 )
 
@@ -16,8 +17,14 @@ func TestNewAddCategoryHandler(t *testing.T) {
 	if err != nil {
 		t.Fatal("cannot start configuration")
 	}
+	logger, cleanup, err := logging.NewZapProd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer cleanup()
+	r := persistence.NewCategory(persistence.NewCategoryInMemory(), logger)
 
-	cmd := NewAddCategoryHandler(persistence.NewCategoryInMemory(), eventbus.NewInMemory(cfg))
+	cmd := NewAddCategoryHandler(r, eventbus.NewInMemory(cfg))
 
 	err = cmd.Invoke(AddCategory{
 		Ctx:         context.Background(),

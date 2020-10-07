@@ -52,23 +52,19 @@ func NewDomain(args DomainArgsDTO) (*Domain, error) {
 
 	var bodyBinary []byte
 	bodyBinary = nil
-	if args.Body != nil {
-		d, err := args.Body.MarshalBinary()
-		if err != nil {
-			return nil, exception.NewFieldFormat("body", "binary or json")
-		}
-		bodyBinary = d
+	bin, err := encodeBinary("body", args.Body)
+	if err != nil {
+		return nil, err
 	}
+	bodyBinary = bin
 
 	var snapshotBinary []byte
 	snapshotBinary = nil
-	if args.Snapshot != nil {
-		d, err := args.Snapshot.MarshalBinary()
-		if err != nil {
-			return nil, exception.NewFieldFormat("snapshot", "binary or json")
-		}
-		snapshotBinary = d
+	bin, err = encodeBinary("snapshot", args.Snapshot)
+	if err != nil {
+		return nil, err
 	}
+	snapshotBinary = bin
 
 	return &Domain{
 		ID: uuid.New().String(),
@@ -83,6 +79,19 @@ func NewDomain(args DomainArgsDTO) (*Domain, error) {
 		PublishTime:   time.Now(),
 		Acknowledge:   "",
 	}, nil
+}
+
+// encodeBinary parses a binary marshaller to binary array
+func encodeBinary(field string, args encoding.BinaryMarshaler) ([]byte, error) {
+	if args != nil {
+		d, err := args.MarshalBinary()
+		if err != nil {
+			return nil, exception.NewFieldFormat(field, "binary or json")
+		}
+		return d, nil
+	}
+
+	return nil, nil
 }
 
 // TopicToUnderscore formats current Topic value to underscore format
