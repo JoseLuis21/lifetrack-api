@@ -11,7 +11,7 @@ import (
 // ActivityAdapter adapts different types of Activity structs
 type ActivityAdapter struct{}
 
-// ToAggregate parses a Activity aggregate root to a read-only model
+// ToModel parses a Activity aggregate root to a read-only model
 func (a ActivityAdapter) ToModel(ag aggregate.Activity) *model.Activity {
 	return &model.Activity{
 		ID:         ag.GetRoot().ID.Get(),
@@ -31,7 +31,7 @@ func (a ActivityAdapter) ToAggregate(m model.Activity) (*aggregate.Activity, err
 		return nil, err
 	}
 
-	titleP, err := value.NewTitle("Activity_title", m.Title)
+	titleP, err := value.NewTitle("activity_title", m.Title)
 	if err != nil {
 		return nil, err
 	}
