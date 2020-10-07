@@ -4,10 +4,11 @@ import (
 	"encoding"
 	"encoding/json"
 	"fmt"
-	"github.com/alexandria-oss/common-go/exception"
-	"github.com/google/uuid"
 	"strings"
 	"time"
+
+	"github.com/alexandria-oss/common-go/exception"
+	"github.com/google/uuid"
 )
 
 // Topic represents a topic name, must be used to subscribe to events

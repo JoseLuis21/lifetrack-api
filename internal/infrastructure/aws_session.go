@@ -1,8 +1,9 @@
 package infrastructure
 
 import (
-	"github.com/aws/aws-sdk-go/aws/session"
 	"sync"
+
+	"github.com/aws/aws-sdk-go/aws/session"
 )
 
 var awsSingleton = new(sync.Once)

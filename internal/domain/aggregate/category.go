@@ -2,6 +2,7 @@ package aggregate
 
 import (
 	"encoding/json"
+
 	"github.com/alexandria-oss/common-go/exception"
 	"github.com/neutrinocorp/life-track-api/internal/domain/entity"
 	"github.com/neutrinocorp/life-track-api/internal/domain/event"

@@ -2,6 +2,7 @@ package model
 
 import (
 	"encoding/json"
+
 	"github.com/alexandria-oss/common-go/exception"
 )
 

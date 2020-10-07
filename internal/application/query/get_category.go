@@ -2,11 +2,13 @@ package query
 
 import (
 	"context"
+
 	"github.com/neutrinocorp/life-track-api/internal/domain/model"
 	"github.com/neutrinocorp/life-track-api/internal/domain/repository"
 	"github.com/neutrinocorp/life-track-api/internal/domain/value"
 )
 
+// GetCategory request a single category
 type GetCategory struct {
 	repo repository.Category
 }

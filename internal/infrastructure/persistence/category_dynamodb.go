@@ -2,6 +2,9 @@ package persistence
 
 import (
 	"context"
+	"strconv"
+	"sync"
+
 	"github.com/alexandria-oss/common-go/exception"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
@@ -14,8 +17,6 @@ import (
 	"github.com/neutrinocorp/life-track-api/internal/domain/shared"
 	"github.com/neutrinocorp/life-track-api/internal/domain/value"
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure"
-	"strconv"
-	"sync"
 )
 
 // CategoryDynamoRepository is the repository.Category implementation using AWS DynamoDB

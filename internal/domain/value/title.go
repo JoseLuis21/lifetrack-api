@@ -1,8 +1,9 @@
 package value
 
 import (
-	"github.com/alexandria-oss/common-go/exception"
 	"strings"
+
+	"github.com/alexandria-oss/common-go/exception"
 )
 
 // Title is the main text header of an entity

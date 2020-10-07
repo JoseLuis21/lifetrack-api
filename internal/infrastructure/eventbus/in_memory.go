@@ -2,10 +2,11 @@ package eventbus
 
 import (
 	"context"
+	"sync"
+
 	"github.com/alexandria-oss/common-go/exception"
 	"github.com/neutrinocorp/life-track-api/internal/domain/event"
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure"
-	"sync"
 )
 
 // InMemory is the event.Bus implementation using in-memory

@@ -2,11 +2,12 @@ package handler
 
 import (
 	"encoding/json"
+	"net/http"
+
 	"github.com/alexandria-oss/common-go/httputil"
 	"github.com/gorilla/mux"
 	"github.com/neutrinocorp/life-track-api/internal/application/query"
 	"github.com/neutrinocorp/life-track-api/internal/domain/model"
-	"net/http"
 )
 
 type ListCategory struct {

@@ -1,9 +1,10 @@
 package entity
 
 import (
+	"time"
+
 	"github.com/alexandria-oss/common-go/exception"
 	"github.com/neutrinocorp/life-track-api/internal/domain/value"
-	"time"
 )
 
 // Category entity used to group n-activities

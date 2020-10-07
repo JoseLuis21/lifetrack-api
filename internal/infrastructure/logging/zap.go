@@ -1,8 +1,9 @@
 package logging
 
 import (
-	"go.uber.org/zap"
 	"sync"
+
+	"go.uber.org/zap"
 )
 
 var prodZapSingleton = new(sync.Once)

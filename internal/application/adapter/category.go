@@ -1,17 +1,18 @@
 package adapter
 
 import (
+	"time"
+
 	"github.com/neutrinocorp/life-track-api/internal/domain/aggregate"
 	"github.com/neutrinocorp/life-track-api/internal/domain/entity"
 	"github.com/neutrinocorp/life-track-api/internal/domain/model"
 	"github.com/neutrinocorp/life-track-api/internal/domain/value"
-	"time"
 )
 
 // CategoryAdapter adapts different types of category structs
 type CategoryAdapter struct{}
 
-// ToAggregate parses a category aggregate root to a read-only model
+// ToModel parses a category aggregate root to a read-only model
 func (a CategoryAdapter) ToModel(ag aggregate.Category) *model.Category {
 	return &model.Category{
 		ID:          ag.GetRoot().ID.Get(),

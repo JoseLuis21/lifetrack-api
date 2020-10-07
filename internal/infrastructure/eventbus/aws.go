@@ -2,6 +2,9 @@ package eventbus
 
 import (
 	"context"
+	"strings"
+	"sync"
+
 	"github.com/alexandria-oss/common-go/exception"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
@@ -10,8 +13,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/sqs"
 	"github.com/neutrinocorp/life-track-api/internal/domain/event"
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure"
-	"strings"
-	"sync"
 )
 
 // AWS is the event.Bus implementation using AWS SNS and SQS
