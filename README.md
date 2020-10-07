@@ -18,7 +18,7 @@ These are the main _features_:
 
 ## Technology
 **Neutrino _LifeTrack_** makes use of _serverless ecosystems_ to keep itself simple to manage and orchestrate.
-We make use of blazingly fast technology such as Go, AWS DynamoDB, Memcached and CassandraDB to satisfy our needs.
+We make use of blazing fast technology such as Go, AWS DynamoDB, Memcached and CassandraDB to satisfy our needs.
 
 - **Go**: The Go Programming Language is a language created by Google which is fast and makes easy to handle high-concurrent systems.
 - **Hashicorp Terraform**: Hashicorp Terraform is a IaaC solution which offers infrastructure orchestration with pure code (HCL).
@@ -35,9 +35,9 @@ We make use of blazingly fast technology such as Go, AWS DynamoDB, Memcached and
   - **SNS**: Simple Notification Service, offers a publish/subscribe mechanism to publish messages to n-consumers.
   - **SQS**: Simple Queue Service, offers a distributed and high-available queue system that is mainly focused on ETL jobs, Cron Jobs or as a Message Broker when used with SNS.
   - **ElastiCache**: Caching service which offers self-managed computation for either Redis or Memcached systems.
-  - **KeySpaces**: Document-oriented service wich offers self-managed computation for Apache Cassandra.
+  - **KeySpaces**: Document-oriented service which offers self-managed computation for Apache Cassandra.
   - **XRay**: AWS XRay is a remote-request distributed tracing mechanism.
-  - **CloudWatch**: CloudWatch is the standard AWS monitoring ecosystem, it offers many functionalities apart from just monitoring such as event triggering straight to SNS to notify specified consumers.
+  - **CloudWatch**: CloudWatch is the standard AWS monitoring ecosystem, it offers many functionality apart from just monitoring such as event triggering straight to SNS to notify specified consumers.
 
 - **Firebase**: Google's application ecosystem.
   - **Authentication** _OAuth2 (Google, Facebook & Apple)_: OAuth2 is a authentication mechanism using the latest security standards.
