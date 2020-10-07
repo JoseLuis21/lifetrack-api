@@ -2,13 +2,15 @@ package main
 
 import (
 	"context"
+	"log"
+
 	"github.com/alexandria-oss/common-go/exception"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/awslabs/aws-lambda-go-api-proxy/gorillamux"
+	"github.com/gorilla/mux"
 	"github.com/neutrinocorp/life-track-api/pkg/dep"
 	"github.com/neutrinocorp/life-track-api/pkg/transport/handler"
-	"log"
 )
 
 var muxLambda *gorillamux.GorillaMuxAdapter
@@ -21,7 +23,7 @@ func init() {
 	}
 	cleaning = clean
 
-	h := handler.NewListCategory(q)
+	h := handler.NewListCategory(q, mux.NewRouter())
 	log.Print("handler successfully started")
 	muxLambda = gorillamux.New(h.GetRouter())
 }

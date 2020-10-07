@@ -16,10 +16,10 @@ type GetCategory struct {
 }
 
 // NewGetCategory creates a get category handler with routing
-func NewGetCategory(q *query.GetCategory) *GetCategory {
+func NewGetCategory(q *query.GetCategory, r *mux.Router) *GetCategory {
 	h := &GetCategory{
 		q:      q,
-		router: mux.NewRouter(),
+		router: r,
 	}
 	h.mapRoutes()
 

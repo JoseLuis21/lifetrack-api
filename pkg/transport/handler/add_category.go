@@ -15,10 +15,10 @@ type AddCategory struct {
 }
 
 // NewAddCategory creates a add category handler with routing
-func NewAddCategory(cmd *command.AddCategoryHandler) *AddCategory {
+func NewAddCategory(cmd *command.AddCategoryHandler, r *mux.Router) *AddCategory {
 	h := &AddCategory{
 		cmd:    cmd,
-		router: mux.NewRouter(),
+		router: r,
 	}
 	h.mapRoute()
 

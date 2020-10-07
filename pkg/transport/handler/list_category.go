@@ -16,10 +16,10 @@ type ListCategory struct {
 }
 
 // NewListCategory creates a new list category handler with routing
-func NewListCategory(q *query.ListCategories) *ListCategory {
+func NewListCategory(q *query.ListCategories, r *mux.Router) *ListCategory {
 	h := &ListCategory{
 		q:      q,
-		router: mux.NewRouter(),
+		router: r,
 	}
 	h.mapRoutes()
 
