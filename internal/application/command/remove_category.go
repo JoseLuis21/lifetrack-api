@@ -6,7 +6,7 @@ import (
 	"github.com/neutrinocorp/life-track-api/internal/application/adapter"
 	"github.com/neutrinocorp/life-track-api/internal/domain/aggregate"
 	"github.com/neutrinocorp/life-track-api/internal/domain/event"
-	"github.com/neutrinocorp/life-track-api/internal/domain/event_factory"
+	"github.com/neutrinocorp/life-track-api/internal/domain/eventfactory"
 	"github.com/neutrinocorp/life-track-api/internal/domain/repository"
 	"github.com/neutrinocorp/life-track-api/internal/domain/value"
 )
@@ -67,7 +67,7 @@ func (h RemoveCategoryHandler) Invoke(cmd RemoveCategory) error {
 func (h RemoveCategoryHandler) publishEvent(ctx context.Context, snapshot aggregate.Category) error {
 	errC := make(chan error)
 	go func() {
-		if err := h.bus.Publish(ctx, event_factory.NewCategoryHardRemoved(snapshot)); err != nil {
+		if err := h.bus.Publish(ctx, eventfactory.NewCategoryHardRemoved(snapshot)); err != nil {
 			// Rollback
 			if errRoll := h.repo.Save(ctx, snapshot); errRoll != nil {
 				errC <- errRoll

@@ -1,4 +1,4 @@
-package event_factory
+package eventfactory
 
 import (
 	"github.com/neutrinocorp/life-track-api/internal/domain/aggregate"

@@ -6,7 +6,7 @@ import (
 	"github.com/neutrinocorp/life-track-api/internal/application/adapter"
 	"github.com/neutrinocorp/life-track-api/internal/domain/aggregate"
 	"github.com/neutrinocorp/life-track-api/internal/domain/event"
-	"github.com/neutrinocorp/life-track-api/internal/domain/event_factory"
+	"github.com/neutrinocorp/life-track-api/internal/domain/eventfactory"
 	"github.com/neutrinocorp/life-track-api/internal/domain/repository"
 	"github.com/neutrinocorp/life-track-api/internal/domain/value"
 )
@@ -72,11 +72,11 @@ func (h ChangeCategoryStateHandler) Invoke(cmd ChangeCategoryState) error {
 
 func (h ChangeCategoryStateHandler) setDomainEvent(ag *aggregate.Category) {
 	if ag.GetRoot().Metadata.GetState() {
-		ag.RecordEvent(event_factory.NewCategoryRestored(*ag.GetRoot().ID))
+		ag.RecordEvent(eventfactory.NewCategoryRestored(*ag.GetRoot().ID))
 		return
 	}
 
-	ag.RecordEvent(event_factory.NewCategoryRemoved(*ag.GetRoot().ID))
+	ag.RecordEvent(eventfactory.NewCategoryRemoved(*ag.GetRoot().ID))
 }
 
 func (h ChangeCategoryStateHandler) publishEvent(ctx context.Context, ag *aggregate.Category, snapshot aggregate.Category) error {

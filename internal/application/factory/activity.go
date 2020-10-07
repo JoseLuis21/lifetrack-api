@@ -3,7 +3,7 @@ package factory
 import (
 	"github.com/neutrinocorp/life-track-api/internal/domain/aggregate"
 	"github.com/neutrinocorp/life-track-api/internal/domain/entity"
-	"github.com/neutrinocorp/life-track-api/internal/domain/event_factory"
+	"github.com/neutrinocorp/life-track-api/internal/domain/eventfactory"
 )
 
 // NewActivity creates an Activity receiving primitive-only data.
@@ -16,7 +16,7 @@ func NewActivity(title, category string) (*aggregate.Activity, error) {
 
 	ag := new(aggregate.Activity)
 	ag.SetRoot(c)
-	ag.RecordEvent(event_factory.NewActivityCreated(*ag))
+	ag.RecordEvent(eventfactory.NewActivityCreated(*ag))
 
 	return ag, nil
 }

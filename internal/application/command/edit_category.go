@@ -6,7 +6,7 @@ import (
 	"github.com/neutrinocorp/life-track-api/internal/application/adapter"
 	"github.com/neutrinocorp/life-track-api/internal/domain/aggregate"
 	"github.com/neutrinocorp/life-track-api/internal/domain/event"
-	"github.com/neutrinocorp/life-track-api/internal/domain/event_factory"
+	"github.com/neutrinocorp/life-track-api/internal/domain/eventfactory"
 	"github.com/neutrinocorp/life-track-api/internal/domain/repository"
 	"github.com/neutrinocorp/life-track-api/internal/domain/value"
 )
@@ -64,7 +64,7 @@ func (h EditCategoryHandler) Invoke(cmd EditCategory) error {
 	}
 
 	// Publish domain events to message broker concurrent-safe
-	category.RecordEvent(event_factory.NewCategoryUpdated(*category))
+	category.RecordEvent(eventfactory.NewCategoryUpdated(*category))
 	return h.publishEvent(cmd.Ctx, category, snapshot)
 }
 

@@ -3,7 +3,7 @@ package factory
 import (
 	"github.com/neutrinocorp/life-track-api/internal/domain/aggregate"
 	"github.com/neutrinocorp/life-track-api/internal/domain/entity"
-	"github.com/neutrinocorp/life-track-api/internal/domain/event_factory"
+	"github.com/neutrinocorp/life-track-api/internal/domain/eventfactory"
 )
 
 // NewCategory creates a category receiving primitive-only data.
@@ -16,7 +16,7 @@ func NewCategory(title, user, description, theme string) (*aggregate.Category, e
 
 	ag := new(aggregate.Category)
 	ag.SetRoot(c)
-	ag.RecordEvent(event_factory.NewCategoryCreated(*ag))
+	ag.RecordEvent(eventfactory.NewCategoryCreated(*ag))
 
 	return ag, nil
 }
