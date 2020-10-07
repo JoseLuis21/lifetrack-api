@@ -3,11 +3,12 @@ package command
 import (
 	"context"
 	"fmt"
+	"testing"
+
 	"github.com/alexandria-oss/common-go/exception"
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure"
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure/eventbus"
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure/persistence"
-	"testing"
 )
 
 func TestNewAddCategoryHandler(t *testing.T) {

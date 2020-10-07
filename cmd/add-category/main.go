@@ -26,6 +26,7 @@ func init() {
 	muxLambda = gorillamux.New(h.GetRouter())
 }
 
+// Handler AWS Lambda handler
 func Handler(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	return muxLambda.ProxyWithContext(ctx, req)
 }

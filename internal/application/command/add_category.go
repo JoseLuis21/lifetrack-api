@@ -2,6 +2,7 @@ package command
 
 import (
 	"context"
+
 	"github.com/neutrinocorp/life-track-api/internal/application/factory"
 	"github.com/neutrinocorp/life-track-api/internal/domain/aggregate"
 	"github.com/neutrinocorp/life-track-api/internal/domain/event"

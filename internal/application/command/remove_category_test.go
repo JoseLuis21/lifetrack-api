@@ -4,12 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"testing"
+
 	"github.com/alexandria-oss/common-go/exception"
 	"github.com/neutrinocorp/life-track-api/internal/domain/shared"
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure"
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure/eventbus"
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure/persistence"
-	"testing"
 )
 
 func TestNewRemoveCategoryHandler(t *testing.T) {
