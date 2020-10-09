@@ -1,11 +1,12 @@
 package adapter
 
 import (
+	"time"
+
 	"github.com/neutrinocorp/life-track-api/internal/domain/aggregate"
 	"github.com/neutrinocorp/life-track-api/internal/domain/entity"
 	"github.com/neutrinocorp/life-track-api/internal/domain/model"
 	"github.com/neutrinocorp/life-track-api/internal/domain/value"
-	"time"
 )
 
 // ActivityAdapter adapts different types of Activity structs
@@ -35,7 +36,6 @@ func (a ActivityAdapter) ToAggregate(m model.Activity) (*aggregate.Activity, err
 	if err != nil {
 		return nil, err
 	}
-
 	category := &value.CUID{}
 	err = id.Set(m.ID)
 	if err != nil {
