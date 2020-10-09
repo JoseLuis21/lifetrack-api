@@ -19,17 +19,17 @@ import (
 
 // AWS is the event.Bus implementation using AWS SNS and SQS
 type AWS struct {
-	sess *session.Session
-	cfg  infrastructure.Configuration
-	mu   *sync.Mutex
+	sess   *session.Session
+	region string
+	mu     *sync.Mutex
 }
 
 // NewAWS creates a concrete struct of AWS event bus
 func NewAWS(s *session.Session, cfg infrastructure.Configuration) *AWS {
 	return &AWS{
-		sess: s,
-		cfg:  cfg,
-		mu:   new(sync.Mutex),
+		sess:   s,
+		region: cfg.EventBus.AWS.Region,
+		mu:     new(sync.Mutex),
 	}
 }
 
@@ -41,7 +41,7 @@ func (b *AWS) Publish(ctx context.Context, e ...event.Domain) error {
 		return exception.NewRequiredField("domain event")
 	}
 
-	svc := NewSNSConn(b.sess, b.cfg.Category.Event.Region)
+	svc := NewSNSConn(b.sess, b.region)
 	for _, ev := range e {
 		ev.TopicToUnderscore()
 		// Get topic Arn before publish
@@ -79,7 +79,7 @@ func (b *AWS) Publish(ctx context.Context, e ...event.Domain) error {
 }
 
 func (b *AWS) SubscribeTo(ctx context.Context, t event.Topic) (chan *event.Domain, error) {
-	svc := NewSQSConn(b.sess, b.cfg.Category.Event.Region)
+	svc := NewSQSConn(b.sess, b.region)
 
 	queueURL, err := b.getQueueURL(ctx, svc, string(t))
 	if err != nil {
@@ -102,7 +102,7 @@ func (b *AWS) SubscribeTo(ctx context.Context, t event.Topic) (chan *event.Domai
 		if aerr, ok := err.(awserr.Error); ok {
 			switch aerr.Code() {
 			case sqs.ErrCodeOverLimit:
-				return nil, exception.NewNetworkCall("aws sns topic "+string(t), b.cfg.Category.Event.Region)
+				return nil, exception.NewNetworkCall("aws sns topic "+string(t), b.region)
 			}
 		}
 
@@ -163,7 +163,7 @@ func (b AWS) getQueueURL(ctx context.Context, svc *sqs.SQS, queue string) (strin
 			case sqs.ErrCodeQueueDoesNotExist:
 				return "", exception.NewNotFound("queue " + queue)
 			case sqs.ErrCodeOverLimit:
-				return "", exception.NewNetworkCall("aws sqs queue "+queue, b.cfg.Category.Event.Region)
+				return "", exception.NewNetworkCall("aws sqs queue "+queue, b.region)
 			}
 		}
 
@@ -200,7 +200,7 @@ func (b AWS) fromSNSError(err error, ev event.Domain) error {
 			case sns.ErrCodeInvalidParameterValueException:
 				return exception.NewFieldFormat(ev.Topic+" parameter", "valid topic parameter value")
 			case sns.ErrCodeThrottledException:
-				return exception.NewNetworkCall("aws sns topic "+ev.Topic, b.cfg.Category.Event.Region)
+				return exception.NewNetworkCall("aws sns topic "+ev.Topic, b.region)
 			}
 		}
 
