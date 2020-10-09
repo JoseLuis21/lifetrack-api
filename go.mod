@@ -10,7 +10,6 @@ require (
 	github.com/google/uuid v1.1.2
 	github.com/google/wire v0.4.0
 	github.com/gorilla/mux v1.8.0
-	github.com/guregu/dynamo v1.9.1 // indirect
 	github.com/lucsky/cuid v1.0.2
 	github.com/onsi/ginkgo v1.14.1 // indirect
 	github.com/onsi/gomega v1.10.2 // indirect
