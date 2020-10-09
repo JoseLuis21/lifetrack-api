@@ -10,7 +10,10 @@ import (
 
 func main() {
 	r := mux.NewRouter()
+	r = r.PathPrefix("/live").Subrouter()
+	// Add middlewares
 
+	// Known code-smell, ignore
 	getCategory, cleanCGet, err := dep.InjectGetCategoryQuery()
 	if err != nil {
 		panic(err)
@@ -34,6 +37,30 @@ func main() {
 	defer cleanACat()
 
 	_ = handler.NewAddCategory(addCategory, r)
+
+	changeCategory, cleanCState, err := dep.InjectChangeCategoryState()
+	if err != nil {
+		panic(err)
+	}
+	defer cleanCState()
+
+	_ = handler.NewChangeCategoryState(changeCategory, r)
+
+	editCategory, cleanECat, err := dep.InjectEditCategory()
+	if err != nil {
+		panic(err)
+	}
+	defer cleanECat()
+
+	_ = handler.NewEditCategory(editCategory, r)
+
+	removeCategory, cleanRCat, err := dep.InjectRemoveCategory()
+	if err != nil {
+		panic(err)
+	}
+	defer cleanRCat()
+
+	_ = handler.NewRemoveCategory(removeCategory, r)
 
 	panic(http.ListenAndServe(":8080", r))
 }

@@ -23,7 +23,7 @@ func init() {
 	}
 	cleaning = clean
 
-	h := handler.NewAddCategory(cmd, mux.NewRouter())
+	h := handler.NewAddCategory(cmd, mux.NewRouter().PathPrefix("/live").Subrouter())
 	log.Print("handler successfully started")
 	muxLambda = gorillamux.New(h.GetRouter())
 }
