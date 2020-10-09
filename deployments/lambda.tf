@@ -6,13 +6,14 @@ resource "aws_lambda_function" "add-category" {
   s3_bucket     = aws_s3_bucket.category.bucket
   s3_key        = "v${var.app_version}/add-category.zip"
   handler       = "add-category"
-  role          = aws_iam_role.category-lambda-exec-full-db.arn
+  role          = aws_iam_role.lambda-exec-full-db.arn
   timeout       = 15
   runtime       = "go1.x"
   environment {
     variables = {
-      "LT_TABLE_NAME" : aws_dynamodb_table.lt-category.name,
-      "LT_TABLE_REGION" : "us-east-1"
+      "LT_DYNAMO_TABLE_NAME" : aws_dynamodb_table.lifetrack-prod.name
+      "LT_DYNAMO_TABLE_REGION" : "us-east-1"
+      "LT_DYNAMO_EVENT_AWS_REGION" : "us-east-1"
     }
   }
   tags = {
@@ -43,13 +44,13 @@ resource "aws_lambda_function" "list-category" {
   s3_bucket     = aws_s3_bucket.category.bucket
   s3_key        = "v${var.app_version}/list-category.zip"
   handler       = "list-category"
-  role          = aws_iam_role.category-lambda-exec-full-db.arn
+  role          = aws_iam_role.lambda-exec-full-db.arn
   timeout       = 15
   runtime       = "go1.x"
   environment {
     variables = {
-      "LT_TABLE_NAME" : aws_dynamodb_table.lt-category.name,
-      "LT_TABLE_REGION" : "us-east-1"
+      "LT_DYNAMO_TABLE_NAME" : aws_dynamodb_table.lifetrack-prod.name
+      "LT_DYNAMO_TABLE_REGION" : "us-east-1"
     }
   }
   tags = {
@@ -80,13 +81,13 @@ resource "aws_lambda_function" "get-category" {
   s3_bucket     = aws_s3_bucket.category.bucket
   s3_key        = "v${var.app_version}/get-category.zip"
   handler       = "get-category"
-  role          = aws_iam_role.category-lambda-exec-full-db.arn
+  role          = aws_iam_role.lambda-exec-full-db.arn
   timeout       = 15
   runtime       = "go1.x"
   environment {
     variables = {
-      "LT_TABLE_NAME" : aws_dynamodb_table.lt-category.name,
-      "LT_TABLE_REGION" : "us-east-1"
+      "LT_DYNAMO_TABLE_NAME" : aws_dynamodb_table.lifetrack-prod
+      "LT_DYNAMO_TABLE_REGION" : "us-east-1"
     }
   }
   tags = {
