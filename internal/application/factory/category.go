@@ -1,9 +1,9 @@
 package factory
 
 import (
+	"github.com/neutrinocorp/life-track-api/internal/application/eventfactory"
 	"github.com/neutrinocorp/life-track-api/internal/domain/aggregate"
 	"github.com/neutrinocorp/life-track-api/internal/domain/entity"
-	"github.com/neutrinocorp/life-track-api/internal/domain/eventfactory"
 )
 
 // NewCategory creates a category receiving primitive-only data.

@@ -4,9 +4,9 @@ import (
 	"context"
 
 	"github.com/neutrinocorp/life-track-api/internal/application/adapter"
+	"github.com/neutrinocorp/life-track-api/internal/application/eventfactory"
 	"github.com/neutrinocorp/life-track-api/internal/domain/aggregate"
 	"github.com/neutrinocorp/life-track-api/internal/domain/event"
-	"github.com/neutrinocorp/life-track-api/internal/domain/eventfactory"
 	"github.com/neutrinocorp/life-track-api/internal/domain/repository"
 	"github.com/neutrinocorp/life-track-api/internal/domain/value"
 )
@@ -96,8 +96,5 @@ func (h ChangeCategoryStateHandler) publishEvent(ctx context.Context, ag *aggreg
 		errC <- nil
 	}()
 
-	select {
-	case err := <-errC:
-		return err
-	}
+	return <-errC
 }

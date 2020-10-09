@@ -1,6 +1,7 @@
 package eventfactory
 
 import (
+	"github.com/neutrinocorp/life-track-api/internal/application/adapter"
 	"github.com/neutrinocorp/life-track-api/internal/domain/aggregate"
 	"github.com/neutrinocorp/life-track-api/internal/domain/event"
 	"github.com/neutrinocorp/life-track-api/internal/domain/value"
@@ -10,10 +11,10 @@ import (
 func NewCategoryCreated(ag aggregate.Category) event.Domain {
 	e, _ := event.NewDomain(event.DomainArgsDTO{
 		Service:       "category",
-		Action:        "created",
+		Action:        "added",
 		AggregateID:   ag.GetRoot().ID.Get(),
 		AggregateName: "category",
-		Body:          ag,
+		Body:          adapter.CategoryAdapter{}.ToModel(ag),
 		Snapshot:      nil,
 	})
 
@@ -21,14 +22,14 @@ func NewCategoryCreated(ag aggregate.Category) event.Domain {
 }
 
 // NewCategoryUpdated returns a pre-build Domain event for category mutations
-func NewCategoryUpdated(ag aggregate.Category) event.Domain {
+func NewCategoryUpdated(ag, snapshot aggregate.Category) event.Domain {
 	e, _ := event.NewDomain(event.DomainArgsDTO{
 		Service:       "category",
 		Action:        "updated",
 		AggregateID:   ag.GetRoot().ID.Get(),
 		AggregateName: "category",
-		Body:          ag,
-		Snapshot:      ag,
+		Body:          adapter.CategoryAdapter{}.ToModel(ag),
+		Snapshot:      adapter.CategoryAdapter{}.ToModel(snapshot),
 	})
 
 	return *e

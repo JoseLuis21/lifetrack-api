@@ -27,7 +27,7 @@ func NewGetCategory(q *query.GetCategory, r *mux.Router) *GetCategory {
 }
 
 func (c *GetCategory) mapRoutes() {
-	c.router.Path("/live/category/{id}").Methods(http.MethodGet).HandlerFunc(c.Handler)
+	c.router.Path("/category/{id}").Methods(http.MethodGet).HandlerFunc(c.Handler)
 }
 
 func (c GetCategory) GetRouter() *mux.Router {

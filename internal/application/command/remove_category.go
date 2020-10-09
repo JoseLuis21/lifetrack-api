@@ -4,9 +4,9 @@ import (
 	"context"
 
 	"github.com/neutrinocorp/life-track-api/internal/application/adapter"
+	"github.com/neutrinocorp/life-track-api/internal/application/eventfactory"
 	"github.com/neutrinocorp/life-track-api/internal/domain/aggregate"
 	"github.com/neutrinocorp/life-track-api/internal/domain/event"
-	"github.com/neutrinocorp/life-track-api/internal/domain/eventfactory"
 	"github.com/neutrinocorp/life-track-api/internal/domain/repository"
 	"github.com/neutrinocorp/life-track-api/internal/domain/value"
 )
@@ -36,15 +36,10 @@ func (h RemoveCategoryHandler) Invoke(cmd RemoveCategory) error {
 		return err
 	}
 
-	// Get data
+	// Get data (required by snapshot if rollback is needed)
 	c, err := h.repo.FetchByID(cmd.Ctx, id)
 	if err != nil {
 		return err
-	}
-
-	// If already deactivated, then skip
-	if c.Active == false {
-		return nil
 	}
 
 	// Parse primitive struct to domain aggregate
@@ -81,8 +76,5 @@ func (h RemoveCategoryHandler) publishEvent(ctx context.Context, snapshot aggreg
 		errC <- nil
 	}()
 
-	select {
-	case err := <-errC:
-		return err
-	}
+	return <-errC
 }

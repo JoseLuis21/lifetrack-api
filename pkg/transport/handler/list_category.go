@@ -27,7 +27,7 @@ func NewListCategory(q *query.ListCategories, r *mux.Router) *ListCategory {
 }
 
 func (c *ListCategory) mapRoutes() {
-	c.router.StrictSlash(true).Path("/live/category").Methods(http.MethodGet).HandlerFunc(c.Handler)
+	c.router.StrictSlash(true).Path("/category").Methods(http.MethodGet).HandlerFunc(c.Handler)
 }
 
 func (c ListCategory) GetRouter() *mux.Router {

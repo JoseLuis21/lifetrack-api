@@ -4,9 +4,9 @@ import (
 	"context"
 
 	"github.com/neutrinocorp/life-track-api/internal/application/adapter"
+	"github.com/neutrinocorp/life-track-api/internal/application/eventfactory"
 	"github.com/neutrinocorp/life-track-api/internal/domain/aggregate"
 	"github.com/neutrinocorp/life-track-api/internal/domain/event"
-	"github.com/neutrinocorp/life-track-api/internal/domain/eventfactory"
 	"github.com/neutrinocorp/life-track-api/internal/domain/repository"
 	"github.com/neutrinocorp/life-track-api/internal/domain/value"
 )
@@ -64,7 +64,7 @@ func (h EditCategoryHandler) Invoke(cmd EditCategory) error {
 	}
 
 	// Publish domain events to message broker concurrent-safe
-	category.RecordEvent(eventfactory.NewCategoryUpdated(*category))
+	category.RecordEvent(eventfactory.NewCategoryUpdated(*category, snapshot))
 	return h.publishEvent(cmd.Ctx, category, snapshot)
 }
 
@@ -85,8 +85,5 @@ func (h EditCategoryHandler) publishEvent(ctx context.Context, ag *aggregate.Cat
 		errC <- nil
 	}()
 
-	select {
-	case err := <-errC:
-		return err
-	}
+	return <-errC
 }

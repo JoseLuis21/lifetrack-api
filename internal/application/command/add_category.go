@@ -65,8 +65,5 @@ func (h AddCategoryHandler) publishEvent(ctx context.Context, c *aggregate.Categ
 		errC <- nil
 	}()
 
-	select {
-	case err := <-errC:
-		return err
-	}
+	return <-errC
 }
