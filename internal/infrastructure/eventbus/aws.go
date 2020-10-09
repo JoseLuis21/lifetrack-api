@@ -2,6 +2,8 @@ package eventbus
 
 import (
 	"context"
+	"encoding/json"
+	"strconv"
 	"strings"
 	"sync"
 
@@ -48,31 +50,28 @@ func (b *AWS) Publish(ctx context.Context, e ...event.Domain) error {
 			return err
 		}
 
-		eventJSON, err := ev.MarshalBinary()
+		// Required SNS JSON struct
+		defMsg := struct {
+			Message string `json:"default"`
+		}{
+			Message: string(ev.Body),
+		}
+
+		eventJSON, err := json.Marshal(defMsg)
 		if err != nil {
-			return err
+			return exception.NewFieldFormat("event_body", "binary or json")
 		}
 
 		_, err = svc.PublishWithContext(ctx, &sns.PublishInput{
-			Message:          aws.String(string(eventJSON)),
-			MessageStructure: aws.String("json"),
-			TopicArn:         aws.String(topicArn),
+			Message:           aws.String(string(eventJSON)),
+			MessageAttributes: b.generateMessageAttr(ev),
+			MessageStructure:  aws.String("json"),
+			TopicArn:          aws.String(topicArn),
 		})
 		if err != nil {
-			if aerr, ok := err.(awserr.Error); ok {
-				switch aerr.Code() {
-				case sns.ErrCodeResourceNotFoundException:
-					return exception.NewNotFound(ev.Topic)
-				case sns.ErrCodeInvalidParameterException:
-					return exception.NewFieldFormat(ev.Topic+" parameter", "valid topic parameter ")
-				case sns.ErrCodeInvalidParameterValueException:
-					return exception.NewFieldFormat(ev.Topic+" parameter", "valid topic parameter value")
-				case sns.ErrCodeThrottledException:
-					return exception.NewNetworkCall("aws sns topic "+ev.Topic, b.cfg.Category.Event.Region)
-				}
-			}
-
-			return err
+			// fromSNSError already verifies nil err, but we cannot return nil from here,
+			// otherwise for loop would be stopped if nil error was found
+			return b.fromSNSError(err, ev)
 		}
 	}
 
@@ -150,7 +149,7 @@ func (b AWS) getTopicArn(ctx context.Context, svc *sns.SNS, topic string) (strin
 		nextToken = *result.NextToken
 	}
 
-	return "", exception.NewNotFound("topic")
+	return "", exception.NewNotFound("topic " + topic)
 }
 
 // getQueueURL returns a queue URL for the given queue name
@@ -187,4 +186,65 @@ func (b AWS) getDomainEvent(msg *sqs.Message) (*event.Domain, error) {
 	e.Acknowledge = *msg.ReceiptHandle
 
 	return e, nil
+}
+
+// fromSNSError parses custom AWS errors to domain errors
+func (b AWS) fromSNSError(err error, ev event.Domain) error {
+	if err != nil {
+		if aerr, ok := err.(awserr.Error); ok {
+			switch aerr.Code() {
+			case sns.ErrCodeResourceNotFoundException:
+				return exception.NewNotFound(ev.Topic)
+			case sns.ErrCodeInvalidParameterException:
+				return exception.NewFieldFormat(ev.Topic+" parameter", "valid topic parameter")
+			case sns.ErrCodeInvalidParameterValueException:
+				return exception.NewFieldFormat(ev.Topic+" parameter", "valid topic parameter value")
+			case sns.ErrCodeThrottledException:
+				return exception.NewNetworkCall("aws sns topic "+ev.Topic, b.cfg.Category.Event.Region)
+			}
+		}
+
+		return err
+	}
+
+	return nil
+}
+
+// generateMessageAttr set SNS message's attributes from event.Domain
+func (b AWS) generateMessageAttr(ev event.Domain) map[string]*sns.MessageAttributeValue {
+	attr := map[string]*sns.MessageAttributeValue{
+		"id": {
+			DataType:    aws.String("String"),
+			StringValue: aws.String(ev.ID),
+		},
+		"service": {
+			DataType:    aws.String("String"),
+			StringValue: aws.String(ev.Service),
+		},
+		"action": {
+			DataType:    aws.String("String"),
+			StringValue: aws.String(ev.Action),
+		},
+		"aggregate_id": {
+			DataType:    aws.String("String"),
+			StringValue: aws.String(ev.AggregateID),
+		},
+		"aggregate_name": {
+			DataType:    aws.String("String"),
+			StringValue: aws.String(ev.AggregateName),
+		},
+		"publish_time": {
+			DataType:    aws.String("Number"),
+			StringValue: aws.String(strconv.FormatInt(ev.PublishTime.UTC().Unix(), 10)),
+		},
+	}
+
+	if ev.Snapshot != nil {
+		attr["snapshot"] = &sns.MessageAttributeValue{
+			DataType:    aws.String("Binary"),
+			BinaryValue: ev.Snapshot,
+		}
+	}
+
+	return attr
 }
