@@ -5,7 +5,7 @@ import (
 	"sync"
 
 	"github.com/alexandria-oss/common-go/exception"
-	"github.com/neutrinocorp/life-track-api/internal/application/adapter"
+	"github.com/neutrinocorp/life-track-api/internal/domain/adapter"
 	"github.com/neutrinocorp/life-track-api/internal/domain/aggregate"
 	"github.com/neutrinocorp/life-track-api/internal/domain/model"
 	"github.com/neutrinocorp/life-track-api/internal/domain/shared"
