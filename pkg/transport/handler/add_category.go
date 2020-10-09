@@ -14,7 +14,7 @@ type AddCategory struct {
 	router *mux.Router
 }
 
-// NewAddCategory creates a add category handler with routing
+// NewAddCategory creates an add category handler with routing
 func NewAddCategory(cmd *command.AddCategoryHandler, r *mux.Router) *AddCategory {
 	h := &AddCategory{
 		cmd:    cmd,
@@ -26,7 +26,7 @@ func NewAddCategory(cmd *command.AddCategoryHandler, r *mux.Router) *AddCategory
 }
 
 func (c *AddCategory) mapRoute() {
-	c.router.Path("/live/category").Methods(http.MethodPost).HandlerFunc(c.Handler)
+	c.router.Path("/category").Methods(http.MethodPost).HandlerFunc(c.Handler)
 }
 
 func (c AddCategory) GetRouter() *mux.Router {
@@ -34,14 +34,12 @@ func (c AddCategory) GetRouter() *mux.Router {
 }
 
 func (c AddCategory) Handler(w http.ResponseWriter, r *http.Request) {
-	err := c.cmd.Invoke(command.AddCategory{
+	if err := c.cmd.Invoke(command.AddCategory{
 		Ctx:         r.Context(),
 		Title:       r.PostFormValue("title"),
 		User:        r.PostFormValue("user"),
 		Description: r.PostFormValue("description"),
-	})
-
-	if err != nil {
+	}); err != nil {
 		httputil.RespondErrorJSON(err, w)
 		return
 	}
