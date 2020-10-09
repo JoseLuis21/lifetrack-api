@@ -25,7 +25,7 @@ type Configuration struct {
 }
 
 func NewConfiguration() (Configuration, error) {
-	viper.SetDefault("lifetrack.persistence.dynamo.table", "lifetrack-prod")
+	viper.SetDefault("lifetrack.persistence.dynamo.table", "lifetrack-dev")
 	viper.SetDefault("lifetrack.persistence.dynamo.region", "us-east-1")
 	viper.SetDefault("lifetrack.eventbus.aws.region", "us-east-1")
 
