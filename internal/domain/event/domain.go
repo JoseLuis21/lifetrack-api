@@ -51,7 +51,6 @@ func NewDomain(args DomainArgsDTO) (*Domain, error) {
 	}
 
 	var bodyBinary []byte
-	bodyBinary = nil
 	bin, err := encodeBinary("body", args.Body)
 	if err != nil {
 		return nil, err
@@ -59,7 +58,6 @@ func NewDomain(args DomainArgsDTO) (*Domain, error) {
 	bodyBinary = bin
 
 	var snapshotBinary []byte
-	snapshotBinary = nil
 	bin, err = encodeBinary("snapshot", args.Snapshot)
 	if err != nil {
 		return nil, err
@@ -68,7 +66,7 @@ func NewDomain(args DomainArgsDTO) (*Domain, error) {
 
 	return &Domain{
 		ID: uuid.New().String(),
-		Topic: strings.ToLower(fmt.Sprintf("%s.%s.%s", args.Service, args.AggregateName,
+		Topic: strings.ToLower(fmt.Sprintf("lt.%s.%s", args.AggregateName,
 			args.Action)),
 		Service:       strings.ToLower(args.Service),
 		Action:        strings.ToUpper(args.Action),
@@ -95,9 +93,16 @@ func encodeBinary(field string, args encoding.BinaryMarshaler) ([]byte, error) {
 }
 
 // TopicToUnderscore formats current Topic value to underscore format
-//	e.g. foo.bar.created -> foo_bar_created
+//	e.g. lt.foo.created -> lt_foo_created
 func (d *Domain) TopicToUnderscore() {
-	d.Topic = strings.ToLower(fmt.Sprintf("%s_%s_%s", d.Service, d.AggregateName,
+	d.Topic = strings.ToLower(fmt.Sprintf("lt_%s_%s", d.AggregateName,
+		d.Action))
+}
+
+// TopicToDash formats current Topic value to dashed format
+//	e.g. lt.foo.created -> lt-foo-created
+func (d *Domain) TopicToDash() {
+	d.Topic = strings.ToLower(fmt.Sprintf("lt-%s-%s", d.AggregateName,
 		d.Action))
 }
 
