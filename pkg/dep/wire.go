@@ -10,6 +10,7 @@ import (
 	"github.com/neutrinocorp/life-track-api/internal/domain/event"
 	"github.com/neutrinocorp/life-track-api/internal/domain/repository"
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure"
+	"github.com/neutrinocorp/life-track-api/internal/infrastructure/awsutil"
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure/eventbus"
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure/logging"
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure/persistence"
@@ -18,7 +19,7 @@ import (
 
 var infraSet = wire.NewSet(
 	infrastructure.NewConfiguration,
-	infrastructure.NewSession,
+	awsutil.NewSession,
 	logging.NewZapProd,
 	provideCategoryRepository,
 	wire.Bind(new(event.Bus), new(*eventbus.AWS)),

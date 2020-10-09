@@ -13,6 +13,7 @@ import (
 	"github.com/neutrinocorp/life-track-api/internal/domain/event"
 	"github.com/neutrinocorp/life-track-api/internal/domain/repository"
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure"
+	"github.com/neutrinocorp/life-track-api/internal/infrastructure/awsutil"
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure/eventbus"
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure/logging"
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure/persistence"
@@ -22,7 +23,7 @@ import (
 // Injectors from wire.go:
 
 func InjectAddCategoryHandler() (*command.AddCategoryHandler, func(), error) {
-	session := infrastructure.NewSession()
+	session := awsutil.NewSession()
 	configuration, err := infrastructure.NewConfiguration()
 	if err != nil {
 		return nil, nil, err
@@ -40,7 +41,7 @@ func InjectAddCategoryHandler() (*command.AddCategoryHandler, func(), error) {
 }
 
 func InjectGetCategoryQuery() (*query.GetCategory, func(), error) {
-	session := infrastructure.NewSession()
+	session := awsutil.NewSession()
 	configuration, err := infrastructure.NewConfiguration()
 	if err != nil {
 		return nil, nil, err
@@ -57,7 +58,7 @@ func InjectGetCategoryQuery() (*query.GetCategory, func(), error) {
 }
 
 func InjectListCategoriesQuery() (*query.ListCategories, func(), error) {
-	session := infrastructure.NewSession()
+	session := awsutil.NewSession()
 	configuration, err := infrastructure.NewConfiguration()
 	if err != nil {
 		return nil, nil, err
@@ -74,7 +75,7 @@ func InjectListCategoriesQuery() (*query.ListCategories, func(), error) {
 }
 
 func InjectChangeCategoryState() (*command.ChangeCategoryStateHandler, func(), error) {
-	session := infrastructure.NewSession()
+	session := awsutil.NewSession()
 	configuration, err := infrastructure.NewConfiguration()
 	if err != nil {
 		return nil, nil, err
@@ -92,7 +93,7 @@ func InjectChangeCategoryState() (*command.ChangeCategoryStateHandler, func(), e
 }
 
 func InjectEditCategory() (*command.EditCategoryHandler, func(), error) {
-	session := infrastructure.NewSession()
+	session := awsutil.NewSession()
 	configuration, err := infrastructure.NewConfiguration()
 	if err != nil {
 		return nil, nil, err
@@ -110,7 +111,7 @@ func InjectEditCategory() (*command.EditCategoryHandler, func(), error) {
 }
 
 func InjectRemoveCategory() (*command.RemoveCategoryHandler, func(), error) {
-	session := infrastructure.NewSession()
+	session := awsutil.NewSession()
 	configuration, err := infrastructure.NewConfiguration()
 	if err != nil {
 		return nil, nil, err
@@ -129,7 +130,7 @@ func InjectRemoveCategory() (*command.RemoveCategoryHandler, func(), error) {
 
 // wire.go:
 
-var infraSet = wire.NewSet(infrastructure.NewConfiguration, infrastructure.NewSession, logging.NewZapProd, provideCategoryRepository, wire.Bind(new(event.Bus), new(*eventbus.AWS)), eventbus.NewAWS)
+var infraSet = wire.NewSet(infrastructure.NewConfiguration, awsutil.NewSession, logging.NewZapProd, provideCategoryRepository, wire.Bind(new(event.Bus), new(*eventbus.AWS)), eventbus.NewAWS)
 
 func provideCategoryRepository(s *session.Session, cfg infrastructure.Configuration, logger *zap.Logger) repository.Category {
 	return persistence.NewCategory(persistence.NewCategoryDynamoRepository(s, cfg), logger)
