@@ -46,3 +46,21 @@ func InjectListCategoriesQuery() (*query.ListCategories, func(), error) {
 
 	return &query.ListCategories{}, nil, nil
 }
+
+func InjectChangeCategoryState() (*command.ChangeCategoryStateHandler, func(), error) {
+	wire.Build(infraSet, command.NewChangeCategoryStateHandler)
+
+	return &command.ChangeCategoryStateHandler{}, nil, nil
+}
+
+func InjectEditCategory() (*command.EditCategoryHandler, func(), error) {
+	wire.Build(infraSet, command.NewEditCategoryHandler)
+
+	return &command.EditCategoryHandler{}, nil, nil
+}
+
+func InjectRemoveCategory() (*command.RemoveCategoryHandler, func(), error) {
+	wire.Build(infraSet, command.NewRemoveCategoryHandler)
+
+	return &command.RemoveCategoryHandler{}, nil, nil
+}

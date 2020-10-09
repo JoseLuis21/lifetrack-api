@@ -73,6 +73,60 @@ func InjectListCategoriesQuery() (*query.ListCategories, func(), error) {
 	}, nil
 }
 
+func InjectChangeCategoryState() (*command.ChangeCategoryStateHandler, func(), error) {
+	session := infrastructure.NewSession()
+	configuration, err := infrastructure.NewConfiguration()
+	if err != nil {
+		return nil, nil, err
+	}
+	logger, cleanup, err := logging.NewZapProd()
+	if err != nil {
+		return nil, nil, err
+	}
+	category := provideCategoryRepository(session, configuration, logger)
+	aws := eventbus.NewAWS(session, configuration)
+	changeCategoryStateHandler := command.NewChangeCategoryStateHandler(category, aws)
+	return changeCategoryStateHandler, func() {
+		cleanup()
+	}, nil
+}
+
+func InjectEditCategory() (*command.EditCategoryHandler, func(), error) {
+	session := infrastructure.NewSession()
+	configuration, err := infrastructure.NewConfiguration()
+	if err != nil {
+		return nil, nil, err
+	}
+	logger, cleanup, err := logging.NewZapProd()
+	if err != nil {
+		return nil, nil, err
+	}
+	category := provideCategoryRepository(session, configuration, logger)
+	aws := eventbus.NewAWS(session, configuration)
+	editCategoryHandler := command.NewEditCategoryHandler(category, aws)
+	return editCategoryHandler, func() {
+		cleanup()
+	}, nil
+}
+
+func InjectRemoveCategory() (*command.RemoveCategoryHandler, func(), error) {
+	session := infrastructure.NewSession()
+	configuration, err := infrastructure.NewConfiguration()
+	if err != nil {
+		return nil, nil, err
+	}
+	logger, cleanup, err := logging.NewZapProd()
+	if err != nil {
+		return nil, nil, err
+	}
+	category := provideCategoryRepository(session, configuration, logger)
+	aws := eventbus.NewAWS(session, configuration)
+	removeCategoryHandler := command.NewRemoveCategoryHandler(category, aws)
+	return removeCategoryHandler, func() {
+		cleanup()
+	}, nil
+}
+
 // wire.go:
 
 var infraSet = wire.NewSet(infrastructure.NewConfiguration, infrastructure.NewSession, logging.NewZapProd, provideCategoryRepository, wire.Bind(new(event.Bus), new(*eventbus.AWS)), eventbus.NewAWS)
