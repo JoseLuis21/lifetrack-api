@@ -10,9 +10,9 @@ import (
 type Category struct {
 	ID          string `json:"category_id"`
 	Title       string `json:"title"`
-	Description string `json:"description"`
+	Description string `json:"description,omitempty"`
 	User        string `json:"user"`
-	Theme       string `json:"theme"`
+	Theme       string `json:"theme,omitempty"`
 	CreateTime  int64  `json:"create_time"`
 	UpdateTime  int64  `json:"update_time"`
 	Active      bool   `json:"active"`
