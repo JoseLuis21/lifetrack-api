@@ -1,6 +1,9 @@
 resource "aws_api_gateway_rest_api" "lifeTrack" {
-  name = "LifeTrack API"
+  name        = "LifeTrack API"
   description = "Neutrino LifeTrack API"
+  tags = {
+    Name : var.app_name
+  }
 }
 
 // -- ACM Cert, API Gateway Domain name & Route53 record --
@@ -19,51 +22,58 @@ data "aws_acm_certificate" "cert" {
 
 resource "aws_api_gateway_domain_name" "domain" {
   certificate_arn = "arn:aws:acm:us-east-1:824699638576:certificate/dcd0e41b-406a-4d0a-a366-4db92d47c012"
-  domain_name = "lifetrack.api.damascus-engineering.com"
+  domain_name     = "lifetrack.api.damascus-engineering.com"
   security_policy = "TLS_1_2"
   tags = {
-    Environment: "prod",
-    Name: "neutrino-lifetrack"
+    Name : var.app_name
   }
 }
 
 resource "aws_api_gateway_base_path_mapping" "map" {
-  api_id = aws_api_gateway_rest_api.lifeTrack.id
-  stage_name = aws_api_gateway_deployment.deploy.stage_name
+  api_id      = aws_api_gateway_rest_api.lifeTrack.id
+  stage_name  = aws_api_gateway_deployment.deploy.stage_name
   domain_name = aws_api_gateway_domain_name.domain.domain_name
-  base_path = "live"
+  base_path   = "live"
 }
 
 data "aws_route53_zone" "primary" {
-  name = "damascus-engineering.com"
+  name         = "damascus-engineering.com"
   private_zone = false
 }
 
 resource "aws_route53_record" "domain-53" {
-  name = aws_api_gateway_domain_name.domain.domain_name
-  type = "A"
+  name    = aws_api_gateway_domain_name.domain.domain_name
+  type    = "A"
   zone_id = data.aws_route53_zone.primary.id
 
   alias {
     evaluate_target_health = true
-    name = aws_api_gateway_domain_name.domain.cloudfront_domain_name
-    zone_id = aws_api_gateway_domain_name.domain.cloudfront_zone_id
+    name                   = aws_api_gateway_domain_name.domain.cloudfront_domain_name
+    zone_id                = aws_api_gateway_domain_name.domain.cloudfront_zone_id
   }
 }
 
 // -- API Gateway Proxy config --
 
-// Category (GET, POST)
+/* Category */
+/* Routes:
+  - GET /category - List
+  - POST /category - Add
+  - GET /category/{id} - Get
+  - PATCH-PUT /category/{id} - Update
+  - DELETE /category/{id} - Hard Remove
+  - PATCH-PUT /category/{id}/state - Change state (active/deactivate - soft remove/restore)
+*/
 resource "aws_api_gateway_resource" "category" {
   rest_api_id = aws_api_gateway_rest_api.lifeTrack.id
-  parent_id = aws_api_gateway_rest_api.lifeTrack.root_resource_id
-  path_part = "category"
+  parent_id   = aws_api_gateway_rest_api.lifeTrack.root_resource_id
+  path_part   = "category"
 }
 
 resource "aws_api_gateway_method" "add-category" {
-  rest_api_id = aws_api_gateway_rest_api.lifeTrack.id
-  resource_id = aws_api_gateway_resource.category.id
-  http_method = "POST"
+  rest_api_id   = aws_api_gateway_rest_api.lifeTrack.id
+  resource_id   = aws_api_gateway_resource.category.id
+  http_method   = "POST"
   authorization = "NONE"
 }
 
@@ -73,14 +83,14 @@ resource "aws_api_gateway_integration" "lambda-add-category" {
   http_method = aws_api_gateway_method.add-category.http_method
 
   integration_http_method = "POST"
-  type = "AWS_PROXY"
-  uri = aws_lambda_function.add-category.invoke_arn
+  type                    = "AWS_PROXY"
+  uri                     = aws_lambda_function.add-category.invoke_arn
 }
 
 resource "aws_api_gateway_method" "list-category" {
-  rest_api_id = aws_api_gateway_rest_api.lifeTrack.id
-  resource_id = aws_api_gateway_resource.category.id
-  http_method = "GET"
+  rest_api_id   = aws_api_gateway_rest_api.lifeTrack.id
+  resource_id   = aws_api_gateway_resource.category.id
+  http_method   = "GET"
   authorization = "NONE"
 }
 
@@ -90,22 +100,22 @@ resource "aws_api_gateway_integration" "lambda-list-category" {
   http_method = aws_api_gateway_method.list-category.http_method
 
   integration_http_method = "POST"
-  type = "AWS_PROXY"
-  uri = aws_lambda_function.list-category.invoke_arn
+  type                    = "AWS_PROXY"
+  uri                     = aws_lambda_function.list-category.invoke_arn
   // cache_key_parameters = ["page_size", "next_token"]
 }
 
 // Category -> detail (GET, PATCH, DELETE)
 resource "aws_api_gateway_resource" "category-detail" {
   rest_api_id = aws_api_gateway_rest_api.lifeTrack.id
-  parent_id = aws_api_gateway_resource.category.id
-  path_part = "{id}"
+  parent_id   = aws_api_gateway_resource.category.id
+  path_part   = "{id}"
 }
 
 resource "aws_api_gateway_method" "category-get" {
-  rest_api_id = aws_api_gateway_rest_api.lifeTrack.id
-  resource_id = aws_api_gateway_resource.category-detail.id
-  http_method = "GET"
+  rest_api_id   = aws_api_gateway_rest_api.lifeTrack.id
+  resource_id   = aws_api_gateway_resource.category-detail.id
+  http_method   = "GET"
   authorization = "NONE"
 }
 
@@ -115,12 +125,16 @@ resource "aws_api_gateway_integration" "lambda-get-category" {
   http_method = aws_api_gateway_method.category-get.http_method
 
   integration_http_method = "POST"
-  type = "AWS_PROXY"
-  uri = aws_lambda_function.get-category.invoke_arn
+  type                    = "AWS_PROXY"
+  uri                     = aws_lambda_function.get-category.invoke_arn
 }
 
+/* Activity */
+
+/* Occurrence */
+
 /*
-INFO: Avoid using proxy to keep serverless ecosystem
+INFO: Avoid using proxy to keep modularized serverless ecosystem
 
 resource "aws_api_gateway_resource" "category_proxy" {
   rest_api_id = aws_api_gateway_rest_api.lifeTrack.id
@@ -153,8 +167,8 @@ resource "aws_api_gateway_deployment" "deploy" {
     aws_api_gateway_integration.lambda-list-category,
     aws_api_gateway_integration.lambda-get-category
   ]
-  rest_api_id = aws_api_gateway_rest_api.lifeTrack.id
-  stage_name = "live"
+  rest_api_id       = aws_api_gateway_rest_api.lifeTrack.id
+  stage_name        = "live"
   stage_description = "Production stage"
 
 }
