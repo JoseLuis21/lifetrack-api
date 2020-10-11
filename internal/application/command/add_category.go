@@ -3,9 +3,9 @@ package command
 import (
 	"context"
 
-	"github.com/neutrinocorp/life-track-api/internal/application/factory"
 	"github.com/neutrinocorp/life-track-api/internal/domain/aggregate"
 	"github.com/neutrinocorp/life-track-api/internal/domain/event"
+	"github.com/neutrinocorp/life-track-api/internal/domain/factory"
 	"github.com/neutrinocorp/life-track-api/internal/domain/repository"
 )
 
@@ -35,9 +35,6 @@ func (h AddCategoryHandler) Invoke(cmd AddCategory) error {
 	if err != nil {
 		return err
 	}
-	if err = c.IsValid(); err != nil {
-		return err
-	}
 
 	// Infrastructure ops
 	if err = h.repo.Save(cmd.Ctx, *c); err != nil {
@@ -53,7 +50,7 @@ func (h AddCategoryHandler) publishEvent(ctx context.Context, c *aggregate.Categ
 	go func() {
 		if err := h.bus.Publish(ctx, c.PullEvents()...); err != nil {
 			// Rollback
-			if errRoll := h.repo.HardRemove(ctx, *c.GetRoot().ID); errRoll != nil {
+			if errRoll := h.repo.HardRemove(ctx, *c.Get().ID); errRoll != nil {
 				errC <- errRoll
 				return
 			}

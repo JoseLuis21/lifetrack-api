@@ -50,7 +50,7 @@ func (h RemoveCategoryHandler) Invoke(cmd RemoveCategory) error {
 	}
 
 	// Persist changes
-	err = h.repo.HardRemove(cmd.Ctx, *snapshot.GetRoot().ID)
+	err = h.repo.HardRemove(cmd.Ctx, *snapshot.Get().ID)
 	if err != nil {
 		return err
 	}
@@ -62,7 +62,7 @@ func (h RemoveCategoryHandler) Invoke(cmd RemoveCategory) error {
 func (h RemoveCategoryHandler) publishEvent(ctx context.Context, snapshot aggregate.Category) error {
 	errC := make(chan error)
 	go func() {
-		if err := h.bus.Publish(ctx, eventfactory.NewCategoryHardRemoved(snapshot)); err != nil {
+		if err := h.bus.Publish(ctx, eventfactory.Category{}.NewCategoryHardRemoved(snapshot)); err != nil {
 			// Rollback
 			if errRoll := h.repo.Save(ctx, snapshot); errRoll != nil {
 				errC <- errRoll

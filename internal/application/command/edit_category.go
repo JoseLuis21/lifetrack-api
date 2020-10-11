@@ -64,7 +64,7 @@ func (h EditCategoryHandler) Invoke(cmd EditCategory) error {
 	}
 
 	// Publish domain events to message broker concurrent-safe
-	category.RecordEvent(eventfactory.NewCategoryUpdated(*category, snapshot))
+	category.RecordEvent(eventfactory.Category{}.NewCategoryUpdated(*category, snapshot))
 	return h.publishEvent(cmd.Ctx, category, snapshot)
 }
 
