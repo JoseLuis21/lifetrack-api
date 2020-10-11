@@ -30,11 +30,11 @@ func (r *CategoryInMemory) Save(_ context.Context, c aggregate.Category) error {
 	defer r.mu.Unlock()
 
 	// O(1) performance
-	if _, ok := r.items[c.GetRoot().ID.Get()]; ok {
+	if _, ok := r.items[c.Get().ID.Get()]; ok {
 		return exception.NewAlreadyExists("category")
 	}
 
-	r.items[c.GetRoot().ID.Get()] = adapter.CategoryAdapter{}.ToModel(c)
+	r.items[c.Get().ID.Get()] = adapter.CategoryAdapter{}.ToModel(c)
 	return nil
 }
 
@@ -74,12 +74,12 @@ func (r *CategoryInMemory) Replace(_ context.Context, c aggregate.Category) erro
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	_, ok := r.items[c.GetRoot().ID.Get()]
+	_, ok := r.items[c.Get().ID.Get()]
 	if !ok {
 		return exception.NewNotFound("category")
 	}
 
-	r.items[c.GetRoot().ID.Get()] = adapter.CategoryAdapter{}.ToModel(c)
+	r.items[c.Get().ID.Get()] = adapter.CategoryAdapter{}.ToModel(c)
 	return nil
 }
 

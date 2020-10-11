@@ -3,8 +3,8 @@ package util
 import "strings"
 
 // GenerateDynamoID returns a dynamoDB id for Adjacency List strategy
-func GenerateDynamoID(table, id string) string {
-	return strings.Title(table) + "#" + id
+func GenerateDynamoID(schema, id string) string {
+	return strings.Title(schema) + "#" + id
 }
 
 // FromDynamoID returns a key from a composite dynamoDB key

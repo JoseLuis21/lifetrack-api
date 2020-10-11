@@ -26,7 +26,7 @@ func (r CategoryLog) Save(ctx context.Context, c aggregate.Category) (err error)
 				zap.String("action", "save"),
 				zap.Duration("backoff", time.Since(init)),
 				zap.String("err", err.Error()),
-				zap.String("id", c.GetRoot().ID.Get()),
+				zap.String("id", c.Get().ID.Get()),
 			)
 			return
 		}
@@ -35,7 +35,7 @@ func (r CategoryLog) Save(ctx context.Context, c aggregate.Category) (err error)
 			zap.String("module", "infrastructure.persistence.category"),
 			zap.String("action", "save"),
 			zap.Duration("backoff", time.Since(init)),
-			zap.String("id", c.GetRoot().ID.Get()),
+			zap.String("id", c.Get().ID.Get()),
 		)
 	}(time.Now())
 
@@ -104,7 +104,7 @@ func (r CategoryLog) Replace(ctx context.Context, c aggregate.Category) (err err
 				zap.String("action", "replace"),
 				zap.Duration("backoff", time.Since(init)),
 				zap.String("err", err.Error()),
-				zap.String("id", c.GetRoot().ID.Get()),
+				zap.String("id", c.Get().ID.Get()),
 			)
 			return
 		}
@@ -113,7 +113,7 @@ func (r CategoryLog) Replace(ctx context.Context, c aggregate.Category) (err err
 			zap.String("module", "infrastructure.persistence.category"),
 			zap.String("action", "replace"),
 			zap.Duration("backoff", time.Since(init)),
-			zap.String("id", c.GetRoot().ID.Get()),
+			zap.String("id", c.Get().ID.Get()),
 		)
 	}(time.Now())
 

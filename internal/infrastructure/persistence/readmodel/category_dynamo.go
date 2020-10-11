@@ -12,7 +12,7 @@ type CategoryDynamo struct {
 	Title       string `json:"title"`
 	Description string `json:"description,omitempty"`
 	User        string `json:"user"`
-	Theme       string `json:"theme,omitempty"`
+	Color       string `json:"color,omitempty"`
 	CreateTime  int64  `json:"create_time"`
 	UpdateTime  int64  `json:"update_time"`
 	Active      bool   `json:"active"`
@@ -27,7 +27,7 @@ func NewCategoryDynamo(schemaName string, m model.Category) *CategoryDynamo {
 		Title:       m.Title,
 		Description: m.Description,
 		User:        m.User,
-		Theme:       m.Theme,
+		Color:       m.Color,
 		CreateTime:  m.CreateTime,
 		UpdateTime:  m.UpdateTime,
 		Active:      m.Active,
@@ -42,7 +42,7 @@ func (c CategoryDynamo) ToModel() *model.Category {
 		Title:       c.Title,
 		Description: c.Description,
 		User:        util.FromDynamoID(c.GSIPK),
-		Theme:       c.Theme,
+		Color:       c.Color,
 		CreateTime:  c.CreateTime,
 		UpdateTime:  c.UpdateTime,
 		Active:      c.Active,
