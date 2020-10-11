@@ -8,15 +8,15 @@ import (
 
 // NewActivity creates an Activity receiving primitive-only data.
 // In addition, this function adds required events to the returning aggregate
-func NewActivity(title, category string) (*aggregate.Activity, error) {
-	c, err := entity.NewActivity(title, category)
+func NewActivity(title string, appointedTime int) (*aggregate.Activity, error) {
+	a, err := entity.NewActivity(title, appointedTime)
 	if err != nil {
 		return nil, err
 	}
 
 	ag := new(aggregate.Activity)
-	ag.SetRoot(c)
-	ag.RecordEvent(eventfactory.NewActivityCreated(*ag))
+	ag.Set(a)
+	ag.RecordEvent(eventfactory.Activity{}.NewActivityCreated(*ag))
 
 	return ag, nil
 }

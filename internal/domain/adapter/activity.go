@@ -15,12 +15,13 @@ type ActivityAdapter struct{}
 // ToModel parses a Activity aggregate root to a read-only model
 func (a ActivityAdapter) ToModel(ag aggregate.Activity) *model.Activity {
 	return &model.Activity{
-		ID:         ag.GetRoot().ID.Get(),
-		Title:      ag.GetRoot().Title.Get(),
-		Category:   ag.GetRoot().Category.Get(),
-		CreateTime: ag.GetRoot().Metadata.GetCreateTime().Unix(),
-		UpdateTime: ag.GetRoot().Metadata.GetUpdateTime().Unix(),
-		Active:     ag.GetRoot().Metadata.GetState(),
+		ID:            ag.Get().ID.Get(),
+		Title:         ag.Get().Title.Get(),
+		Category:      ag.GetCategory(),
+		AppointedTime: int64(ag.Get().AppointedTime.Get().Minutes()),
+		CreateTime:    ag.Get().Metadata.GetCreateTime().Unix(),
+		UpdateTime:    ag.Get().Metadata.GetUpdateTime().Unix(),
+		Active:        ag.Get().Metadata.GetState(),
 	}
 }
 
@@ -36,24 +37,27 @@ func (a ActivityAdapter) ToAggregate(m model.Activity) (*aggregate.Activity, err
 	if err != nil {
 		return nil, err
 	}
-	category := &value.CUID{}
-	err = id.Set(m.ID)
-	if err != nil {
+
+	meta := new(value.Metadata)
+	meta.SetCreateTime(time.Unix(m.CreateTime, 0).UTC())
+	meta.SetUpdateTime(time.Unix(m.UpdateTime, 0).UTC())
+	meta.SetState(m.Active)
+
+	apTime := new(value.AppointedTime)
+	if err := apTime.Set(int(m.AppointedTime)); err != nil {
 		return nil, err
 	}
 
-	meta := new(value.Metadata)
-	_ = meta.SetCreateTime(time.Unix(m.CreateTime, 0).UTC())
-	_ = meta.SetUpdateTime(time.Unix(m.UpdateTime, 0).UTC())
-	_ = meta.SetState(m.Active)
-
 	ag := new(aggregate.Activity)
-	ag.SetRoot(&entity.Activity{
-		ID:       id,
-		Title:    titleP,
-		Category: category,
-		Metadata: meta,
+	ag.Set(&entity.Activity{
+		ID:            id,
+		Title:         titleP,
+		AppointedTime: apTime,
+		Metadata:      meta,
 	})
+	if err := ag.AssignCategory(m.Category); err != nil {
+		return nil, err
+	}
 
 	return ag, nil
 }
