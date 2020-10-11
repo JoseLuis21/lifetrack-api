@@ -6,13 +6,13 @@ import (
 	"github.com/alexandria-oss/common-go/exception"
 )
 
-// Category read model
+// Category default-read model
 type Category struct {
 	ID          string `json:"category_id"`
 	Title       string `json:"title"`
 	Description string `json:"description,omitempty"`
 	User        string `json:"user"`
-	Theme       string `json:"theme,omitempty"`
+	Color       string `json:"color,omitempty"`
 	CreateTime  int64  `json:"create_time"`
 	UpdateTime  int64  `json:"update_time"`
 	Active      bool   `json:"active"`
@@ -22,7 +22,7 @@ type Category struct {
 func (c Category) MarshalBinary() ([]byte, error) {
 	cJSON, err := json.Marshal(c)
 	if err != nil {
-		return nil, exception.NewFieldFormat("category aggregate", "json")
+		return nil, exception.NewFieldFormat("category", "json")
 	}
 
 	return cJSON, nil
@@ -31,7 +31,7 @@ func (c Category) MarshalBinary() ([]byte, error) {
 // UnmarshalBinary injects binary data to model
 func (c *Category) UnmarshalBinary(data []byte) error {
 	if err := json.Unmarshal(data, c); err != nil {
-		return exception.NewFieldFormat("category aggregate", "json")
+		return exception.NewFieldFormat("category", "json")
 	}
 
 	return nil

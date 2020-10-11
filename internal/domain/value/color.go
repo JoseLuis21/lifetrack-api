@@ -6,27 +6,27 @@ import (
 	"github.com/alexandria-oss/common-go/exception"
 )
 
-// Theme RGB-color scheme
-type Theme struct {
+// Color RGB-color scheme
+type Color struct {
 	value string
 }
 
-func NewTheme(theme string) (*Theme, error) {
-	t := new(Theme)
-	if err := t.Set(theme); err != nil {
+func NewColor(color string) (*Color, error) {
+	t := new(Color)
+	if err := t.Set(color); err != nil {
 		return nil, err
 	}
 
 	return t, nil
 }
 
-func (t Theme) Get() string {
+func (t Color) Get() string {
 	return t.value
 }
 
-func (t *Theme) Set(theme string) error {
+func (t *Color) Set(color string) error {
 	memoized := t.value
-	t.value = strings.ToUpper(theme)
+	t.value = strings.ToUpper(color)
 
 	if err := t.IsValid(); err != nil {
 		t.value = memoized
@@ -36,9 +36,9 @@ func (t *Theme) Set(theme string) error {
 	return nil
 }
 
-func (t Theme) IsValid() error {
+func (t Color) IsValid() error {
 	if t.value != "" && (t.value != "RED" && t.value != "BLUE" && t.value != "YELLOW" && t.value != "PINK" && t.value != "GREEN") {
-		return exception.NewFieldFormat("theme", "[Red, Blue, Yellow, Pink, Green]")
+		return exception.NewFieldFormat("color", "[Red, Blue, Yellow, Pink, Green]")
 	}
 
 	return nil

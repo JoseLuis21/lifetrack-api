@@ -15,14 +15,14 @@ type CategoryAdapter struct{}
 // ToModel parses a category aggregate root to a read-only model
 func (a CategoryAdapter) ToModel(ag aggregate.Category) *model.Category {
 	return &model.Category{
-		ID:          ag.GetRoot().ID.Get(),
-		Title:       ag.GetRoot().Title.Get(),
-		Description: ag.GetRoot().Description.Get(),
-		User:        ag.GetRoot().User,
-		Theme:       ag.GetRoot().Theme.Get(),
-		CreateTime:  ag.GetRoot().Metadata.GetCreateTime().Unix(),
-		UpdateTime:  ag.GetRoot().Metadata.GetUpdateTime().Unix(),
-		Active:      ag.GetRoot().Metadata.GetState(),
+		ID:          ag.Get().ID.Get(),
+		Title:       ag.Get().Title.Get(),
+		Description: ag.Get().Description.Get(),
+		User:        ag.GetUser(),
+		Color:       ag.Get().Color.Get(),
+		CreateTime:  ag.Get().Metadata.GetCreateTime().Unix(),
+		UpdateTime:  ag.Get().Metadata.GetUpdateTime().Unix(),
+		Active:      ag.Get().Metadata.GetState(),
 	}
 }
 
@@ -44,25 +44,27 @@ func (a CategoryAdapter) ToAggregate(m model.Category) (*aggregate.Category, err
 		return nil, err
 	}
 
-	theme, err := value.NewTheme(m.Theme)
+	color, err := value.NewColor(m.Color)
 	if err != nil {
 		return nil, err
 	}
 
 	meta := new(value.Metadata)
-	_ = meta.SetCreateTime(time.Unix(m.CreateTime, 0).UTC())
-	_ = meta.SetUpdateTime(time.Unix(m.UpdateTime, 0).UTC())
-	_ = meta.SetState(m.Active)
+	meta.SetCreateTime(time.Unix(m.CreateTime, 0).UTC())
+	meta.SetUpdateTime(time.Unix(m.UpdateTime, 0).UTC())
+	meta.SetState(m.Active)
 
 	ag := new(aggregate.Category)
-	ag.SetRoot(&entity.Category{
+	ag.Set(&entity.Category{
 		ID:          id,
 		Title:       titleP,
 		Description: desc,
-		User:        m.User,
-		Theme:       theme,
+		Color:       color,
 		Metadata:    meta,
 	})
+	if err := ag.AssignUser(m.User); err != nil {
+		return nil, err
+	}
 
 	return ag, nil
 }
