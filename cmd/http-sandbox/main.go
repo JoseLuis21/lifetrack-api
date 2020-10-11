@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -61,6 +62,8 @@ func main() {
 	defer cleanRCat()
 
 	_ = handler.NewRemoveCategory(removeCategory, r)
+
+	log.Print("starting http sandbox")
 
 	panic(http.ListenAndServe(":8080", r))
 }
