@@ -29,19 +29,16 @@ func (m Metadata) GetState() bool {
 	return m.active
 }
 
-func (m *Metadata) SetCreateTime(t time.Time) error {
+func (m *Metadata) SetCreateTime(t time.Time) {
 	m.createTime = t
-	return nil
 }
 
-func (m *Metadata) SetUpdateTime(t time.Time) error {
+func (m *Metadata) SetUpdateTime(t time.Time) {
 	m.updateTime = t
-	return nil
 }
 
-func (m *Metadata) SetState(s bool) error {
+func (m *Metadata) SetState(s bool) {
 	m.active = s
-	return nil
 }
 
 func (m *Metadata) ToggleSate() {
