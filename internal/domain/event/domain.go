@@ -28,8 +28,8 @@ type Domain struct {
 	Acknowledge   string    `json:"-"`
 }
 
-// DomainArgsDTO Data Transfer object required to create Domain events
-type DomainArgsDTO struct {
+// DomainArgs Data Transfer object required to create Domain events
+type DomainArgs struct {
 	Service       string
 	Action        string
 	AggregateID   string
@@ -39,7 +39,7 @@ type DomainArgsDTO struct {
 }
 
 // NewDomain generates a new Domain event
-func NewDomain(args DomainArgsDTO) (*Domain, error) {
+func NewDomain(args DomainArgs) (*Domain, error) {
 	if args.Service == "" {
 		return nil, exception.NewRequiredField("service")
 	} else if args.AggregateName == "" {
