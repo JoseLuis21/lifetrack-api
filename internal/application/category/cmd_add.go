@@ -1,4 +1,4 @@
-package command
+package category
 
 import (
 	"context"
@@ -9,8 +9,8 @@ import (
 	"github.com/neutrinocorp/life-track-api/internal/domain/repository"
 )
 
-// AddCategory request a new category creation
-type AddCategory struct {
+// Add request a new category creation
+type Add struct {
 	Ctx         context.Context
 	Title       string
 	User        string
@@ -18,18 +18,18 @@ type AddCategory struct {
 	Theme       string
 }
 
-// AddCategoryHandler handles AddCategory commands
-type AddCategoryHandler struct {
+// AddHandler handles Add commands
+type AddHandler struct {
 	repo repository.Category
 	bus  event.Bus
 }
 
-// NewAddCategoryHandler creates a new add category command handler implementation
-func NewAddCategoryHandler(r repository.Category, b event.Bus) *AddCategoryHandler {
-	return &AddCategoryHandler{repo: r, bus: b}
+// NewAddHandler creates a new Add command handler implementation
+func NewAddHandler(r repository.Category, b event.Bus) *AddHandler {
+	return &AddHandler{repo: r, bus: b}
 }
 
-func (h AddCategoryHandler) Invoke(cmd AddCategory) error {
+func (h AddHandler) Invoke(cmd Add) error {
 	// Business ops
 	c, err := factory.NewCategory(cmd.Title, cmd.User, cmd.Description, cmd.Theme)
 	if err != nil {
@@ -45,7 +45,7 @@ func (h AddCategoryHandler) Invoke(cmd AddCategory) error {
 	return h.publishEvent(cmd.Ctx, c)
 }
 
-func (h AddCategoryHandler) publishEvent(ctx context.Context, c *aggregate.Category) error {
+func (h AddHandler) publishEvent(ctx context.Context, c *aggregate.Category) error {
 	errC := make(chan error)
 	go func() {
 		if err := h.bus.Publish(ctx, c.PullEvents()...); err != nil {

@@ -1,4 +1,4 @@
-package command
+package category
 
 import (
 	"context"
@@ -21,8 +21,8 @@ func TestNewEditCategoryHandler(t *testing.T) {
 
 	r := category.NewInMemoryRepository()
 
-	cmdAdd := NewAddCategoryHandler(r, eventbus.NewInMemory(cfg))
-	err = cmdAdd.Invoke(AddCategory{
+	cmdAdd := NewAddHandler(r, eventbus.NewInMemory(cfg))
+	err = cmdAdd.Invoke(Add{
 		Ctx:         context.Background(),
 		Title:       "Classical Mechanics",
 		User:        "123",
@@ -41,9 +41,9 @@ func TestNewEditCategoryHandler(t *testing.T) {
 	t.Log("list category query succeed")
 	t.Log(categories[0])
 
-	cmd := NewEditCategoryHandler(r, eventbus.NewInMemory(cfg))
+	cmd := NewEditHandler(r, eventbus.NewInMemory(cfg))
 
-	err = cmd.Invoke(EditCategory{
+	err = cmd.Invoke(Edit{
 		Ctx:         context.Background(),
 		ID:          categories[0].ID,
 		Title:       "",
@@ -54,7 +54,7 @@ func TestNewEditCategoryHandler(t *testing.T) {
 		t.Fatal("edit category command did not failed, expected required field (user)")
 	}
 
-	err = cmd.Invoke(EditCategory{
+	err = cmd.Invoke(Edit{
 		Ctx:         context.Background(),
 		ID:          categories[0].ID,
 		Title:       "Special Relativity",

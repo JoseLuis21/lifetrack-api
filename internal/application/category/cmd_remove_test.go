@@ -1,4 +1,4 @@
-package command
+package category
 
 import (
 	"context"
@@ -14,17 +14,16 @@ import (
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure/eventbus"
 )
 
-func TestNewChangeCategoryStateHandler(t *testing.T) {
+func TestNewRemoveCategoryHandler(t *testing.T) {
 	cfg, err := infrastructure.NewConfiguration()
 	if err != nil {
 		t.Fatal("cannot start configuration")
 	}
 
 	r := category.NewInMemoryRepository()
-	b := eventbus.NewInMemory(cfg)
 
-	cmdAdd := NewAddCategoryHandler(r, b)
-	err = cmdAdd.Invoke(AddCategory{
+	cmdAdd := NewAddHandler(r, eventbus.NewInMemory(cfg))
+	err = cmdAdd.Invoke(Add{
 		Ctx:         context.Background(),
 		Title:       "Classical Mechanics",
 		User:        "123",
@@ -35,8 +34,6 @@ func TestNewChangeCategoryStateHandler(t *testing.T) {
 		t.Fatal("add category command failed", fmt.Sprintf("err: %v", exception.GetDescription(err)))
 	}
 
-	t.Log("add category command succeed")
-
 	categories, _, err := r.Fetch(context.Background(), "", 1, shared.CategoryCriteria{})
 	if err != nil {
 		t.Fatal("list category query failed", fmt.Sprintf("err: %v", exception.GetDescription(err)))
@@ -45,24 +42,27 @@ func TestNewChangeCategoryStateHandler(t *testing.T) {
 	t.Log("list category query succeed")
 	t.Log(categories[0])
 
-	cmd := NewChangeCategoryStateHandler(r, b)
-	err = cmd.Invoke(ChangeCategoryState{
-		Ctx:   context.Background(),
-		ID:    "",
-		State: false,
+	cmd := NewRemoveHandler(r, eventbus.NewInMemory(cfg))
+	err = cmd.Invoke(Remove{
+		Ctx: context.Background(),
+		ID:  "",
 	})
-	if err == nil || errors.Is(err, exception.RequiredField) {
-		t.Fatal("change state category command failed, expected required field (id)")
+	if err == nil {
+		t.Fatal("remove category command did not failed, expected required field (id)")
 	}
 
-	err = cmd.Invoke(ChangeCategoryState{
-		Ctx:   context.Background(),
-		ID:    categories[0].ID,
-		State: false,
+	err = cmd.Invoke(Remove{
+		Ctx: context.Background(),
+		ID:  categories[0].ID,
 	})
 	if err != nil {
-		t.Fatal("change state category command failed, expected nil error", fmt.Sprintf("err: %v", exception.GetDescription(err)))
+		t.Fatal("remove category command failed", fmt.Sprintf("err: %v", exception.GetDescription(err)))
 	}
 
-	t.Log("change state category command succeed")
+	categories, _, err = r.Fetch(context.Background(), "", 1, shared.CategoryCriteria{})
+	if err == nil || !errors.Is(err, exception.NotFound) {
+		t.Fatal("remove category command failed, expected category not found")
+	}
+
+	t.Log("remove category command succeed")
 }

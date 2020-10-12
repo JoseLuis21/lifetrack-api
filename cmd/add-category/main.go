@@ -10,7 +10,7 @@ import (
 	"github.com/awslabs/aws-lambda-go-api-proxy/gorillamux"
 	"github.com/gorilla/mux"
 	"github.com/neutrinocorp/life-track-api/pkg/dep"
-	"github.com/neutrinocorp/life-track-api/pkg/transport/handler"
+	"github.com/neutrinocorp/life-track-api/pkg/transport/categoryhandler"
 )
 
 var muxLambda *gorillamux.GorillaMuxAdapter
@@ -23,12 +23,12 @@ func init() {
 	}
 	cleaning = clean
 
-	h := handler.NewAddCategory(cmd, mux.NewRouter().PathPrefix("/live").Subrouter())
-	log.Print("handler successfully started")
+	h := categoryhandler.NewAdd(cmd, mux.NewRouter().PathPrefix("/live").Subrouter())
+	log.Print("category handler successfully started")
 	muxLambda = gorillamux.New(h.GetRouter())
 }
 
-// Handler AWS Lambda handler
+// Handler AWS Lambda category handler
 func Handler(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	return muxLambda.ProxyWithContext(ctx, req)
 }

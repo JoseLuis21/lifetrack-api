@@ -1,22 +1,23 @@
-package handler
+package categoryhandler
 
 import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/neutrinocorp/life-track-api/internal/application/category"
+
 	"github.com/alexandria-oss/common-go/httputil"
 	"github.com/gorilla/mux"
-	"github.com/neutrinocorp/life-track-api/internal/application/command"
 )
 
-type RemoveCategory struct {
-	cmd *command.RemoveCategoryHandler
+type Remove struct {
+	cmd *category.RemoveHandler
 	r   *mux.Router
 }
 
-// NewRemoveCategory creates an remove category state handler with routing
-func NewRemoveCategory(cmd *command.RemoveCategoryHandler, r *mux.Router) *RemoveCategory {
-	h := &RemoveCategory{
+// NewRemove creates a Remove handler with routing
+func NewRemove(cmd *category.RemoveHandler, r *mux.Router) *Remove {
+	h := &Remove{
 		cmd: cmd,
 		r:   r,
 	}
@@ -25,16 +26,16 @@ func NewRemoveCategory(cmd *command.RemoveCategoryHandler, r *mux.Router) *Remov
 	return h
 }
 
-func (c *RemoveCategory) mapRoutes() {
+func (c *Remove) mapRoutes() {
 	c.r.Path("/category/{id}").Methods(http.MethodDelete).HandlerFunc(c.Handler)
 }
 
-func (c RemoveCategory) GetRouter() *mux.Router {
+func (c Remove) GetRouter() *mux.Router {
 	return c.r
 }
 
-func (c RemoveCategory) Handler(w http.ResponseWriter, r *http.Request) {
-	if err := c.cmd.Invoke(command.RemoveCategory{
+func (c Remove) Handler(w http.ResponseWriter, r *http.Request) {
+	if err := c.cmd.Invoke(category.Remove{
 		Ctx: r.Context(),
 		ID:  mux.Vars(r)["id"],
 	}); err != nil {

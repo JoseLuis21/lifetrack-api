@@ -1,4 +1,4 @@
-package command
+package category
 
 import (
 	"context"
@@ -25,9 +25,9 @@ func TestNewAddCategoryHandler(t *testing.T) {
 	defer cleanup()
 	r := category.NewCategory(category.NewInMemoryRepository(), logger)
 
-	cmd := NewAddCategoryHandler(r, eventbus.NewInMemory(cfg))
+	cmd := NewAddHandler(r, eventbus.NewInMemory(cfg))
 
-	err = cmd.Invoke(AddCategory{
+	err = cmd.Invoke(Add{
 		Ctx:         context.Background(),
 		Title:       "",
 		User:        "",
@@ -38,7 +38,7 @@ func TestNewAddCategoryHandler(t *testing.T) {
 		t.Fatal("add category command did not failed, expected required fields (title, user)")
 	}
 
-	err = cmd.Invoke(AddCategory{
+	err = cmd.Invoke(Add{
 		Ctx:         context.Background(),
 		Title:       "Quantum Mechanics",
 		User:        "",
@@ -49,7 +49,7 @@ func TestNewAddCategoryHandler(t *testing.T) {
 		t.Fatal("add category command did not failed, expected required field (user)")
 	}
 
-	err = cmd.Invoke(AddCategory{
+	err = cmd.Invoke(Add{
 		Ctx:         context.Background(),
 		Title:       "Classical Mechanics",
 		User:        "123",

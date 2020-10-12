@@ -1,25 +1,26 @@
-package handler
+package categoryhandler
 
 import (
 	"encoding/json"
 	"net/http"
 	"strconv"
 
+	"github.com/neutrinocorp/life-track-api/internal/application/category"
+
 	"github.com/alexandria-oss/common-go/exception"
 
 	"github.com/alexandria-oss/common-go/httputil"
 	"github.com/gorilla/mux"
-	"github.com/neutrinocorp/life-track-api/internal/application/command"
 )
 
-type ChangeCategoryState struct {
-	cmd    *command.ChangeCategoryStateHandler
+type ChangeState struct {
+	cmd    *category.ChangeStateHandler
 	router *mux.Router
 }
 
-// NewChangeCategoryState creates an change category state handler with routing
-func NewChangeCategoryState(cmd *command.ChangeCategoryStateHandler, r *mux.Router) *ChangeCategoryState {
-	h := &ChangeCategoryState{
+// NewChangeState creates a ChangeState handler with routing
+func NewChangeState(cmd *category.ChangeStateHandler, r *mux.Router) *ChangeState {
+	h := &ChangeState{
 		cmd:    cmd,
 		router: r,
 	}
@@ -28,22 +29,22 @@ func NewChangeCategoryState(cmd *command.ChangeCategoryStateHandler, r *mux.Rout
 	return h
 }
 
-func (c *ChangeCategoryState) mapRoute() {
+func (c *ChangeState) mapRoute() {
 	c.router.Path("/category/{id}/state").Methods(http.MethodPatch, http.MethodPut).HandlerFunc(c.Handler)
 }
 
-func (c ChangeCategoryState) GetRouter() *mux.Router {
+func (c ChangeState) GetRouter() *mux.Router {
 	return c.router
 }
 
-func (c ChangeCategoryState) Handler(w http.ResponseWriter, r *http.Request) {
+func (c ChangeState) Handler(w http.ResponseWriter, r *http.Request) {
 	state, err := strconv.ParseBool(r.PostFormValue("state"))
 	if err != nil {
 		httputil.RespondErrorJSON(exception.NewFieldFormat("state", "boolean"), w)
 		return
 	}
 
-	if err = c.cmd.Invoke(command.ChangeCategoryState{
+	if err = c.cmd.Invoke(category.ChangeState{
 		Ctx:   r.Context(),
 		ID:    mux.Vars(r)["id"],
 		State: state,

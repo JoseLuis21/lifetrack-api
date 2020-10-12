@@ -1,22 +1,23 @@
-package handler
+package categoryhandler
 
 import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/neutrinocorp/life-track-api/internal/application/category"
+
 	"github.com/alexandria-oss/common-go/httputil"
 	"github.com/gorilla/mux"
-	"github.com/neutrinocorp/life-track-api/internal/application/command"
 )
 
-type EditCategory struct {
-	cmd    *command.EditCategoryHandler
+type Edit struct {
+	cmd    *category.EditHandler
 	router *mux.Router
 }
 
-// NewEditCategory creates an edit category handler with routing
-func NewEditCategory(cmd *command.EditCategoryHandler, r *mux.Router) *EditCategory {
-	h := &EditCategory{
+// NewEdit creates an Edit handler with routing
+func NewEdit(cmd *category.EditHandler, r *mux.Router) *Edit {
+	h := &Edit{
 		cmd:    cmd,
 		router: r,
 	}
@@ -25,16 +26,16 @@ func NewEditCategory(cmd *command.EditCategoryHandler, r *mux.Router) *EditCateg
 	return h
 }
 
-func (c *EditCategory) mapRoute() {
+func (c *Edit) mapRoute() {
 	c.router.Path("/category/{id}").Methods(http.MethodPut, http.MethodPatch).HandlerFunc(c.Handler)
 }
 
-func (c EditCategory) GetRouter() *mux.Router {
+func (c Edit) GetRouter() *mux.Router {
 	return c.router
 }
 
-func (c EditCategory) Handler(w http.ResponseWriter, r *http.Request) {
-	if err := c.cmd.Invoke(command.EditCategory{
+func (c Edit) Handler(w http.ResponseWriter, r *http.Request) {
+	if err := c.cmd.Invoke(category.Edit{
 		Ctx:         r.Context(),
 		ID:          mux.Vars(r)["id"],
 		Title:       r.PostFormValue("title"),

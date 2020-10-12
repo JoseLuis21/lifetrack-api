@@ -1,4 +1,4 @@
-package query
+package category
 
 import (
 	"context"
@@ -8,19 +8,19 @@ import (
 	"github.com/neutrinocorp/life-track-api/internal/domain/value"
 )
 
-// GetCategory request a single category
-type GetCategory struct {
+// Get request a single category
+type Get struct {
 	repo repository.Category
 }
 
-// NewGetCategory get a new get category query
-func NewGetCategory(r repository.Category) *GetCategory {
-	return &GetCategory{
+// NewGet get a new Get query implementation
+func NewGet(r repository.Category) *Get {
+	return &Get{
 		repo: r,
 	}
 }
 
-func (q GetCategory) Query(ctx context.Context, id string) (*model.Category, error) {
+func (q Get) Query(ctx context.Context, id string) (*model.Category, error) {
 	idCUID := new(value.CUID)
 	if err := idCUID.Set(id); err != nil {
 		return nil, err

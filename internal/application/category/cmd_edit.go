@@ -1,4 +1,4 @@
-package command
+package category
 
 import (
 	"context"
@@ -11,8 +11,8 @@ import (
 	"github.com/neutrinocorp/life-track-api/internal/domain/value"
 )
 
-// EditCategory request a category mutation
-type EditCategory struct {
+// Edit request a category mutation
+type Edit struct {
 	Ctx         context.Context
 	ID          string
 	Title       string
@@ -20,18 +20,18 @@ type EditCategory struct {
 	Theme       string
 }
 
-// EditCategoryHandler handles EditCategory commands
-type EditCategoryHandler struct {
+// EditHandler handles Edit commands
+type EditHandler struct {
 	repo repository.Category
 	bus  event.Bus
 }
 
-// NewEditCategoryHandler creates a new EditCategory command handler implementation
-func NewEditCategoryHandler(r repository.Category, b event.Bus) *EditCategoryHandler {
-	return &EditCategoryHandler{repo: r, bus: b}
+// NewEditHandler creates a new Edit command handler implementation
+func NewEditHandler(r repository.Category, b event.Bus) *EditHandler {
+	return &EditHandler{repo: r, bus: b}
 }
 
-func (h EditCategoryHandler) Invoke(cmd EditCategory) error {
+func (h EditHandler) Invoke(cmd Edit) error {
 	// Business ops
 	id := value.CUID{}
 	err := id.Set(cmd.ID)
@@ -68,7 +68,7 @@ func (h EditCategoryHandler) Invoke(cmd EditCategory) error {
 	return h.publishEvent(cmd.Ctx, category, snapshot)
 }
 
-func (h EditCategoryHandler) publishEvent(ctx context.Context, ag *aggregate.Category, snapshot aggregate.Category) error {
+func (h EditHandler) publishEvent(ctx context.Context, ag *aggregate.Category, snapshot aggregate.Category) error {
 	errC := make(chan error)
 	go func() {
 		if err := h.bus.Publish(ctx, ag.PullEvents()...); err != nil {

@@ -1,4 +1,4 @@
-package query
+package category
 
 import (
 	"context"
@@ -10,19 +10,19 @@ import (
 	"github.com/neutrinocorp/life-track-api/internal/domain/shared"
 )
 
-// ListCategories request a list of categories
-type ListCategories struct {
+// List request a list of categories
+type List struct {
 	repo repository.Category
 }
 
-// NewListCategories get list of categories
-func NewListCategories(r repository.Category) *ListCategories {
-	return &ListCategories{
+// NewList get a new List query implementation
+func NewList(r repository.Category) *List {
+	return &List{
 		repo: r,
 	}
 }
 
-func (q ListCategories) Query(ctx context.Context, token, limit string, filter map[string]string) ([]*model.Category, string, error) {
+func (q List) Query(ctx context.Context, token, limit string, filter map[string]string) ([]*model.Category, string, error) {
 	// TODO: Turn token and limit to value objects
 	var limitInt int64
 	limitInt = 100

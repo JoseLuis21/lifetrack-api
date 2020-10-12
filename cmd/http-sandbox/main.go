@@ -6,7 +6,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/neutrinocorp/life-track-api/pkg/dep"
-	"github.com/neutrinocorp/life-track-api/pkg/transport/handler"
+	"github.com/neutrinocorp/life-track-api/pkg/transport/categoryhandler"
 )
 
 func main() {
@@ -21,7 +21,7 @@ func main() {
 	}
 	defer cleanCGet()
 
-	_ = handler.NewGetCategory(getCategory, r)
+	_ = categoryhandler.NewGet(getCategory, r)
 
 	listCategory, cleanLCat, err := dep.InjectListCategoriesQuery()
 	if err != nil {
@@ -29,7 +29,7 @@ func main() {
 	}
 	defer cleanLCat()
 
-	_ = handler.NewListCategory(listCategory, r)
+	_ = categoryhandler.NewList(listCategory, r)
 
 	addCategory, cleanACat, err := dep.InjectAddCategoryHandler()
 	if err != nil {
@@ -37,7 +37,7 @@ func main() {
 	}
 	defer cleanACat()
 
-	_ = handler.NewAddCategory(addCategory, r)
+	_ = categoryhandler.NewAdd(addCategory, r)
 
 	changeCategory, cleanCState, err := dep.InjectChangeCategoryState()
 	if err != nil {
@@ -45,7 +45,7 @@ func main() {
 	}
 	defer cleanCState()
 
-	_ = handler.NewChangeCategoryState(changeCategory, r)
+	_ = categoryhandler.NewChangeState(changeCategory, r)
 
 	editCategory, cleanECat, err := dep.InjectEditCategory()
 	if err != nil {
@@ -53,7 +53,7 @@ func main() {
 	}
 	defer cleanECat()
 
-	_ = handler.NewEditCategory(editCategory, r)
+	_ = categoryhandler.NewEdit(editCategory, r)
 
 	removeCategory, cleanRCat, err := dep.InjectRemoveCategory()
 	if err != nil {
@@ -61,7 +61,7 @@ func main() {
 	}
 	defer cleanRCat()
 
-	_ = handler.NewRemoveCategory(removeCategory, r)
+	_ = categoryhandler.NewRemove(removeCategory, r)
 
 	log.Print("starting http sandbox")
 

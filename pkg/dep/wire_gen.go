@@ -8,21 +8,20 @@ package dep
 import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/google/wire"
-	"github.com/neutrinocorp/life-track-api/internal/application/command"
-	"github.com/neutrinocorp/life-track-api/internal/application/query"
+	"github.com/neutrinocorp/life-track-api/internal/application/category"
 	"github.com/neutrinocorp/life-track-api/internal/domain/event"
 	"github.com/neutrinocorp/life-track-api/internal/domain/repository"
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure"
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure/awsutil"
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure/eventbus"
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure/logging"
-	"github.com/neutrinocorp/life-track-api/internal/infrastructure/persistence/category"
+	category2 "github.com/neutrinocorp/life-track-api/internal/infrastructure/persistence/category"
 	"go.uber.org/zap"
 )
 
 // Injectors from wire.go:
 
-func InjectAddCategoryHandler() (*command.AddCategoryHandler, func(), error) {
+func InjectAddCategoryHandler() (*category.AddHandler, func(), error) {
 	session := awsutil.NewSession()
 	configuration, err := infrastructure.NewConfiguration()
 	if err != nil {
@@ -32,15 +31,15 @@ func InjectAddCategoryHandler() (*command.AddCategoryHandler, func(), error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	category := provideCategoryRepository(session, configuration, logger)
+	repositoryCategory := provideCategoryRepository(session, configuration, logger)
 	bus := provideEventBus(session, configuration, logger)
-	addCategoryHandler := command.NewAddCategoryHandler(category, bus)
-	return addCategoryHandler, func() {
+	addHandler := category.NewAddHandler(repositoryCategory, bus)
+	return addHandler, func() {
 		cleanup()
 	}, nil
 }
 
-func InjectGetCategoryQuery() (*query.GetCategory, func(), error) {
+func InjectGetCategoryQuery() (*category.Get, func(), error) {
 	session := awsutil.NewSession()
 	configuration, err := infrastructure.NewConfiguration()
 	if err != nil {
@@ -50,14 +49,14 @@ func InjectGetCategoryQuery() (*query.GetCategory, func(), error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	category := provideCategoryRepository(session, configuration, logger)
-	getCategory := query.NewGetCategory(category)
-	return getCategory, func() {
+	repositoryCategory := provideCategoryRepository(session, configuration, logger)
+	get := category.NewGet(repositoryCategory)
+	return get, func() {
 		cleanup()
 	}, nil
 }
 
-func InjectListCategoriesQuery() (*query.ListCategories, func(), error) {
+func InjectListCategoriesQuery() (*category.List, func(), error) {
 	session := awsutil.NewSession()
 	configuration, err := infrastructure.NewConfiguration()
 	if err != nil {
@@ -67,14 +66,14 @@ func InjectListCategoriesQuery() (*query.ListCategories, func(), error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	category := provideCategoryRepository(session, configuration, logger)
-	listCategories := query.NewListCategories(category)
-	return listCategories, func() {
+	repositoryCategory := provideCategoryRepository(session, configuration, logger)
+	list := category.NewList(repositoryCategory)
+	return list, func() {
 		cleanup()
 	}, nil
 }
 
-func InjectChangeCategoryState() (*command.ChangeCategoryStateHandler, func(), error) {
+func InjectChangeCategoryState() (*category.ChangeStateHandler, func(), error) {
 	session := awsutil.NewSession()
 	configuration, err := infrastructure.NewConfiguration()
 	if err != nil {
@@ -84,15 +83,15 @@ func InjectChangeCategoryState() (*command.ChangeCategoryStateHandler, func(), e
 	if err != nil {
 		return nil, nil, err
 	}
-	category := provideCategoryRepository(session, configuration, logger)
+	repositoryCategory := provideCategoryRepository(session, configuration, logger)
 	bus := provideEventBus(session, configuration, logger)
-	changeCategoryStateHandler := command.NewChangeCategoryStateHandler(category, bus)
-	return changeCategoryStateHandler, func() {
+	changeStateHandler := category.NewChangeStateHandler(repositoryCategory, bus)
+	return changeStateHandler, func() {
 		cleanup()
 	}, nil
 }
 
-func InjectEditCategory() (*command.EditCategoryHandler, func(), error) {
+func InjectEditCategory() (*category.EditHandler, func(), error) {
 	session := awsutil.NewSession()
 	configuration, err := infrastructure.NewConfiguration()
 	if err != nil {
@@ -102,15 +101,15 @@ func InjectEditCategory() (*command.EditCategoryHandler, func(), error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	category := provideCategoryRepository(session, configuration, logger)
+	repositoryCategory := provideCategoryRepository(session, configuration, logger)
 	bus := provideEventBus(session, configuration, logger)
-	editCategoryHandler := command.NewEditCategoryHandler(category, bus)
-	return editCategoryHandler, func() {
+	editHandler := category.NewEditHandler(repositoryCategory, bus)
+	return editHandler, func() {
 		cleanup()
 	}, nil
 }
 
-func InjectRemoveCategory() (*command.RemoveCategoryHandler, func(), error) {
+func InjectRemoveCategory() (*category.RemoveHandler, func(), error) {
 	session := awsutil.NewSession()
 	configuration, err := infrastructure.NewConfiguration()
 	if err != nil {
@@ -120,10 +119,10 @@ func InjectRemoveCategory() (*command.RemoveCategoryHandler, func(), error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	category := provideCategoryRepository(session, configuration, logger)
+	repositoryCategory := provideCategoryRepository(session, configuration, logger)
 	bus := provideEventBus(session, configuration, logger)
-	removeCategoryHandler := command.NewRemoveCategoryHandler(category, bus)
-	return removeCategoryHandler, func() {
+	removeHandler := category.NewRemoveHandler(repositoryCategory, bus)
+	return removeHandler, func() {
 		cleanup()
 	}, nil
 }
@@ -135,7 +134,7 @@ var infraSet = wire.NewSet(infrastructure.NewConfiguration, awsutil.NewSession, 
 )
 
 func provideCategoryRepository(s *session.Session, cfg infrastructure.Configuration, logger *zap.Logger) repository.Category {
-	return category.NewCategory(category.NewDynamoRepository(s, cfg), logger)
+	return category2.NewCategory(category2.NewDynamoRepository(s, cfg), logger)
 }
 
 func provideEventBus(s *session.Session, cfg infrastructure.Configuration, logger *zap.Logger) event.Bus {

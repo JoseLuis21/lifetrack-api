@@ -1,4 +1,4 @@
-package handler
+package categoryhandler
 
 import (
 	"encoding/json"
@@ -6,17 +6,17 @@ import (
 
 	"github.com/alexandria-oss/common-go/httputil"
 	"github.com/gorilla/mux"
-	"github.com/neutrinocorp/life-track-api/internal/application/command"
+	"github.com/neutrinocorp/life-track-api/internal/application/category"
 )
 
-type AddCategory struct {
-	cmd    *command.AddCategoryHandler
+type Add struct {
+	cmd    *category.AddHandler
 	router *mux.Router
 }
 
-// NewAddCategory creates an add category handler with routing
-func NewAddCategory(cmd *command.AddCategoryHandler, r *mux.Router) *AddCategory {
-	h := &AddCategory{
+// NewAdd creates an Add handler with routing
+func NewAdd(cmd *category.AddHandler, r *mux.Router) *Add {
+	h := &Add{
 		cmd:    cmd,
 		router: r,
 	}
@@ -25,16 +25,16 @@ func NewAddCategory(cmd *command.AddCategoryHandler, r *mux.Router) *AddCategory
 	return h
 }
 
-func (c *AddCategory) mapRoute() {
+func (c *Add) mapRoute() {
 	c.router.Path("/category").Methods(http.MethodPost).HandlerFunc(c.Handler)
 }
 
-func (c AddCategory) GetRouter() *mux.Router {
+func (c Add) GetRouter() *mux.Router {
 	return c.router
 }
 
-func (c AddCategory) Handler(w http.ResponseWriter, r *http.Request) {
-	if err := c.cmd.Invoke(command.AddCategory{
+func (c Add) Handler(w http.ResponseWriter, r *http.Request) {
+	if err := c.cmd.Invoke(category.Add{
 		Ctx:         r.Context(),
 		Title:       r.PostFormValue("title"),
 		User:        r.PostFormValue("user"),

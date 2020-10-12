@@ -5,8 +5,7 @@ package dep
 import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/google/wire"
-	"github.com/neutrinocorp/life-track-api/internal/application/command"
-	"github.com/neutrinocorp/life-track-api/internal/application/query"
+	categoryapp "github.com/neutrinocorp/life-track-api/internal/application/category"
 	"github.com/neutrinocorp/life-track-api/internal/domain/event"
 	"github.com/neutrinocorp/life-track-api/internal/domain/repository"
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure"
@@ -34,38 +33,32 @@ func provideEventBus(s *session.Session, cfg infrastructure.Configuration, logge
 	return eventbus.NewEventBus(eventbus.NewAWS(s, cfg), logger)
 }
 
-func InjectAddCategoryHandler() (*command.AddCategoryHandler, func(), error) {
-	wire.Build(infraSet, command.NewAddCategoryHandler)
-
-	return &command.AddCategoryHandler{}, nil, nil
+func InjectAddCategoryHandler() (*categoryapp.AddHandler, func(), error) {
+	wire.Build(infraSet, categoryapp.NewAddHandler)
+	return &categoryapp.AddHandler{}, nil, nil
 }
 
-func InjectGetCategoryQuery() (*query.GetCategory, func(), error) {
-	wire.Build(infraSet, query.NewGetCategory)
-
-	return &query.GetCategory{}, nil, nil
+func InjectGetCategoryQuery() (*categoryapp.Get, func(), error) {
+	wire.Build(infraSet, categoryapp.NewGet)
+	return &categoryapp.Get{}, nil, nil
 }
 
-func InjectListCategoriesQuery() (*query.ListCategories, func(), error) {
-	wire.Build(infraSet, query.NewListCategories)
-
-	return &query.ListCategories{}, nil, nil
+func InjectListCategoriesQuery() (*categoryapp.List, func(), error) {
+	wire.Build(infraSet, categoryapp.NewList)
+	return &categoryapp.List{}, nil, nil
 }
 
-func InjectChangeCategoryState() (*command.ChangeCategoryStateHandler, func(), error) {
-	wire.Build(infraSet, command.NewChangeCategoryStateHandler)
-
-	return &command.ChangeCategoryStateHandler{}, nil, nil
+func InjectChangeCategoryState() (*categoryapp.ChangeStateHandler, func(), error) {
+	wire.Build(infraSet, categoryapp.NewChangeStateHandler)
+	return &categoryapp.ChangeStateHandler{}, nil, nil
 }
 
-func InjectEditCategory() (*command.EditCategoryHandler, func(), error) {
-	wire.Build(infraSet, command.NewEditCategoryHandler)
-
-	return &command.EditCategoryHandler{}, nil, nil
+func InjectEditCategory() (*categoryapp.EditHandler, func(), error) {
+	wire.Build(infraSet, categoryapp.NewEditHandler)
+	return &categoryapp.EditHandler{}, nil, nil
 }
 
-func InjectRemoveCategory() (*command.RemoveCategoryHandler, func(), error) {
-	wire.Build(infraSet, command.NewRemoveCategoryHandler)
-
-	return &command.RemoveCategoryHandler{}, nil, nil
+func InjectRemoveCategory() (*categoryapp.RemoveHandler, func(), error) {
+	wire.Build(infraSet, categoryapp.NewRemoveHandler)
+	return &categoryapp.RemoveHandler{}, nil, nil
 }

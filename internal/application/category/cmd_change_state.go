@@ -1,4 +1,4 @@
-package command
+package category
 
 import (
 	"context"
@@ -11,28 +11,28 @@ import (
 	"github.com/neutrinocorp/life-track-api/internal/domain/value"
 )
 
-// ChangeCategoryState request a category state change
-type ChangeCategoryState struct {
+// ChangeState request a category state change
+type ChangeState struct {
 	Ctx   context.Context
 	ID    string
 	State bool
 }
 
-// ChangeCategoryStateHandler handles ChangeCategoryState commands
-type ChangeCategoryStateHandler struct {
+// ChangeStateHandler handles ChangeState commands
+type ChangeStateHandler struct {
 	repo repository.Category
 	bus  event.Bus
 }
 
-// NewChangeCategoryStateHandler creates a new category state change command handler implementation
-func NewChangeCategoryStateHandler(r repository.Category, b event.Bus) *ChangeCategoryStateHandler {
-	return &ChangeCategoryStateHandler{
+// NewChangeStateHandler creates a new ChangeState command handler implementation
+func NewChangeStateHandler(r repository.Category, b event.Bus) *ChangeStateHandler {
+	return &ChangeStateHandler{
 		repo: r,
 		bus:  b,
 	}
 }
 
-func (h ChangeCategoryStateHandler) Invoke(cmd ChangeCategoryState) error {
+func (h ChangeStateHandler) Invoke(cmd ChangeState) error {
 	// Business ops
 	id := value.CUID{}
 	if err := id.Set(cmd.ID); err != nil {
@@ -60,7 +60,7 @@ func (h ChangeCategoryStateHandler) Invoke(cmd ChangeCategoryState) error {
 	return h.publishEvent(cmd.Ctx, category, snapshot)
 }
 
-func (h ChangeCategoryStateHandler) fetchCategory(ctx context.Context, id value.CUID) (*aggregate.Category, error) {
+func (h ChangeStateHandler) fetchCategory(ctx context.Context, id value.CUID) (*aggregate.Category, error) {
 	m, err := h.repo.FetchByID(ctx, id)
 	if err != nil {
 		return nil, err
@@ -75,7 +75,7 @@ func (h ChangeCategoryStateHandler) fetchCategory(ctx context.Context, id value.
 	return category, nil
 }
 
-func (h ChangeCategoryStateHandler) setDomainEvent(ag *aggregate.Category) {
+func (h ChangeStateHandler) setDomainEvent(ag *aggregate.Category) {
 	if ag.Get().Metadata.GetState() {
 		ag.RecordEvent(eventfactory.Category{}.NewCategoryRestored(*ag.Get().ID))
 		return
@@ -84,7 +84,7 @@ func (h ChangeCategoryStateHandler) setDomainEvent(ag *aggregate.Category) {
 	ag.RecordEvent(eventfactory.Category{}.NewCategoryRemoved(*ag.Get().ID))
 }
 
-func (h ChangeCategoryStateHandler) publishEvent(ctx context.Context, ag *aggregate.Category, snapshot aggregate.Category) error {
+func (h ChangeStateHandler) publishEvent(ctx context.Context, ag *aggregate.Category, snapshot aggregate.Category) error {
 	errC := make(chan error)
 	go func() {
 		if err := h.bus.Publish(ctx, ag.PullEvents()...); err != nil {

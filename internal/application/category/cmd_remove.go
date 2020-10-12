@@ -1,4 +1,4 @@
-package command
+package category
 
 import (
 	"context"
@@ -11,24 +11,24 @@ import (
 	"github.com/neutrinocorp/life-track-api/internal/domain/value"
 )
 
-// RemoveCategory request a category removal operation (hard remove)
-type RemoveCategory struct {
+// Remove request a category removal operation (hard remove)
+type Remove struct {
 	Ctx context.Context
 	ID  string
 }
 
-// RemoveCategoryHandler handle category removal operations
-type RemoveCategoryHandler struct {
+// RemoveHandler handle category removal operations
+type RemoveHandler struct {
 	repo repository.Category
 	bus  event.Bus
 }
 
-// NewRemoveCategoryHandler creates a new remove category command handler implementation
-func NewRemoveCategoryHandler(r repository.Category, b event.Bus) *RemoveCategoryHandler {
-	return &RemoveCategoryHandler{repo: r, bus: b}
+// NewRemoveHandler creates a new Remove command handler implementation
+func NewRemoveHandler(r repository.Category, b event.Bus) *RemoveHandler {
+	return &RemoveHandler{repo: r, bus: b}
 }
 
-func (h RemoveCategoryHandler) Invoke(cmd RemoveCategory) error {
+func (h RemoveHandler) Invoke(cmd Remove) error {
 	// Business ops
 	id := value.CUID{}
 	err := id.Set(cmd.ID)
@@ -59,7 +59,7 @@ func (h RemoveCategoryHandler) Invoke(cmd RemoveCategory) error {
 	return h.publishEvent(cmd.Ctx, *snapshot)
 }
 
-func (h RemoveCategoryHandler) publishEvent(ctx context.Context, snapshot aggregate.Category) error {
+func (h RemoveHandler) publishEvent(ctx context.Context, snapshot aggregate.Category) error {
 	errC := make(chan error)
 	go func() {
 		if err := h.bus.Publish(ctx, eventfactory.Category{}.NewCategoryHardRemoved(snapshot)); err != nil {
