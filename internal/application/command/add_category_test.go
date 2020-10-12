@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/neutrinocorp/life-track-api/internal/infrastructure/persistence/category"
+
 	"github.com/alexandria-oss/common-go/exception"
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure"
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure/eventbus"
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure/logging"
-	"github.com/neutrinocorp/life-track-api/internal/infrastructure/persistence"
 )
 
 func TestNewAddCategoryHandler(t *testing.T) {
@@ -22,7 +23,7 @@ func TestNewAddCategoryHandler(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer cleanup()
-	r := persistence.NewCategory(persistence.NewCategoryInMemory(), logger)
+	r := category.NewCategory(category.NewInMemoryRepository(), logger)
 
 	cmd := NewAddCategoryHandler(r, eventbus.NewInMemory(cfg))
 

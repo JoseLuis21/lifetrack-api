@@ -1,4 +1,4 @@
-package categorybuilder
+package category
 
 import (
 	"context"
@@ -8,21 +8,20 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
 	"github.com/neutrinocorp/life-track-api/internal/domain/model"
-	"github.com/neutrinocorp/life-track-api/internal/infrastructure/persistence/readmodel"
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure/persistence/util"
 )
 
-// UserDynamo constructs and executes an AWS DynamoDB query fetching user's categories only
+// BuilderUserDynamo constructs and executes an AWS DynamoDB query fetching user's categories only
 //	This is a concrete CategoryDynamo strategy implementation
-type UserDynamo struct {
+type BuilderUserDynamo struct {
 	user   string
 	schema string
 	exp    expression.Builder
 	input  *dynamodb.QueryInput
 }
 
-func NewUserDynamo(tableName, indexName, schema string) *UserDynamo {
-	return &UserDynamo{
+func NewBuilderUserDynamo(tableName, indexName, schema string) *BuilderUserDynamo {
+	return &BuilderUserDynamo{
 		user:   "",
 		schema: schema,
 		exp:    expression.NewBuilder(),
@@ -34,7 +33,7 @@ func NewUserDynamo(tableName, indexName, schema string) *UserDynamo {
 	}
 }
 
-func (b *UserDynamo) GetInput() *dynamodb.QueryInput {
+func (b *BuilderUserDynamo) GetInput() *dynamodb.QueryInput {
 	exp, _ := b.exp.Build()
 	b.input.SetExpressionAttributeNames(exp.Names())
 	b.input.SetExpressionAttributeValues(exp.Values())
@@ -48,7 +47,7 @@ func (b *UserDynamo) GetInput() *dynamodb.QueryInput {
 	return b.input
 }
 
-func (b *UserDynamo) ByUser(user string) *UserDynamo {
+func (b *BuilderUserDynamo) ByUser(user string) *BuilderUserDynamo {
 	if user != "" {
 		b.user = user
 		b.exp = b.exp.WithKeyCondition(expression.KeyAnd(expression.Key("GSIPK").
@@ -59,7 +58,7 @@ func (b *UserDynamo) ByUser(user string) *UserDynamo {
 	return b
 }
 
-func (b *UserDynamo) Query(keyword string) *UserDynamo {
+func (b *BuilderUserDynamo) Query(keyword string) *BuilderUserDynamo {
 	if keyword != "" {
 		b.exp = b.exp.WithFilter(expression.Contains(expression.Name("title"), keyword))
 	}
@@ -67,7 +66,7 @@ func (b *UserDynamo) Query(keyword string) *UserDynamo {
 	return b
 }
 
-func (b *UserDynamo) Limit(l int64) *UserDynamo {
+func (b *BuilderUserDynamo) Limit(l int64) *BuilderUserDynamo {
 	if l > 0 {
 		b.input.SetLimit(l)
 	}
@@ -76,12 +75,12 @@ func (b *UserDynamo) Limit(l int64) *UserDynamo {
 }
 
 // OrderBy true -> asc, false -> desc
-func (b *UserDynamo) OrderBy(o bool) *UserDynamo {
+func (b *BuilderUserDynamo) OrderBy(o bool) *BuilderUserDynamo {
 	b.input.SetScanIndexForward(o)
 	return b
 }
 
-func (b *UserDynamo) NextPage(token string) *UserDynamo {
+func (b *BuilderUserDynamo) NextPage(token string) *BuilderUserDynamo {
 	if token != "" {
 		b.input.SetExclusiveStartKey(map[string]*dynamodb.AttributeValue{
 			"GSIPK": {
@@ -102,7 +101,7 @@ func (b *UserDynamo) NextPage(token string) *UserDynamo {
 	return b
 }
 
-func (b UserDynamo) Do(ctx context.Context, db *dynamodb.DynamoDB) ([]*model.Category, string, error) {
+func (b BuilderUserDynamo) Do(ctx context.Context, db *dynamodb.DynamoDB) ([]*model.Category, string, error) {
 	o, err := db.QueryWithContext(ctx, b.GetInput())
 	if err != nil {
 		return nil, "", err
@@ -110,7 +109,7 @@ func (b UserDynamo) Do(ctx context.Context, db *dynamodb.DynamoDB) ([]*model.Cat
 
 	categories := make([]*model.Category, 0)
 	for _, i := range o.Items {
-		c := new(readmodel.CategoryDynamo)
+		c := new(DynamoModel)
 		err = dynamodbattribute.UnmarshalMap(i, c)
 		if err != nil {
 			return nil, "", err

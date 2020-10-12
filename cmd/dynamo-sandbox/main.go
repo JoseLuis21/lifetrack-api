@@ -7,13 +7,13 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/neutrinocorp/life-track-api/internal/infrastructure/persistence/category"
+
 	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
 
 	"github.com/neutrinocorp/life-track-api/internal/domain/model"
 
 	"github.com/aws/aws-sdk-go/aws"
-
-	"github.com/neutrinocorp/life-track-api/internal/infrastructure/persistence/readmodel"
 
 	"github.com/alexandria-oss/common-go/httputil"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
@@ -158,7 +158,7 @@ func (b InputBuilder) Do(db *dynamodb.DynamoDB) ([]*model.Category, string, erro
 
 	categories := make([]*model.Category, 0)
 	for _, i := range o.Items {
-		c := new(readmodel.CategoryDynamo)
+		c := new(category.CategoryDynamo)
 		err = dynamodbattribute.UnmarshalMap(i, c)
 		if err != nil {
 			return nil, "", err

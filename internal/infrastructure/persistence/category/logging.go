@@ -1,4 +1,4 @@
-package persistence
+package category
 
 import (
 	"context"
@@ -14,13 +14,13 @@ import (
 	"go.uber.org/zap"
 )
 
-// CategoryLog is a CoR implementation for repository.Category logging
-type CategoryLog struct {
+// Log is a CoR implementation for repository.Category logging
+type Log struct {
 	Log  *zap.Logger
 	Next repository.Category
 }
 
-func (r CategoryLog) Save(ctx context.Context, c aggregate.Category) (err error) {
+func (r Log) Save(ctx context.Context, c aggregate.Category) (err error) {
 	defer func(init time.Time) {
 		fields := []zap.Field{
 			zap.String("module", "infrastructure.persistence.category"),
@@ -44,7 +44,7 @@ func (r CategoryLog) Save(ctx context.Context, c aggregate.Category) (err error)
 	return
 }
 
-func (r CategoryLog) FetchByID(ctx context.Context, id value.CUID) (category *model.Category, err error) {
+func (r Log) FetchByID(ctx context.Context, id value.CUID) (category *model.Category, err error) {
 	defer func(init time.Time) {
 		fields := []zap.Field{
 			zap.String("module", "infrastructure.persistence.category"),
@@ -66,7 +66,7 @@ func (r CategoryLog) FetchByID(ctx context.Context, id value.CUID) (category *mo
 	return
 }
 
-func (r CategoryLog) Fetch(ctx context.Context, token string, limit int64, criteria shared.CategoryCriteria) (
+func (r Log) Fetch(ctx context.Context, token string, limit int64, criteria shared.CategoryCriteria) (
 	categories []*model.Category, nextToken string, err error) {
 	defer func(init time.Time) {
 		fields := []zap.Field{
@@ -93,7 +93,7 @@ func (r CategoryLog) Fetch(ctx context.Context, token string, limit int64, crite
 	return
 }
 
-func (r CategoryLog) Replace(ctx context.Context, c aggregate.Category) (err error) {
+func (r Log) Replace(ctx context.Context, c aggregate.Category) (err error) {
 	defer func(init time.Time) {
 		fields := []zap.Field{
 			zap.String("module", "infrastructure.persistence.category"),
@@ -118,7 +118,7 @@ func (r CategoryLog) Replace(ctx context.Context, c aggregate.Category) (err err
 	return
 }
 
-func (r CategoryLog) HardRemove(ctx context.Context, id value.CUID) (err error) {
+func (r Log) HardRemove(ctx context.Context, id value.CUID) (err error) {
 	defer func(init time.Time) {
 		fields := []zap.Field{
 			zap.String("module", "infrastructure.persistence.category"),

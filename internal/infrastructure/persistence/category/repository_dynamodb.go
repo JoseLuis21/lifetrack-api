@@ -1,4 +1,4 @@
-package persistence
+package category
 
 import (
 	"context"
@@ -6,11 +6,9 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/neutrinocorp/life-track-api/internal/infrastructure/persistence/categorybuilder"
+	"github.com/neutrinocorp/life-track-api/internal/infrastructure/persistence"
 
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure/persistence/util"
-
-	"github.com/neutrinocorp/life-track-api/internal/infrastructure/persistence/readmodel"
 
 	"github.com/alexandria-oss/common-go/exception"
 	"github.com/aws/aws-sdk-go/aws"
@@ -25,8 +23,8 @@ import (
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure"
 )
 
-// CategoryDynamoRepository is the repository.Category implementation using AWS DynamoDB
-type CategoryDynamoRepository struct {
+// DynamoRepository is the repository.Category implementation using AWS DynamoDB
+type DynamoRepository struct {
 	sess        *session.Session
 	tableName   string
 	tableRegion string
@@ -34,8 +32,8 @@ type CategoryDynamoRepository struct {
 	mu          *sync.RWMutex
 }
 
-func NewCategoryDynamoRepository(s *session.Session, cfg infrastructure.Configuration) *CategoryDynamoRepository {
-	return &CategoryDynamoRepository{
+func NewDynamoRepository(s *session.Session, cfg infrastructure.Configuration) *DynamoRepository {
+	return &DynamoRepository{
 		sess:        s,
 		tableName:   cfg.Persistence.DynamoDB.Table,
 		tableRegion: cfg.Persistence.DynamoDB.Region,
@@ -44,11 +42,11 @@ func NewCategoryDynamoRepository(s *session.Session, cfg infrastructure.Configur
 	}
 }
 
-func (r CategoryDynamoRepository) Save(ctx context.Context, c aggregate.Category) error {
+func (r DynamoRepository) Save(ctx context.Context, c aggregate.Category) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	db := NewDynamoConn(r.sess, r.tableRegion)
+	db := persistence.NewDynamoConn(r.sess, r.tableRegion)
 	id := util.GenerateDynamoID(r.schemaName, c.Get().ID.Get())
 	_, err := db.PutItemWithContext(ctx, &dynamodb.PutItemInput{
 		Item: map[string]*dynamodb.AttributeValue{
@@ -91,11 +89,11 @@ func (r CategoryDynamoRepository) Save(ctx context.Context, c aggregate.Category
 	return r.getDomainError(err)
 }
 
-func (r CategoryDynamoRepository) FetchByID(ctx context.Context, id value.CUID) (*model.Category, error) {
+func (r DynamoRepository) FetchByID(ctx context.Context, id value.CUID) (*model.Category, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
-	db := NewDynamoConn(r.sess, r.tableRegion)
+	db := persistence.NewDynamoConn(r.sess, r.tableRegion)
 	res, err := db.GetItemWithContext(ctx, &dynamodb.GetItemInput{
 		Key:       r.generateKeyAttributes(id),
 		TableName: aws.String(r.tableName),
@@ -108,7 +106,7 @@ func (r CategoryDynamoRepository) FetchByID(ctx context.Context, id value.CUID) 
 		return nil, exception.NewNotFound("category")
 	}
 
-	m := new(readmodel.CategoryDynamo)
+	m := new(DynamoModel)
 	err = dynamodbattribute.UnmarshalMap(res.Item, m)
 	if err != nil {
 		return nil, err
@@ -117,12 +115,12 @@ func (r CategoryDynamoRepository) FetchByID(ctx context.Context, id value.CUID) 
 	return m.ToModel(), nil
 }
 
-func (r CategoryDynamoRepository) Fetch(ctx context.Context, token string, limit int64,
+func (r DynamoRepository) Fetch(ctx context.Context, token string, limit int64,
 	criteria shared.CategoryCriteria) ([]*model.Category, string, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
-	var y categorybuilder.BuilderDynamo
+	var y BuilderDynamo
 	// Set strategy
 	if criteria.User != "" {
 		order := false
@@ -130,14 +128,14 @@ func (r CategoryDynamoRepository) Fetch(ctx context.Context, token string, limit
 			order = true
 		}
 
-		y = categorybuilder.NewUserDynamo(r.tableName, "GSIPK-index", r.schemaName).ByUser(criteria.User).
+		y = NewBuilderUserDynamo(r.tableName, "GSIPK-index", r.schemaName).ByUser(criteria.User).
 			Query(criteria.Query).Limit(limit).OrderBy(order).NextPage(token)
 	} else {
-		y = categorybuilder.NewCategoryDynamo(r.tableName, r.schemaName).
+		y = NewBuilderDynamo(r.tableName, r.schemaName).
 			Query(criteria.Query).Limit(limit).NextPage(token)
 	}
 
-	categories, nextPage, err := y.Do(ctx, NewDynamoConn(r.sess, r.tableRegion))
+	categories, nextPage, err := y.Do(ctx, persistence.NewDynamoConn(r.sess, r.tableRegion))
 	if err != nil {
 		return nil, "", r.getDomainError(err)
 	} else if len(categories) == 0 {
@@ -147,11 +145,11 @@ func (r CategoryDynamoRepository) Fetch(ctx context.Context, token string, limit
 	return categories, nextPage, nil
 }
 
-func (r *CategoryDynamoRepository) Replace(ctx context.Context, c aggregate.Category) error {
+func (r *DynamoRepository) Replace(ctx context.Context, c aggregate.Category) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	db := NewDynamoConn(r.sess, r.tableRegion)
+	db := persistence.NewDynamoConn(r.sess, r.tableRegion)
 	_, err := db.UpdateItemWithContext(ctx, &dynamodb.UpdateItemInput{
 		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
 			":t": {
@@ -178,11 +176,11 @@ func (r *CategoryDynamoRepository) Replace(ctx context.Context, c aggregate.Cate
 	return r.getDomainError(err)
 }
 
-func (r *CategoryDynamoRepository) HardRemove(ctx context.Context, id value.CUID) error {
+func (r *DynamoRepository) HardRemove(ctx context.Context, id value.CUID) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	db := NewDynamoConn(r.sess, r.tableRegion)
+	db := persistence.NewDynamoConn(r.sess, r.tableRegion)
 	_, err := db.DeleteItemWithContext(ctx, &dynamodb.DeleteItemInput{
 		Key:       r.generateKeyAttributes(id),
 		TableName: aws.String(r.tableName),
@@ -192,7 +190,7 @@ func (r *CategoryDynamoRepository) HardRemove(ctx context.Context, id value.CUID
 }
 
 // generateKeyAttributes returns a primary and sort key map as a dynamo map
-func (r CategoryDynamoRepository) generateKeyAttributes(id value.CUID) map[string]*dynamodb.AttributeValue {
+func (r DynamoRepository) generateKeyAttributes(id value.CUID) map[string]*dynamodb.AttributeValue {
 	return map[string]*dynamodb.AttributeValue{
 		"PK": {
 			S: aws.String(util.GenerateDynamoID(r.schemaName, id.Get())),
@@ -204,7 +202,7 @@ func (r CategoryDynamoRepository) generateKeyAttributes(id value.CUID) map[strin
 }
 
 // getDomainError returns a valid domain error from awserr dynamodb exceptions
-func (r CategoryDynamoRepository) getDomainError(err error) error {
+func (r DynamoRepository) getDomainError(err error) error {
 	if err != nil {
 		if aerr, ok := err.(awserr.Error); ok {
 			switch aerr.Code() {

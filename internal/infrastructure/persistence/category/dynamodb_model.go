@@ -1,12 +1,12 @@
-package readmodel
+package category
 
 import (
 	"github.com/neutrinocorp/life-track-api/internal/domain/model"
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure/persistence/util"
 )
 
-// CategoryDynamo read model
-type CategoryDynamo struct {
+// DynamoModel AWS DynamoDB model
+type DynamoModel struct {
 	PK          string `json:"pk"`
 	SK          string `json:"sk"`
 	Title       string `json:"title"`
@@ -20,23 +20,7 @@ type CategoryDynamo struct {
 	GSISK       string `json:"gsisk"`
 }
 
-func NewCategoryDynamo(schemaName string, m model.Category) *CategoryDynamo {
-	return &CategoryDynamo{
-		PK:          util.GenerateDynamoID(schemaName, m.ID),
-		SK:          util.GenerateDynamoID(schemaName, m.ID),
-		Title:       m.Title,
-		Description: m.Description,
-		User:        m.User,
-		Color:       m.Color,
-		CreateTime:  m.CreateTime,
-		UpdateTime:  m.UpdateTime,
-		Active:      m.Active,
-		GSIPK:       util.GenerateDynamoID("User", m.User),
-		GSISK:       util.GenerateDynamoID(schemaName, m.ID),
-	}
-}
-
-func (c CategoryDynamo) ToModel() *model.Category {
+func (c DynamoModel) ToModel() *model.Category {
 	return &model.Category{
 		ID:          util.FromDynamoID(c.PK),
 		Title:       c.Title,

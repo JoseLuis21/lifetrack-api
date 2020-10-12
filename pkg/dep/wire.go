@@ -13,7 +13,7 @@ import (
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure/awsutil"
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure/eventbus"
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure/logging"
-	"github.com/neutrinocorp/life-track-api/internal/infrastructure/persistence"
+	"github.com/neutrinocorp/life-track-api/internal/infrastructure/persistence/category"
 	"go.uber.org/zap"
 )
 
@@ -27,7 +27,7 @@ var infraSet = wire.NewSet(
 )
 
 func provideCategoryRepository(s *session.Session, cfg infrastructure.Configuration, logger *zap.Logger) repository.Category {
-	return persistence.NewCategory(persistence.NewCategoryDynamoRepository(s, cfg), logger)
+	return category.NewCategory(category.NewDynamoRepository(s, cfg), logger)
 }
 
 func InjectAddCategoryHandler() (*command.AddCategoryHandler, func(), error) {

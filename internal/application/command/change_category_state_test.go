@@ -6,11 +6,12 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/neutrinocorp/life-track-api/internal/infrastructure/persistence/category"
+
 	"github.com/alexandria-oss/common-go/exception"
 	"github.com/neutrinocorp/life-track-api/internal/domain/shared"
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure"
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure/eventbus"
-	"github.com/neutrinocorp/life-track-api/internal/infrastructure/persistence"
 )
 
 func TestNewChangeCategoryStateHandler(t *testing.T) {
@@ -19,7 +20,7 @@ func TestNewChangeCategoryStateHandler(t *testing.T) {
 		t.Fatal("cannot start configuration")
 	}
 
-	r := persistence.NewCategoryInMemory()
+	r := category.NewInMemoryRepository()
 	b := eventbus.NewInMemory(cfg)
 
 	cmdAdd := NewAddCategoryHandler(r, b)

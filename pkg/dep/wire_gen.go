@@ -16,7 +16,7 @@ import (
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure/awsutil"
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure/eventbus"
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure/logging"
-	"github.com/neutrinocorp/life-track-api/internal/infrastructure/persistence"
+	"github.com/neutrinocorp/life-track-api/internal/infrastructure/persistence/category"
 	"go.uber.org/zap"
 )
 
@@ -133,5 +133,5 @@ func InjectRemoveCategory() (*command.RemoveCategoryHandler, func(), error) {
 var infraSet = wire.NewSet(infrastructure.NewConfiguration, awsutil.NewSession, logging.NewZapProd, provideCategoryRepository, wire.Bind(new(event.Bus), new(*eventbus.AWS)), eventbus.NewAWS)
 
 func provideCategoryRepository(s *session.Session, cfg infrastructure.Configuration, logger *zap.Logger) repository.Category {
-	return persistence.NewCategory(persistence.NewCategoryDynamoRepository(s, cfg), logger)
+	return category.NewCategory(category.NewDynamoRepository(s, cfg), logger)
 }

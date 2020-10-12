@@ -1,4 +1,4 @@
-package persistence
+package category
 
 import (
 	"context"
@@ -12,20 +12,20 @@ import (
 	"github.com/neutrinocorp/life-track-api/internal/domain/value"
 )
 
-// CategoryInMemory in-memory category repository layer
-type CategoryInMemory struct {
+// InMemoryRepository in-memory category repository layer
+type InMemoryRepository struct {
 	items map[string]*model.Category
 	mu    *sync.RWMutex
 }
 
-func NewCategoryInMemory() *CategoryInMemory {
-	return &CategoryInMemory{
+func NewInMemoryRepository() *InMemoryRepository {
+	return &InMemoryRepository{
 		items: map[string]*model.Category{},
 		mu:    new(sync.RWMutex),
 	}
 }
 
-func (r *CategoryInMemory) Save(_ context.Context, c aggregate.Category) error {
+func (r *InMemoryRepository) Save(_ context.Context, c aggregate.Category) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -38,7 +38,7 @@ func (r *CategoryInMemory) Save(_ context.Context, c aggregate.Category) error {
 	return nil
 }
 
-func (r CategoryInMemory) FetchByID(_ context.Context, id value.CUID) (*model.Category, error) {
+func (r InMemoryRepository) FetchByID(_ context.Context, id value.CUID) (*model.Category, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
@@ -50,7 +50,7 @@ func (r CategoryInMemory) FetchByID(_ context.Context, id value.CUID) (*model.Ca
 	return c, nil
 }
 
-func (r CategoryInMemory) Fetch(_ context.Context, _ string, limit int64, _ shared.CategoryCriteria) ([]*model.Category, string, error) {
+func (r InMemoryRepository) Fetch(_ context.Context, _ string, limit int64, _ shared.CategoryCriteria) ([]*model.Category, string, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
@@ -70,7 +70,7 @@ func (r CategoryInMemory) Fetch(_ context.Context, _ string, limit int64, _ shar
 	return items, "", nil
 }
 
-func (r *CategoryInMemory) Replace(_ context.Context, c aggregate.Category) error {
+func (r *InMemoryRepository) Replace(_ context.Context, c aggregate.Category) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -83,7 +83,7 @@ func (r *CategoryInMemory) Replace(_ context.Context, c aggregate.Category) erro
 	return nil
 }
 
-func (r *CategoryInMemory) HardRemove(_ context.Context, id value.CUID) error {
+func (r *InMemoryRepository) HardRemove(_ context.Context, id value.CUID) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 

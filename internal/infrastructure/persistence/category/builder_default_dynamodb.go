@@ -1,4 +1,4 @@
-package categorybuilder
+package category
 
 import (
 	"context"
@@ -8,20 +8,19 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
 	"github.com/neutrinocorp/life-track-api/internal/domain/model"
-	"github.com/neutrinocorp/life-track-api/internal/infrastructure/persistence/readmodel"
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure/persistence/util"
 )
 
-// CategoryDynamo constructs and executes an AWS DynamoDB query fetching all categories
-//	This is the default concrete CategoryDynamo strategy implementation
-type CategoryDynamo struct {
+// BuilderDefaultDynamo constructs and executes an AWS DynamoDB query fetching all categories
+//	This is the default concrete BuilderDefaultDynamo strategy implementation
+type BuilderDefaultDynamo struct {
 	exp    expression.Builder
 	schema string
 	input  *dynamodb.ScanInput
 }
 
-func NewCategoryDynamo(table, schema string) *CategoryDynamo {
-	return &CategoryDynamo{
+func NewBuilderDynamo(table, schema string) *BuilderDefaultDynamo {
+	return &BuilderDefaultDynamo{
 		exp:    expression.NewBuilder(),
 		schema: schema,
 		input: &dynamodb.ScanInput{
@@ -31,7 +30,7 @@ func NewCategoryDynamo(table, schema string) *CategoryDynamo {
 	}
 }
 
-func (b *CategoryDynamo) GetInput() *dynamodb.ScanInput {
+func (b *BuilderDefaultDynamo) GetInput() *dynamodb.ScanInput {
 	b.exp = b.exp.WithFilter(expression.BeginsWith(expression.Name("PK"), b.schema))
 	exp, _ := b.exp.Build()
 	b.input.SetExpressionAttributeNames(exp.Names())
@@ -43,7 +42,7 @@ func (b *CategoryDynamo) GetInput() *dynamodb.ScanInput {
 	return b.input
 }
 
-func (b *CategoryDynamo) Query(keyword string) *CategoryDynamo {
+func (b *BuilderDefaultDynamo) Query(keyword string) *BuilderDefaultDynamo {
 	if keyword != "" {
 		b.exp = b.exp.WithFilter(expression.Contains(expression.Name("title"), keyword))
 	}
@@ -51,7 +50,7 @@ func (b *CategoryDynamo) Query(keyword string) *CategoryDynamo {
 	return b
 }
 
-func (b *CategoryDynamo) Limit(l int64) *CategoryDynamo {
+func (b *BuilderDefaultDynamo) Limit(l int64) *BuilderDefaultDynamo {
 	if l > 0 && l <= 100 {
 		b.input.SetLimit(l)
 	}
@@ -59,7 +58,7 @@ func (b *CategoryDynamo) Limit(l int64) *CategoryDynamo {
 	return b
 }
 
-func (b *CategoryDynamo) NextPage(token string) *CategoryDynamo {
+func (b *BuilderDefaultDynamo) NextPage(token string) *BuilderDefaultDynamo {
 	if token != "" {
 		b.input.SetExclusiveStartKey(map[string]*dynamodb.AttributeValue{
 			"PK": {
@@ -74,7 +73,7 @@ func (b *CategoryDynamo) NextPage(token string) *CategoryDynamo {
 	return b
 }
 
-func (b CategoryDynamo) Do(ctx context.Context, db *dynamodb.DynamoDB) ([]*model.Category, string, error) {
+func (b BuilderDefaultDynamo) Do(ctx context.Context, db *dynamodb.DynamoDB) ([]*model.Category, string, error) {
 	o, err := db.ScanWithContext(ctx, b.GetInput())
 	if err != nil {
 		return nil, "", err
@@ -82,7 +81,7 @@ func (b CategoryDynamo) Do(ctx context.Context, db *dynamodb.DynamoDB) ([]*model
 
 	categories := make([]*model.Category, 0)
 	for _, i := range o.Items {
-		c := new(readmodel.CategoryDynamo)
+		c := new(DynamoModel)
 		err = dynamodbattribute.UnmarshalMap(i, c)
 		if err != nil {
 			return nil, "", err

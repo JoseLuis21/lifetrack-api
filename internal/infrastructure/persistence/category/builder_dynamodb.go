@@ -1,4 +1,4 @@
-package categorybuilder
+package category
 
 import (
 	"context"
