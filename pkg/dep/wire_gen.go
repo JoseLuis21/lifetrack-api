@@ -33,8 +33,8 @@ func InjectAddCategoryHandler() (*command.AddCategoryHandler, func(), error) {
 		return nil, nil, err
 	}
 	category := provideCategoryRepository(session, configuration, logger)
-	aws := eventbus.NewAWS(session, configuration)
-	addCategoryHandler := command.NewAddCategoryHandler(category, aws)
+	bus := provideEventBus(session, configuration, logger)
+	addCategoryHandler := command.NewAddCategoryHandler(category, bus)
 	return addCategoryHandler, func() {
 		cleanup()
 	}, nil
@@ -85,8 +85,8 @@ func InjectChangeCategoryState() (*command.ChangeCategoryStateHandler, func(), e
 		return nil, nil, err
 	}
 	category := provideCategoryRepository(session, configuration, logger)
-	aws := eventbus.NewAWS(session, configuration)
-	changeCategoryStateHandler := command.NewChangeCategoryStateHandler(category, aws)
+	bus := provideEventBus(session, configuration, logger)
+	changeCategoryStateHandler := command.NewChangeCategoryStateHandler(category, bus)
 	return changeCategoryStateHandler, func() {
 		cleanup()
 	}, nil
@@ -103,8 +103,8 @@ func InjectEditCategory() (*command.EditCategoryHandler, func(), error) {
 		return nil, nil, err
 	}
 	category := provideCategoryRepository(session, configuration, logger)
-	aws := eventbus.NewAWS(session, configuration)
-	editCategoryHandler := command.NewEditCategoryHandler(category, aws)
+	bus := provideEventBus(session, configuration, logger)
+	editCategoryHandler := command.NewEditCategoryHandler(category, bus)
 	return editCategoryHandler, func() {
 		cleanup()
 	}, nil
@@ -121,8 +121,8 @@ func InjectRemoveCategory() (*command.RemoveCategoryHandler, func(), error) {
 		return nil, nil, err
 	}
 	category := provideCategoryRepository(session, configuration, logger)
-	aws := eventbus.NewAWS(session, configuration)
-	removeCategoryHandler := command.NewRemoveCategoryHandler(category, aws)
+	bus := provideEventBus(session, configuration, logger)
+	removeCategoryHandler := command.NewRemoveCategoryHandler(category, bus)
 	return removeCategoryHandler, func() {
 		cleanup()
 	}, nil
@@ -130,8 +130,14 @@ func InjectRemoveCategory() (*command.RemoveCategoryHandler, func(), error) {
 
 // wire.go:
 
-var infraSet = wire.NewSet(infrastructure.NewConfiguration, awsutil.NewSession, logging.NewZapProd, provideCategoryRepository, wire.Bind(new(event.Bus), new(*eventbus.AWS)), eventbus.NewAWS)
+var infraSet = wire.NewSet(infrastructure.NewConfiguration, awsutil.NewSession, logging.NewZapProd, provideCategoryRepository,
+	provideEventBus, eventbus.NewAWS,
+)
 
 func provideCategoryRepository(s *session.Session, cfg infrastructure.Configuration, logger *zap.Logger) repository.Category {
 	return category.NewCategory(category.NewDynamoRepository(s, cfg), logger)
+}
+
+func provideEventBus(s *session.Session, cfg infrastructure.Configuration, logger *zap.Logger) event.Bus {
+	return eventbus.NewEventBus(eventbus.NewAWS(s, cfg), logger)
 }

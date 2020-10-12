@@ -22,12 +22,16 @@ var infraSet = wire.NewSet(
 	awsutil.NewSession,
 	logging.NewZapProd,
 	provideCategoryRepository,
-	wire.Bind(new(event.Bus), new(*eventbus.AWS)),
+	provideEventBus,
 	eventbus.NewAWS,
 )
 
 func provideCategoryRepository(s *session.Session, cfg infrastructure.Configuration, logger *zap.Logger) repository.Category {
 	return category.NewCategory(category.NewDynamoRepository(s, cfg), logger)
+}
+
+func provideEventBus(s *session.Session, cfg infrastructure.Configuration, logger *zap.Logger) event.Bus {
+	return eventbus.NewEventBus(eventbus.NewAWS(s, cfg), logger)
 }
 
 func InjectAddCategoryHandler() (*command.AddCategoryHandler, func(), error) {
