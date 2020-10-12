@@ -3,9 +3,10 @@ package persistence
 import (
 	"context"
 	"strconv"
+	"strings"
 	"sync"
 
-	"github.com/neutrinocorp/life-track-api/internal/infrastructure/persistence/querybuilder"
+	"github.com/neutrinocorp/life-track-api/internal/infrastructure/persistence/categorybuilder"
 
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure/persistence/util"
 
@@ -17,7 +18,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
-	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
 	"github.com/neutrinocorp/life-track-api/internal/domain/aggregate"
 	"github.com/neutrinocorp/life-track-api/internal/domain/model"
 	"github.com/neutrinocorp/life-track-api/internal/domain/shared"
@@ -48,9 +48,9 @@ func (r CategoryDynamoRepository) Save(ctx context.Context, c aggregate.Category
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	svc := NewDynamoConn(r.sess, r.tableRegion)
+	db := NewDynamoConn(r.sess, r.tableRegion)
 	id := util.GenerateDynamoID(r.schemaName, c.Get().ID.Get())
-	_, err := svc.PutItemWithContext(ctx, &dynamodb.PutItemInput{
+	_, err := db.PutItemWithContext(ctx, &dynamodb.PutItemInput{
 		Item: map[string]*dynamodb.AttributeValue{
 			"PK": {
 				S: aws.String(id),
@@ -95,8 +95,8 @@ func (r CategoryDynamoRepository) FetchByID(ctx context.Context, id value.CUID) 
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
-	svc := NewDynamoConn(r.sess, r.tableRegion)
-	res, err := svc.GetItemWithContext(ctx, &dynamodb.GetItemInput{
+	db := NewDynamoConn(r.sess, r.tableRegion)
+	res, err := db.GetItemWithContext(ctx, &dynamodb.GetItemInput{
 		Key:       r.generateKeyAttributes(id),
 		TableName: aws.String(r.tableName),
 	})
@@ -122,63 +122,37 @@ func (r CategoryDynamoRepository) Fetch(ctx context.Context, token string, limit
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
-	var nextTokenMap map[string]*dynamodb.AttributeValue
-	if token != "" {
-		nextTokenMap = map[string]*dynamodb.AttributeValue{
-			"PK": {
-				S: aws.String(util.GenerateDynamoID(r.schemaName, token)),
-			},
-			"SK": {
-				S: aws.String(util.GenerateDynamoID(r.schemaName, token)),
-			},
+	var y categorybuilder.BuilderDynamo
+	// Set strategy
+	if criteria.User != "" {
+		order := false
+		if strings.ToUpper(criteria.OrderBy) == "ASC" {
+			order = true
 		}
+
+		y = categorybuilder.NewUserDynamo(r.tableName, "GSIPK-index", r.schemaName).ByUser(criteria.User).
+			Query(criteria.Query).Limit(limit).OrderBy(order).NextPage(token)
+	} else {
+		y = categorybuilder.NewCategoryDynamo(r.tableName, r.schemaName).
+			Query(criteria.Query).Limit(limit).NextPage(token)
 	}
 
-	// Construct query
-	exp, _ := r.buildFilter(criteria)
-
-	svc := NewDynamoConn(r.sess, r.tableRegion)
-	res, err := svc.ScanWithContext(ctx, &dynamodb.ScanInput{
-		ExclusiveStartKey:         nextTokenMap,
-		ExpressionAttributeNames:  exp.Names(),
-		ExpressionAttributeValues: exp.Values(),
-		FilterExpression:          exp.Filter(),
-		ProjectionExpression:      exp.Projection(),
-		Limit:                     aws.Int64(limit),
-		TableName:                 aws.String(r.tableName),
-	})
+	categories, nextPage, err := y.Do(ctx, NewDynamoConn(r.sess, r.tableRegion))
 	if err != nil {
 		return nil, "", r.getDomainError(err)
-	}
-
-	if len(res.Items) == 0 {
+	} else if len(categories) == 0 {
 		return nil, "", exception.NewNotFound("category")
 	}
 
-	categories := make([]*model.Category, 0)
-	for _, i := range res.Items {
-		c := new(readmodel.CategoryDynamo)
-		err = dynamodbattribute.UnmarshalMap(i, c)
-		if err != nil {
-			return nil, "", err
-		}
-		categories = append(categories, c.ToModel())
-	}
-
-	nextToken := ""
-	if t := res.LastEvaluatedKey["PK"]; t != nil {
-		nextToken = util.FromDynamoID(*t.S)
-	}
-
-	return categories, nextToken, nil
+	return categories, nextPage, nil
 }
 
 func (r *CategoryDynamoRepository) Replace(ctx context.Context, c aggregate.Category) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	svc := NewDynamoConn(r.sess, r.tableRegion)
-	_, err := svc.UpdateItemWithContext(ctx, &dynamodb.UpdateItemInput{
+	db := NewDynamoConn(r.sess, r.tableRegion)
+	_, err := db.UpdateItemWithContext(ctx, &dynamodb.UpdateItemInput{
 		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
 			":t": {
 				S: aws.String(c.Get().Title.Get()),
@@ -208,8 +182,8 @@ func (r *CategoryDynamoRepository) HardRemove(ctx context.Context, id value.CUID
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	svc := NewDynamoConn(r.sess, r.tableRegion)
-	_, err := svc.DeleteItemWithContext(ctx, &dynamodb.DeleteItemInput{
+	db := NewDynamoConn(r.sess, r.tableRegion)
+	_, err := db.DeleteItemWithContext(ctx, &dynamodb.DeleteItemInput{
 		Key:       r.generateKeyAttributes(id),
 		TableName: aws.String(r.tableName),
 	})
@@ -249,9 +223,4 @@ func (r CategoryDynamoRepository) getDomainError(err error) error {
 	}
 
 	return nil
-}
-
-// buildFilter constructs category fetch query criteria
-func (r CategoryDynamoRepository) buildFilter(c shared.CategoryCriteria) (expression.Expression, error) {
-	return querybuilder.NewCategoryDynamo(r.schemaName).User(c.User).Title(c.Title).Query(c.Query).Build()
 }
