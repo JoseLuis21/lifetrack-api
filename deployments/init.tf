@@ -16,6 +16,11 @@ variable "app_name" {
   description = "<Application Name>"
 }
 
+variable "app_short_name" {
+  default     = "lifetrack"
+  description = "<Application Short Name>"
+}
+
 variable "app_version" {
   default     = "1.0.0"
   description = "<Application Version>"

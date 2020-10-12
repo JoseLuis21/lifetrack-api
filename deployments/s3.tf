@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "category" {
-  bucket = "lifetrack-serverless"
+  bucket = "${var.app_short_name}-serverless"
   acl    = "private"
 
   tags = {

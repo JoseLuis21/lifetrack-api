@@ -1,7 +1,7 @@
 /* Category */
 
 resource "aws_lambda_function" "add-category" {
-  function_name = "lt-add-category"
+  function_name = "${var.app_short_name}-add-category"
   description   = "Neutrino LifeTrack - Add category command"
   s3_bucket     = aws_s3_bucket.category.bucket
   s3_key        = "v${var.app_version}/add-category.zip"
@@ -39,7 +39,7 @@ resource "aws_lambda_permission" "add-category-apigw" {
 }
 
 resource "aws_lambda_function" "list-category" {
-  function_name = "lt-list-category"
+  function_name = "${var.app_short_name}-list-category"
   description   = "Neutrino LifeTrack - List categories query"
   s3_bucket     = aws_s3_bucket.category.bucket
   s3_key        = "v${var.app_version}/list-category.zip"
@@ -76,7 +76,7 @@ resource "aws_lambda_permission" "list-category-apigw" {
 }
 
 resource "aws_lambda_function" "get-category" {
-  function_name = "lt-get-category"
+  function_name = "${var.app_short_name}-get-category"
   description   = "Neutrino LifeTrack - Get category query"
   s3_bucket     = aws_s3_bucket.category.bucket
   s3_key        = "v${var.app_version}/get-category.zip"
@@ -86,7 +86,7 @@ resource "aws_lambda_function" "get-category" {
   runtime       = "go1.x"
   environment {
     variables = {
-      "LT_DYNAMO_TABLE_NAME" : aws_dynamodb_table.lifetrack-prod
+      "LT_DYNAMO_TABLE_NAME" : aws_dynamodb_table.lifetrack-prod.name
       "LT_DYNAMO_TABLE_REGION" : "us-east-1"
     }
   }
@@ -113,7 +113,7 @@ resource "aws_lambda_permission" "get-category-apigw" {
 }
 
 resource "aws_lambda_function" "edit-category" {
-  function_name = "lt-edit-category"
+  function_name = "${var.app_short_name}-edit-category"
   description   = "Neutrino LifeTrack - Edit category command"
   s3_bucket     = aws_s3_bucket.category.bucket
   s3_key        = "v${var.app_version}/edit-category.zip"
@@ -151,7 +151,7 @@ resource "aws_lambda_permission" "edit-category-apigw" {
 }
 
 resource "aws_lambda_function" "change-state-category" {
-  function_name = "lt-change-state-category"
+  function_name = "${var.app_short_name}-change-state-category"
   description   = "Neutrino LifeTrack - Change state category command"
   s3_bucket     = aws_s3_bucket.category.bucket
   s3_key        = "v${var.app_version}/change-state-category.zip"
@@ -189,7 +189,7 @@ resource "aws_lambda_permission" "change-state-category-apigw" {
 }
 
 resource "aws_lambda_function" "remove-category" {
-  function_name = "lt-remove-category"
+  function_name = "${var.app_short_name}-remove-category"
   description   = "Neutrino LifeTrack - Remove category command"
   s3_bucket     = aws_s3_bucket.category.bucket
   s3_key        = "v${var.app_version}/remove-category.zip"
