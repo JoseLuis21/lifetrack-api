@@ -56,6 +56,14 @@ resource "aws_route53_record" "domain-53" {
 // -- API Gateway Proxy config --
 
 /* Category */
+resource "aws_api_gateway_resource" "category" {
+  rest_api_id = aws_api_gateway_rest_api.lifeTrack.id
+  parent_id   = aws_api_gateway_rest_api.lifeTrack.root_resource_id
+  path_part   = "category"
+}
+
+
+
 /* Routes:
   - GET /category - List
   - POST /category - Add
@@ -64,11 +72,6 @@ resource "aws_route53_record" "domain-53" {
   - DELETE /category/{id} - Hard Remove
   - PATCH-PUT /category/{id}/state - Change state (active/deactivate - soft remove/restore)
 */
-resource "aws_api_gateway_resource" "category" {
-  rest_api_id = aws_api_gateway_rest_api.lifeTrack.id
-  parent_id   = aws_api_gateway_rest_api.lifeTrack.root_resource_id
-  path_part   = "category"
-}
 
 resource "aws_api_gateway_method" "add-category" {
   rest_api_id   = aws_api_gateway_rest_api.lifeTrack.id
@@ -105,12 +108,16 @@ resource "aws_api_gateway_integration" "lambda-list-category" {
   // cache_key_parameters = ["page_size", "next_token"]
 }
 
+
+
 // Category -> detail (GET, PATCH, DELETE)
+// Resource /category/{id}
 resource "aws_api_gateway_resource" "category-detail" {
   rest_api_id = aws_api_gateway_rest_api.lifeTrack.id
   parent_id   = aws_api_gateway_resource.category.id
   path_part   = "{id}"
 }
+
 
 resource "aws_api_gateway_method" "category-get" {
   rest_api_id   = aws_api_gateway_rest_api.lifeTrack.id
@@ -127,6 +134,64 @@ resource "aws_api_gateway_integration" "lambda-get-category" {
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
   uri                     = aws_lambda_function.get-category.invoke_arn
+}
+
+resource "aws_api_gateway_method" "category-edit" {
+  rest_api_id   = aws_api_gateway_rest_api.lifeTrack.id
+  resource_id   = aws_api_gateway_resource.category-detail.id
+  http_method   = "PATCH"
+  authorization = "NONE"
+}
+
+resource "aws_api_gateway_integration" "lambda-edit-category" {
+  rest_api_id = aws_api_gateway_rest_api.lifeTrack.id
+  resource_id = aws_api_gateway_method.category-edit.resource_id
+  http_method = aws_api_gateway_method.category-edit.http_method
+
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = aws_lambda_function.edit-category.invoke_arn
+}
+
+resource "aws_api_gateway_method" "category-remove" {
+  rest_api_id   = aws_api_gateway_rest_api.lifeTrack.id
+  resource_id   = aws_api_gateway_resource.category-detail.id
+  http_method   = "DELETE"
+  authorization = "NONE"
+}
+
+resource "aws_api_gateway_integration" "lambda-remove-category" {
+  rest_api_id = aws_api_gateway_rest_api.lifeTrack.id
+  resource_id = aws_api_gateway_method.category-remove.resource_id
+  http_method = aws_api_gateway_method.category-remove.http_method
+
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = aws_lambda_function.remove-category.invoke_arn
+}
+
+// Resource /category/{id}/state
+resource "aws_api_gateway_resource" "category-state" {
+  rest_api_id = aws_api_gateway_rest_api.lifeTrack.id
+  parent_id   = aws_api_gateway_resource.category-detail.id
+  path_part   = "/state"
+}
+
+resource "aws_api_gateway_method" "category-change-state" {
+  rest_api_id   = aws_api_gateway_rest_api.lifeTrack.id
+  resource_id   = aws_api_gateway_resource.category-state.id
+  http_method   = "PATCH"
+  authorization = "NONE"
+}
+
+resource "aws_api_gateway_integration" "lambda-change-state-category" {
+  rest_api_id = aws_api_gateway_rest_api.lifeTrack.id
+  resource_id = aws_api_gateway_method.category-change-state.resource_id
+  http_method = aws_api_gateway_method.category-change-state.http_method
+
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = aws_lambda_function.change-state-category.invoke_arn
 }
 
 /* Activity */
@@ -165,7 +230,10 @@ resource "aws_api_gateway_deployment" "deploy" {
   depends_on = [
     aws_api_gateway_integration.lambda-add-category,
     aws_api_gateway_integration.lambda-list-category,
-    aws_api_gateway_integration.lambda-get-category
+    aws_api_gateway_integration.lambda-get-category,
+    aws_api_gateway_integration.lambda-edit-category,
+    aws_api_gateway_integration.lambda-remove-category,
+    aws_api_gateway_integration.lambda-change-state-category
   ]
   rest_api_id       = aws_api_gateway_rest_api.lifeTrack.id
   stage_name        = "live"
