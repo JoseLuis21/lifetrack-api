@@ -5,14 +5,21 @@ type FilterMap map[string]string
 
 // CategoryCriteria represents a filter struct to fetch fine-grained categories
 type CategoryCriteria struct {
-	User  string `json:"user"`
-	Title string `json:"title"`
-	Query string `json:"query"`
+	User    string `json:"user"`
+	Query   string `json:"query"`
+	OrderBy string `json:"order_by"`
 }
 
 // ActivityCriteria represents a filter struct to fetch fine-grained activities
 type ActivityCriteria struct {
 	Category string `json:"category"`
-	Title    string `json:"title"`
 	Query    string `json:"query"`
+	OrderBy  string `json:"order_by"`
+}
+
+// ActivityCriteria represents a filter struct to fetch fine-grained occurrences
+type OccurrenceCriteria struct {
+	Activity string `json:"activity"`
+	Query    string `json:"query"`
+	OrderBy  string `json:"order_by"`
 }
