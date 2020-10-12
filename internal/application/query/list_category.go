@@ -36,8 +36,8 @@ func (q ListCategories) Query(ctx context.Context, token, limit string, filter m
 	}
 
 	return q.repo.Fetch(ctx, token, limitInt, shared.CategoryCriteria{
-		User:  filter["user"],
-		Title: filter["title"],
-		Query: filter["query"],
+		User:    filter["user"],
+		Query:   filter["query"],
+		OrderBy: filter["order"],
 	})
 }

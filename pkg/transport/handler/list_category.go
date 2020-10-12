@@ -35,10 +35,10 @@ func (c ListCategory) GetRouter() *mux.Router {
 }
 
 func (c *ListCategory) Handler(w http.ResponseWriter, r *http.Request) {
-	categories, token, err := c.q.Query(r.Context(), r.URL.Query().Get("next_token"), r.URL.Query().Get("page_size"), map[string]string{
+	categories, nextPage, err := c.q.Query(r.Context(), r.URL.Query().Get("next_page"), r.URL.Query().Get("page_size"), map[string]string{
 		"user":  r.URL.Query().Get("user"),
-		"title": r.URL.Query().Get("title"),
-		"query": r.URL.Query().Get("q"),
+		"query": r.URL.Query().Get("query"),
+		"order": r.URL.Query().Get("order"),
 	})
 	if err != nil {
 		httputil.RespondErrorJSON(err, w)
@@ -49,10 +49,10 @@ func (c *ListCategory) Handler(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(struct {
 		Categories []*model.Category `json:"categories"`
 		TotalItems int               `json:"total_items"`
-		NextToken  string            `json:"next_token"`
+		NextPage   string            `json:"next_page"`
 	}{
 		Categories: categories,
 		TotalItems: len(categories),
-		NextToken:  token,
+		NextPage:   nextPage,
 	})
 }
