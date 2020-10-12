@@ -158,7 +158,7 @@ func (b InputBuilder) Do(db *dynamodb.DynamoDB) ([]*model.Category, string, erro
 
 	categories := make([]*model.Category, 0)
 	for _, i := range o.Items {
-		c := new(category.CategoryDynamo)
+		c := new(category.DynamoModel)
 		err = dynamodbattribute.UnmarshalMap(i, c)
 		if err != nil {
 			return nil, "", err
