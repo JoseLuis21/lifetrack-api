@@ -129,7 +129,7 @@ func (b AWS) getTopicArn(ctx context.Context, svc *sns.SNS, topic string) (strin
 			NextToken: aws.String(nextToken),
 		})
 		if err != nil {
-			return "", exception.NewNotFound("topics")
+			return "", exception.NewNotFound("topic(s)")
 		}
 
 		// Up to 100 topics
