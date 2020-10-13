@@ -1,4 +1,4 @@
-resource "aws_s3_bucket" "category" {
+resource "aws_s3_bucket" "serverless" {
   bucket = "${var.app_short_name}-serverless"
   acl    = "private"
 
