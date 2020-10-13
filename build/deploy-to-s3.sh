@@ -26,11 +26,11 @@ function upload_to_s3() {
   BUCKET_NAME="lifetrack-serverless"
 
   if [ "$3" != "" ]; then
-      APP_VERSION=v"$2"
+      APP_VERSION=v"$3"
   fi
 
   if [ "$4" != "" ]; then
-      BUCKET_NAME="$3"
+      BUCKET_NAME="$4"
   fi
 
   if [ "$1" != "" ] || [ "$2" != "" ]; then
