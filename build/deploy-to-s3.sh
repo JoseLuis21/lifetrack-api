@@ -13,10 +13,11 @@ err() {
 # Globals:
 #   GOPATH
 # Arguments:
-#   $1 = Module name (e.g. add-category)
-#   $2 = Application version (e.g. 1.0.1)
+#   $1 = Module name (e.g. category)
+#   $2 = Function name (e.g. add-category)
+#   $3 = Application version (e.g. 1.0.1)
 #     Uses v1.0.0 as default value
-#   $3 = AWS S3 bucket name (e.g. my-lifetrack-bucket)
+#   $4 = AWS S3 bucket name (e.g. my-lifetrack-bucket)
 #     Uses lifetrack-serverless as default value
 #######################################
 function upload_to_s3() {
@@ -24,22 +25,23 @@ function upload_to_s3() {
   # Legacy bucket name - life-track-serverless
   BUCKET_NAME="lifetrack-serverless"
 
-  if [ "$2" != "" ]; then
+  if [ "$3" != "" ]; then
       APP_VERSION=v"$2"
   fi
 
-  if [ "$3" != "" ]; then
+  if [ "$4" != "" ]; then
       BUCKET_NAME="$3"
   fi
 
-  if [ "$1" != "" ]; then
+  if [ "$1" != "" ] || [ "$2" != "" ]; then
+    FILE_NAME="$1/$2"
     LT_PATH="$GOPATH/src/github.com/neutrinocorp/life-track-api"
-    /bin/bash "$LT_PATH"/build/build.sh "$1"
-    aws s3 cp "$LT_PATH"/build/release/"$1".zip s3://"$BUCKET_NAME"/"$APP_VERSION"/"$1".zip
+    /bin/bash "$LT_PATH/build/build.sh" "$1" "$2"
+    aws s3 cp "$LT_PATH/build/release/$FILE_NAME".zip s3://"$BUCKET_NAME/$APP_VERSION/$FILE_NAME".zip
     else
-      err "empty argument"
+      err "empty argument(s)"
       exit 1
   fi
 }
 
-upload_to_s3 "$1" "$2" "$3"
+upload_to_s3 "$1" "$2" "$3" "$4"
