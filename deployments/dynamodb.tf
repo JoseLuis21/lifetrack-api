@@ -29,11 +29,6 @@ resource "aws_dynamodb_table" "lifetrack-prod" {
     type = "S"
   }
 
-  ttl {
-    attribute_name = "TimeToExist"
-    enabled        = false
-  }
-
   global_secondary_index {
     name            = var.gsi-index
     projection_type = "ALL"
