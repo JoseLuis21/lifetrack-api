@@ -4,7 +4,7 @@ resource "aws_lambda_function" "add-category" {
   function_name = "${var.app_short_name}-add-category"
   description   = "Neutrino LifeTrack - Add category command"
   s3_bucket     = aws_s3_bucket.category.bucket
-  s3_key        = "v${var.app_version}/add-category.zip"
+  s3_key        = "v${var.app_version}/category/add-category.zip"
   handler       = "add-category"
   role          = aws_iam_role.lambda-exec-full-db.arn
   timeout       = 15
@@ -42,7 +42,7 @@ resource "aws_lambda_function" "list-category" {
   function_name = "${var.app_short_name}-list-category"
   description   = "Neutrino LifeTrack - List categories query"
   s3_bucket     = aws_s3_bucket.category.bucket
-  s3_key        = "v${var.app_version}/list-category.zip"
+  s3_key        = "v${var.app_version}/category/list-category.zip"
   handler       = "list-category"
   role          = aws_iam_role.lambda-exec-read-db.arn
   timeout       = 15
@@ -79,7 +79,7 @@ resource "aws_lambda_function" "get-category" {
   function_name = "${var.app_short_name}-get-category"
   description   = "Neutrino LifeTrack - Get category query"
   s3_bucket     = aws_s3_bucket.category.bucket
-  s3_key        = "v${var.app_version}/get-category.zip"
+  s3_key        = "v${var.app_version}/category/get-category.zip"
   handler       = "get-category"
   role          = aws_iam_role.lambda-exec-read-db.arn
   timeout       = 15
@@ -116,7 +116,7 @@ resource "aws_lambda_function" "edit-category" {
   function_name = "${var.app_short_name}-edit-category"
   description   = "Neutrino LifeTrack - Edit category command"
   s3_bucket     = aws_s3_bucket.category.bucket
-  s3_key        = "v${var.app_version}/edit-category.zip"
+  s3_key        = "v${var.app_version}/category/edit-category.zip"
   handler       = "edit-category"
   role          = aws_iam_role.lambda-exec-full-db.arn
   timeout       = 15
@@ -154,7 +154,7 @@ resource "aws_lambda_function" "change-state-category" {
   function_name = "${var.app_short_name}-change-state-category"
   description   = "Neutrino LifeTrack - Change state category command"
   s3_bucket     = aws_s3_bucket.category.bucket
-  s3_key        = "v${var.app_version}/change-state-category.zip"
+  s3_key        = "v${var.app_version}/category/change-state-category.zip"
   handler       = "change-state-category"
   role          = aws_iam_role.lambda-exec-full-db.arn
   timeout       = 15
@@ -192,7 +192,7 @@ resource "aws_lambda_function" "remove-category" {
   function_name = "${var.app_short_name}-remove-category"
   description   = "Neutrino LifeTrack - Remove category command"
   s3_bucket     = aws_s3_bucket.category.bucket
-  s3_key        = "v${var.app_version}/remove-category.zip"
+  s3_key        = "v${var.app_version}/category/remove-category.zip"
   handler       = "remove-category"
   role          = aws_iam_role.lambda-exec-full-db.arn
   timeout       = 15
