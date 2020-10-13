@@ -25,7 +25,7 @@ type Configuration struct {
 }
 
 func NewConfiguration() (Configuration, error) {
-	viper.SetDefault("lifetrack.persistence.dynamo.table", "lifetrack-dev")
+	viper.SetDefault("lifetrack.persistence.dynamo.table", "lifetrack-prod")
 	viper.SetDefault("lifetrack.persistence.dynamo.region", "us-east-1")
 	viper.SetDefault("lifetrack.eventbus.aws.region", "us-east-1")
 
@@ -46,12 +46,12 @@ func NewConfiguration() (Configuration, error) {
 }
 
 func SetOSEnv() error {
-	viper.SetEnvPrefix("lt")
-	if err := viper.BindEnv("dynamo_table_name", "lifetrack.persistence.dynamo.table"); err != nil {
+	viper.AutomaticEnv()
+	if err := viper.BindEnv("lifetrack.persistence.dynamo.table", "LT_DYNAMO_TABLE_NAME"); err != nil {
 		return err
-	} else if err := viper.BindEnv("event_aws_region", "lifetrack.eventbus.aws.region"); err != nil {
+	} else if err := viper.BindEnv("lifetrack.persistence.dynamo.region", "LT_DYNAMO_TABLE_REGION"); err != nil {
 		return err
 	}
 
-	return viper.BindEnv("dynamo_table_region", "lifetrack.persistence.dynamo.region")
+	return viper.BindEnv("lifetrack.eventbus.aws.region", "LT_DYNAMO_EVENT_AWS_REGION")
 }
