@@ -13,7 +13,7 @@ data "aws_iam_policy_document" "lambda-exec" {
 data "aws_iam_policy_document" "dynamo-read" {
   statement {
     actions   = ["dynamodb:GetItem", "dynamodb:Scan", "dynamodb:Query"]
-    resources = [aws_dynamodb_table.lifetrack-prod.arn]
+    resources = [aws_dynamodb_table.lifetrack-prod.arn, "${aws_dynamodb_table.lifetrack-prod.arn}/index/*"]
     effect    = "Allow"
   }
 }
@@ -21,7 +21,7 @@ data "aws_iam_policy_document" "dynamo-read" {
 data "aws_iam_policy_document" "dynamo-write" {
   statement {
     actions   = ["dynamodb:PutItem", "dynamodb:DeleteItem", "dynamodb:UpdateItem"]
-    resources = [aws_dynamodb_table.lifetrack-prod.arn]
+    resources = [aws_dynamodb_table.lifetrack-prod.arn, "${aws_dynamodb_table.lifetrack-prod.arn}/index/*"]
     effect    = "Allow"
   }
 }
