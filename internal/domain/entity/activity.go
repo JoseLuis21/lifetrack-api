@@ -10,21 +10,21 @@ import (
 // Activity is a user's habit, resides inside of a category if desired
 type Activity struct {
 	ID            *value.CUID
-	Title         *value.Title
+	Name          *value.Title
 	AppointedTime *value.AppointedTime
 	Metadata      *value.Metadata
 }
 
 // NewActivity creates a new activity entity
-func NewActivity(title string, appointedTime int) (*Activity, error) {
-	t, err := value.NewTitle("activity_title", title)
+func NewActivity(name string, appointedTime int) (*Activity, error) {
+	t, err := value.NewTitle("activity_name", name)
 	if err != nil {
 		return nil, err
 	}
 
 	act := &Activity{
 		ID:       value.NewCUID(),
-		Title:    t,
+		Name:     t,
 		Metadata: value.NewMetadata(),
 	}
 
@@ -42,10 +42,10 @@ func NewActivity(title string, appointedTime int) (*Activity, error) {
 }
 
 func (a Activity) IsValid() error {
-	// Required: id, title
+	// a.	required fields [id, name)
 	if a.ID == nil {
 		return exception.NewRequiredField("activity_id")
-	} else if a.Title == nil {
+	} else if a.Name == nil {
 		return exception.NewRequiredField("activity_title")
 	}
 
@@ -54,7 +54,7 @@ func (a Activity) IsValid() error {
 
 // Update mutates data atomically and sets UpdateTime metadata to current time in UTC
 func (a *Activity) Update(title string, appointedTime int) error {
-	if err := a.Title.Set(title); title != "" && err != nil {
+	if err := a.Name.Set(title); title != "" && err != nil {
 		return err
 	}
 	if appointedTime > 0 {
