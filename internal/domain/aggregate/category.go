@@ -17,8 +17,8 @@ type Category struct {
 }
 
 // Update mutates category data and sets UpdateTime metadata to current time in UTC
-func (c *Category) Update(title, description, color string) error {
-	if err := c.category.Update(title, description, color); err != nil {
+func (c *Category) Update(title, description, color, image string) error {
+	if err := c.category.Update(title, description, color, image); err != nil {
 		return err
 	}
 
