@@ -36,29 +36,33 @@ func (h RemoveHandler) Invoke(cmd Remove) error {
 		return err
 	}
 
-	// Get data (required by snapshot if rollback is needed)
-	c, err := h.repo.FetchByID(cmd.Ctx, id)
+	// Get data
+	snapshot, err := h.fetch(cmd.Ctx, id)
 	if err != nil {
 		return err
+	}
+
+	return h.persist(cmd, snapshot)
+}
+
+// fetch retrieve given category
+func (h RemoveHandler) fetch(ctx context.Context, id value.CUID) (*aggregate.Category, error) {
+	// Get data
+	c, err := h.repo.FetchByID(ctx, id)
+	if err != nil {
+		return nil, err
 	}
 
 	// Parse primitive struct to domain aggregate
-	// Store snapshot if rollback is needed
-	snapshot, err := adapter.CategoryAdapter{}.ToAggregate(*c)
+	category, err := adapter.CategoryAdapter{}.ToAggregate(*c)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	// Persist changes
-	err = h.repo.HardRemove(cmd.Ctx, *snapshot.Get().ID)
-	if err != nil {
-		return err
-	}
-
-	// Publish events to message broker concurrent-safe
-	return h.publishEvent(cmd.Ctx, *snapshot)
+	return category, nil
 }
 
+// publishEvent publishes a domain event concurrently
 func (h RemoveHandler) publishEvent(ctx context.Context, snapshot aggregate.Category) error {
 	errC := make(chan error)
 	go func() {
@@ -77,4 +81,15 @@ func (h RemoveHandler) publishEvent(ctx context.Context, snapshot aggregate.Cate
 	}()
 
 	return <-errC
+}
+
+// persist saves all recorded changes to ecosystem's persistence
+func (h RemoveHandler) persist(cmd Remove, snapshot *aggregate.Category) error {
+	// Persist changes
+	if err := h.repo.HardRemove(cmd.Ctx, *snapshot.Get().ID); err != nil {
+		return err
+	}
+
+	// Publish events to message broker concurrent-safe
+	return h.publishEvent(cmd.Ctx, *snapshot)
 }

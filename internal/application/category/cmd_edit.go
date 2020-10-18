@@ -18,6 +18,7 @@ type Edit struct {
 	Title       string
 	Description string
 	Theme       string
+	Image       string
 }
 
 // EditHandler handles Edit commands
@@ -40,34 +41,32 @@ func (h EditHandler) Invoke(cmd Edit) error {
 	}
 
 	// Get data
-	c, err := h.repo.FetchByID(cmd.Ctx, id)
+	category, err := h.fetch(cmd.Ctx, id)
 	if err != nil {
 		return err
+	}
+
+	return h.persist(category, cmd)
+}
+
+// fetch retrieve given category
+func (h EditHandler) fetch(ctx context.Context, id value.CUID) (*aggregate.Category, error) {
+	// Get data
+	c, err := h.repo.FetchByID(ctx, id)
+	if err != nil {
+		return nil, err
 	}
 
 	// Parse primitive struct to domain aggregate
 	category, err := adapter.CategoryAdapter{}.ToAggregate(*c)
 	if err != nil {
-		return err
-	}
-	// Store snapshot if rollback is needed
-	snapshot := *category
-
-	// Update fields
-	if err = category.Update(cmd.Title, cmd.Description, cmd.Theme); err != nil {
-		return err
+		return nil, err
 	}
 
-	// Replace in persistence layer
-	if err = h.repo.Replace(cmd.Ctx, *category); err != nil {
-		return err
-	}
-
-	// Publish domain events to message broker concurrent-safe
-	category.RecordEvent(eventfactory.Category{}.NewCategoryUpdated(*category, snapshot))
-	return h.publishEvent(cmd.Ctx, category, snapshot)
+	return category, nil
 }
 
+// publishEvent publishes a domain event concurrently
 func (h EditHandler) publishEvent(ctx context.Context, ag *aggregate.Category, snapshot aggregate.Category) error {
 	errC := make(chan error)
 	go func() {
@@ -86,4 +85,24 @@ func (h EditHandler) publishEvent(ctx context.Context, ag *aggregate.Category, s
 	}()
 
 	return <-errC
+}
+
+// persist saves all recorded changes to ecosystem's persistence
+func (h EditHandler) persist(category *aggregate.Category, cmd Edit) error {
+	// Store snapshot if rollback is needed
+	snapshot := *category
+
+	// Update fields
+	if err := category.Update(cmd.Title, cmd.Description, cmd.Theme, cmd.Image); err != nil {
+		return err
+	}
+
+	// Replace in persistence layer
+	if err := h.repo.Replace(cmd.Ctx, *category); err != nil {
+		return err
+	}
+
+	// Publish domain events to message broker concurrent-safe
+	category.RecordEvent(eventfactory.Category{}.NewCategoryUpdated(*category, snapshot))
+	return h.publishEvent(cmd.Ctx, category, snapshot)
 }

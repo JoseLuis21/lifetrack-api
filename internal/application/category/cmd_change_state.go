@@ -40,27 +40,16 @@ func (h ChangeStateHandler) Invoke(cmd ChangeState) error {
 	}
 
 	// Fetch data
-	category, err := h.fetchCategory(cmd.Ctx, id)
-	if err != nil {
-		return err
-	}
-	snapshot := *category
-
-	// Actual state change
-	category.SetState(cmd.State)
-
-	// Persist change
-	err = h.repo.Replace(cmd.Ctx, *category)
+	category, err := h.fetch(cmd.Ctx, id)
 	if err != nil {
 		return err
 	}
 
-	// Publish events to message broker concurrent-safe
-	h.setDomainEvent(category)
-	return h.publishEvent(cmd.Ctx, category, snapshot)
+	return h.persist(cmd, category)
 }
 
-func (h ChangeStateHandler) fetchCategory(ctx context.Context, id value.CUID) (*aggregate.Category, error) {
+// fetch retrieve given category
+func (h ChangeStateHandler) fetch(ctx context.Context, id value.CUID) (*aggregate.Category, error) {
 	m, err := h.repo.FetchByID(ctx, id)
 	if err != nil {
 		return nil, err
@@ -75,6 +64,7 @@ func (h ChangeStateHandler) fetchCategory(ctx context.Context, id value.CUID) (*
 	return category, nil
 }
 
+// setDomainEvent retrieves either restored or removed category domain event depending on current aggregate state
 func (h ChangeStateHandler) setDomainEvent(ag *aggregate.Category) {
 	if ag.Get().Metadata.GetState() {
 		ag.RecordEvent(eventfactory.Category{}.NewCategoryRestored(*ag.Get().ID))
@@ -84,10 +74,12 @@ func (h ChangeStateHandler) setDomainEvent(ag *aggregate.Category) {
 	ag.RecordEvent(eventfactory.Category{}.NewCategoryRemoved(*ag.Get().ID))
 }
 
-func (h ChangeStateHandler) publishEvent(ctx context.Context, ag *aggregate.Category, snapshot aggregate.Category) error {
+// publishEvent publishes a domain event concurrently
+func (h ChangeStateHandler) publishEvent(ctx context.Context, category *aggregate.Category, snapshot aggregate.Category) error {
+	h.setDomainEvent(category)
 	errC := make(chan error)
 	go func() {
-		if err := h.bus.Publish(ctx, ag.PullEvents()...); err != nil {
+		if err := h.bus.Publish(ctx, category.PullEvents()...); err != nil {
 			// Rollback
 			if errR := h.repo.Replace(ctx, snapshot); errR != nil {
 				errC <- errR
@@ -102,4 +94,21 @@ func (h ChangeStateHandler) publishEvent(ctx context.Context, ag *aggregate.Cate
 	}()
 
 	return <-errC
+}
+
+// persist saves all recorded changes to ecosystem's persistence
+func (h ChangeStateHandler) persist(cmd ChangeState, category *aggregate.Category) error {
+	// Store snapshot if rollback is needed
+	snapshot := *category
+
+	// Actual state change
+	category.SetState(cmd.State)
+
+	// Persist change
+	if err := h.repo.Replace(cmd.Ctx, *category); err != nil {
+		return err
+	}
+
+	// Publish events to message broker concurrent-safe
+	return h.publishEvent(cmd.Ctx, category, snapshot)
 }
