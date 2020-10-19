@@ -1,7 +1,10 @@
 package adapter
 
 import (
+	"fmt"
 	"time"
+
+	"github.com/alexandria-oss/common-go/exception"
 
 	"github.com/neutrinocorp/life-track-api/internal/domain/aggregate"
 	"github.com/neutrinocorp/life-track-api/internal/domain/entity"
@@ -18,7 +21,7 @@ func (a OccurrenceAdapter) ToModel(ag aggregate.Occurrence) *model.Occurrence {
 		ID:            ag.Get().ID.Get(),
 		StartTime:     ag.Get().StartTime.Unix(),
 		EndTime:       ag.Get().EndTime.Unix(),
-		TotalDuration: ag.Get().TotalDuration,
+		TotalDuration: ag.Get().TotalDuration.Minutes(),
 		Activity:      ag.GetActivity(),
 		CreateTime:    ag.Get().Metadata.GetCreateTime().Unix(),
 		UpdateTime:    ag.Get().Metadata.GetUpdateTime().Unix(),
@@ -39,12 +42,18 @@ func (a OccurrenceAdapter) ToAggregate(m model.Occurrence) (*aggregate.Occurrenc
 	meta.SetUpdateTime(time.Unix(m.UpdateTime, 0).UTC())
 	meta.SetState(m.Active)
 
+	// Parse to minutes
+	duration, err := time.ParseDuration(fmt.Sprintf("%fm", m.TotalDuration))
+	if err != nil {
+		return nil, exception.NewFieldFormat("total_duration", "real (R) number")
+	}
+
 	ag := new(aggregate.Occurrence)
 	ag.Set(&entity.Occurrence{
 		ID:            id,
 		StartTime:     time.Unix(m.StartTime, 0).UTC(),
 		EndTime:       time.Unix(m.StartTime, 0).UTC(),
-		TotalDuration: m.TotalDuration,
+		TotalDuration: duration,
 		Metadata:      meta,
 	})
 	if err := ag.AssignActivity(m.Activity); err != nil {
