@@ -4,7 +4,8 @@ import (
 	"context"
 	"strconv"
 
-	"github.com/alexandria-oss/common-go/exception"
+	"github.com/neutrinocorp/life-track-api/internal/domain/adapter"
+
 	"github.com/neutrinocorp/life-track-api/internal/domain/model"
 	"github.com/neutrinocorp/life-track-api/internal/domain/repository"
 	"github.com/neutrinocorp/life-track-api/internal/domain/shared"
@@ -23,21 +24,35 @@ func NewList(r repository.Category) *List {
 }
 
 func (q List) Query(ctx context.Context, token, limit string, filter map[string]string) ([]*model.Category, string, error) {
-	// TODO: Turn token and limit to value objects
+	c, next, err := q.repo.Fetch(ctx, token, q.sanitizeLimit(limit), q.generateCriteria(filter))
+	if err != nil {
+		return nil, "", err
+	}
+
+	return adapter.CategoryAdapter{}.BulkToModel(c...), next, nil
+}
+
+// sanitizeLimit clean corrupted limit values, returns 10 as default value
+func (q List) sanitizeLimit(limit string) int64 {
 	var limitInt int64
-	limitInt = 100
+	limitInt = 10
 
 	if limit != "" {
 		l, err := strconv.ParseInt(limit, 10, 64)
 		if err != nil {
-			return nil, "", exception.NewFieldFormat("limit", "integer")
+			return limitInt
 		}
 		limitInt = l
 	}
 
-	return q.repo.Fetch(ctx, token, limitInt, shared.CategoryCriteria{
+	return limitInt
+}
+
+// generateCriteria create a new category criteria struct
+func (q List) generateCriteria(filter map[string]string) shared.CategoryCriteria {
+	return shared.CategoryCriteria{
 		User:    filter["user"],
 		Query:   filter["query"],
 		OrderBy: filter["order"],
-	})
+	}
 }

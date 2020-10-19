@@ -7,7 +7,6 @@ import (
 	"github.com/alexandria-oss/common-go/exception"
 
 	"github.com/neutrinocorp/life-track-api/internal/domain/aggregate"
-	"github.com/neutrinocorp/life-track-api/internal/domain/model"
 	"github.com/neutrinocorp/life-track-api/internal/domain/repository"
 	"github.com/neutrinocorp/life-track-api/internal/domain/shared"
 	"github.com/neutrinocorp/life-track-api/internal/domain/value"
@@ -44,7 +43,7 @@ func (r Log) Save(ctx context.Context, c aggregate.Category) (err error) {
 	return
 }
 
-func (r Log) FetchByID(ctx context.Context, id value.CUID) (category *model.Category, err error) {
+func (r Log) FetchByID(ctx context.Context, id value.CUID) (category *aggregate.Category, err error) {
 	defer func(init time.Time) {
 		fields := []zap.Field{
 			zap.String("module", "infrastructure.persistence.category"),
@@ -67,7 +66,7 @@ func (r Log) FetchByID(ctx context.Context, id value.CUID) (category *model.Cate
 }
 
 func (r Log) Fetch(ctx context.Context, token string, limit int64, criteria shared.CategoryCriteria) (
-	categories []*model.Category, nextToken string, err error) {
+	categories []*aggregate.Category, nextToken string, err error) {
 	defer func(init time.Time) {
 		fields := []zap.Field{
 			zap.String("module", "infrastructure.persistence.category"),

@@ -17,7 +17,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"github.com/neutrinocorp/life-track-api/internal/domain/aggregate"
-	"github.com/neutrinocorp/life-track-api/internal/domain/model"
 	"github.com/neutrinocorp/life-track-api/internal/domain/shared"
 	"github.com/neutrinocorp/life-track-api/internal/domain/value"
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure"
@@ -89,7 +88,7 @@ func (r DynamoRepository) Save(ctx context.Context, c aggregate.Category) error 
 	return r.getDomainError(err)
 }
 
-func (r DynamoRepository) FetchByID(ctx context.Context, id value.CUID) (*model.Category, error) {
+func (r DynamoRepository) FetchByID(ctx context.Context, id value.CUID) (*aggregate.Category, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
@@ -112,11 +111,11 @@ func (r DynamoRepository) FetchByID(ctx context.Context, id value.CUID) (*model.
 		return nil, err
 	}
 
-	return m.ToModel(), nil
+	return m.ToAggregate(), nil
 }
 
 func (r DynamoRepository) Fetch(ctx context.Context, token string, limit int64,
-	criteria shared.CategoryCriteria) ([]*model.Category, string, error) {
+	criteria shared.CategoryCriteria) ([]*aggregate.Category, string, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 

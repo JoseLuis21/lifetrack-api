@@ -3,6 +3,8 @@ package category
 import (
 	"context"
 
+	"github.com/neutrinocorp/life-track-api/internal/domain/adapter"
+
 	"github.com/neutrinocorp/life-track-api/internal/domain/model"
 	"github.com/neutrinocorp/life-track-api/internal/domain/repository"
 	"github.com/neutrinocorp/life-track-api/internal/domain/value"
@@ -26,5 +28,10 @@ func (q Get) Query(ctx context.Context, id string) (*model.Category, error) {
 		return nil, err
 	}
 
-	return q.repo.FetchByID(ctx, *idCUID)
+	c, err := q.repo.FetchByID(ctx, *idCUID)
+	if err != nil {
+		return nil, err
+	}
+
+	return adapter.CategoryAdapter{}.ToModel(*c), nil
 }

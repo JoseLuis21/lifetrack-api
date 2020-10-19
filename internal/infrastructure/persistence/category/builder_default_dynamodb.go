@@ -3,11 +3,12 @@ package category
 import (
 	"context"
 
+	"github.com/neutrinocorp/life-track-api/internal/domain/aggregate"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
-	"github.com/neutrinocorp/life-track-api/internal/domain/model"
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure/persistence/util"
 )
 
@@ -73,20 +74,20 @@ func (b *BuilderDefaultDynamo) NextPage(token string) *BuilderDefaultDynamo {
 	return b
 }
 
-func (b BuilderDefaultDynamo) Do(ctx context.Context, db *dynamodb.DynamoDB) ([]*model.Category, string, error) {
+func (b BuilderDefaultDynamo) Do(ctx context.Context, db *dynamodb.DynamoDB) ([]*aggregate.Category, string, error) {
 	o, err := db.ScanWithContext(ctx, b.GetInput())
 	if err != nil {
 		return nil, "", err
 	}
 
-	categories := make([]*model.Category, 0)
+	categories := make([]*aggregate.Category, 0)
 	for _, i := range o.Items {
 		c := new(DynamoModel)
 		err = dynamodbattribute.UnmarshalMap(i, c)
 		if err != nil {
 			return nil, "", err
 		}
-		categories = append(categories, c.ToModel())
+		categories = append(categories, c.ToAggregate())
 	}
 
 	nextPage := ""
