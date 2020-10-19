@@ -37,8 +37,9 @@ func (t *Color) Set(color string) error {
 }
 
 func (t Color) IsValid() error {
-	if t.value != "" && (t.value != "RED" && t.value != "BLUE" && t.value != "YELLOW" && t.value != "PINK" && t.value != "GREEN") {
-		return exception.NewFieldFormat("color", "[Red, Blue, Yellow, Pink, Green]")
+	isColor := t.value != "" && (t.value != "RED" && t.value != "BLUE" && t.value != "YELLOW" && t.value != "PINK" && t.value != "GREEN")
+	if isColor {
+		return exception.NewFieldFormat("color", "[Red, Blue, Yellow, Pink, Green)")
 	}
 
 	return nil
