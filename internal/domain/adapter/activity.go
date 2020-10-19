@@ -16,7 +16,7 @@ type ActivityAdapter struct{}
 func (a ActivityAdapter) ToModel(ag aggregate.Activity) *model.Activity {
 	return &model.Activity{
 		ID:            ag.Get().ID.Get(),
-		Title:         ag.Get().Title.Get(),
+		Name:          ag.Get().Name.Get(),
 		Category:      ag.GetCategory(),
 		AppointedTime: int64(ag.Get().AppointedTime.Get().Minutes()),
 		CreateTime:    ag.Get().Metadata.GetCreateTime().Unix(),
@@ -33,7 +33,7 @@ func (a ActivityAdapter) ToAggregate(m model.Activity) (*aggregate.Activity, err
 		return nil, err
 	}
 
-	titleP, err := value.NewTitle("activity_title", m.Title)
+	titleP, err := value.NewTitle("activity_name", m.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +51,7 @@ func (a ActivityAdapter) ToAggregate(m model.Activity) (*aggregate.Activity, err
 	ag := new(aggregate.Activity)
 	ag.Set(&entity.Activity{
 		ID:            id,
-		Title:         titleP,
+		Name:          titleP,
 		AppointedTime: apTime,
 		Metadata:      meta,
 	})
