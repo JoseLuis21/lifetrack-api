@@ -12,21 +12,34 @@ import (
 // CategoryAdapter adapts different types of category structs
 type CategoryAdapter struct{}
 
-// ToModel parses a category aggregate root to a read-only model
-func (a CategoryAdapter) ToModel(ag aggregate.Category) *model.Category {
+// ToModel parses a category aggregate root to a read model for queries
+func (a CategoryAdapter) ToModel(category aggregate.Category) *model.Category {
 	return &model.Category{
-		ID:          ag.Get().ID.Get(),
-		Title:       ag.Get().Title.Get(),
-		Description: ag.Get().Description.Get(),
-		User:        ag.GetUser(),
-		Color:       ag.Get().Color.Get(),
-		CreateTime:  ag.Get().Metadata.GetCreateTime().Unix(),
-		UpdateTime:  ag.Get().Metadata.GetUpdateTime().Unix(),
-		Active:      ag.Get().Metadata.GetState(),
+		ID:          category.Get().ID.Get(),
+		Title:       category.Get().Title.Get(),
+		Description: category.Get().Description.Get(),
+		User:        category.GetUser(),
+		Color:       category.Get().Color.Get(),
+		Image:       category.Get().Image.Get(),
+		CreateTime:  category.Get().Metadata.GetCreateTime().Unix(),
+		UpdateTime:  category.Get().Metadata.GetUpdateTime().Unix(),
+		Active:      category.Get().Metadata.GetState(),
 	}
 }
 
-// ToAggregate parses a category read-only model to aggregate root
+// BulkToModel parses a whole slice of category aggregates to read models for queries
+func (a CategoryAdapter) BulkToModel(categories ...*aggregate.Category) []*model.Category {
+	catsModel := make([]*model.Category, 0)
+
+	for _, cAg := range categories {
+		c := a.ToModel(*cAg)
+		catsModel = append(catsModel, c)
+	}
+
+	return catsModel
+}
+
+// ToAggregate parses a category read model to aggregate root
 func (a CategoryAdapter) ToAggregate(m model.Category) (*aggregate.Category, error) {
 	id := &value.CUID{}
 	err := id.Set(m.ID)
@@ -49,6 +62,11 @@ func (a CategoryAdapter) ToAggregate(m model.Category) (*aggregate.Category, err
 		return nil, err
 	}
 
+	image, err := value.NewImage(m.Image)
+	if err != nil {
+		return nil, err
+	}
+
 	meta := new(value.Metadata)
 	meta.SetCreateTime(time.Unix(m.CreateTime, 0).UTC())
 	meta.SetUpdateTime(time.Unix(m.UpdateTime, 0).UTC())
@@ -60,6 +78,7 @@ func (a CategoryAdapter) ToAggregate(m model.Category) (*aggregate.Category, err
 		Title:       titleP,
 		Description: desc,
 		Color:       color,
+		Image:       image,
 		Metadata:    meta,
 	})
 	if err := ag.AssignUser(m.User); err != nil {
