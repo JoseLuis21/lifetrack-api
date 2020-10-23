@@ -41,7 +41,8 @@ func (t *AppointedTime) Set(appointedTime int) error {
 
 func (t AppointedTime) IsValid() error {
 	// rules
-	// - from 10 minutes up to 1 year (525,600 min. aprox.)
+	// 1. value between 10 min. up to 1 year in minutes. (1 year ≈ 525,600 min. approx.)
+	//		Dom. = 525,600 >= x >= 10
 	if t.value.Minutes() < 10 || t.value.Minutes() > 525600 {
 		return exception.NewFieldRange("appointed_time", "10 minutes", "1 year")
 	}

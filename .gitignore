@@ -25,5 +25,5 @@ deployments/terraform.tfstate.backup
 .idea/
 
 # Builds
-build/release/*.zip
+build/release/
 build/bin/

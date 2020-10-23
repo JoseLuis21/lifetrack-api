@@ -9,7 +9,7 @@ import (
 // Activity default-read model
 type Activity struct {
 	ID            string `json:"id"`
-	Title         string `json:"title"`
+	Name          string `json:"name"`
 	AppointedTime int64  `json:"appointed_time"`
 	Category      string `json:"category"`
 	CreateTime    int64  `json:"create_time"`

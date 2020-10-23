@@ -41,6 +41,7 @@ func (c Edit) Handler(w http.ResponseWriter, r *http.Request) {
 		Title:       r.PostFormValue("title"),
 		Description: r.PostFormValue("description"),
 		Theme:       r.PostFormValue("theme"),
+		Image:       r.PostFormValue("image"),
 	}); err != nil {
 		httputil.RespondErrorJSON(err, w)
 		return

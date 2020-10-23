@@ -12,12 +12,13 @@ type Category struct {
 	ID          *value.CUID
 	Title       *value.Title
 	Description *value.Description
+	Image       *value.Image
 	Color       *value.Color
 	Metadata    *value.Metadata
 }
 
 // NewCategory creates a category entity receiving primitive-only data
-func NewCategory(title, description, color string) (*Category, error) {
+func NewCategory(title, description, color, image string) (*Category, error) {
 	titleP, err := value.NewTitle("category_title", title)
 	if err != nil {
 		return nil, err
@@ -33,11 +34,17 @@ func NewCategory(title, description, color string) (*Category, error) {
 		return nil, err
 	}
 
+	img, err := value.NewImage(image)
+	if err != nil {
+		return nil, err
+	}
+
 	c := &Category{
 		ID:          value.NewCUID(),
 		Title:       titleP,
 		Description: desc,
 		Color:       cl,
+		Image:       img,
 		Metadata:    value.NewMetadata(),
 	}
 
@@ -62,7 +69,7 @@ func (c Category) IsValid() error {
 }
 
 // Update mutates data atomically and sets UpdateTime metadata to current time in UTC
-func (c *Category) Update(title, description, color string) error {
+func (c *Category) Update(title, description, color, image string) error {
 	if err := c.Title.Set(title); title != "" && err != nil {
 		return err
 	}
@@ -70,6 +77,9 @@ func (c *Category) Update(title, description, color string) error {
 		return err
 	}
 	if err := c.Color.Set(color); color != "" && err != nil {
+		return err
+	}
+	if err := c.Image.Set(image); image != "" && err != nil {
 		return err
 	}
 	c.Metadata.SetUpdateTime(time.Now().UTC())

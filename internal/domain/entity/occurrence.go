@@ -8,15 +8,13 @@ import (
 	"github.com/neutrinocorp/life-track-api/internal/domain/value"
 )
 
-// TODO: Turn start and end times into value objects
-
 // Occurrence is a task done inside an activity
 type Occurrence struct {
 	ID        *value.CUID
 	StartTime time.Time
 	EndTime   time.Time
 	// Duration in minutes (m)
-	TotalDuration float64
+	TotalDuration time.Duration
 	Metadata      *value.Metadata
 }
 
@@ -37,7 +35,7 @@ func NewOccurrence(startTime, endTime string) (*Occurrence, error) {
 		return nil, err
 	}
 
-	o.TotalDuration = e.Sub(s).Minutes()
+	o.TotalDuration = e.Sub(s)
 	return o, nil
 }
 
@@ -59,8 +57,10 @@ func (o Occurrence) parseTimes(s, e string) (start, end time.Time, err error) {
 // IsValid validates current Occurrence values
 func (o Occurrence) IsValid() error {
 	// rules
-	// required: id, start_time, end_time
-	// times up to 1 year at max
+	// a.	required fields [id, start_time, end_time)
+	// b.	start_time and end_time maximum value up to 1 year
+	// c.	end_time is greater than start_time + 10 min (t = end_time, u = start_time, Dom. t < u + 10 min.)
+	//		1c. 10 min. of time difference between start_time and end_time
 	switch {
 	case o.ID.Get() == "":
 		return exception.NewRequiredField("occurrence_id")
@@ -68,7 +68,7 @@ func (o Occurrence) IsValid() error {
 		return exception.NewRequiredField("occurrence_start_time")
 	case o.EndTime.IsZero():
 		return exception.NewRequiredField("occurrence_end_time")
-	case o.EndTime.Before(o.StartTime):
+	case o.EndTime.Sub(o.StartTime).Minutes() < 10:
 		return exception.NewFieldRange("occurrence_end_time", "start_time", "end_time")
 	case o.StartTime.After(time.Now().UTC().Add(time.Hour * 8760)):
 		return exception.NewFieldRange("occurrence_start_time", "1 minute", "1 year")

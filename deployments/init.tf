@@ -4,6 +4,11 @@ terraform {
       source = "hashicorp/aws"
     }
   }
+  backend "s3" {
+    bucket = "lifetrack-terraform"
+    key    = "terraform/"
+    region = "us-east-1"
+  }
 }
 
 provider "aws" {
