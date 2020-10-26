@@ -3,6 +3,7 @@ package categoryhandler
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/neutrinocorp/life-track-api/internal/application/category"
 
@@ -11,12 +12,12 @@ import (
 )
 
 type Edit struct {
-	cmd    *category.EditHandler
+	cmd    *category.UpdateCommandHandler
 	router *mux.Router
 }
 
 // NewEdit creates an Edit handler with routing
-func NewEdit(cmd *category.EditHandler, r *mux.Router) *Edit {
+func NewEdit(cmd *category.UpdateCommandHandler, r *mux.Router) *Edit {
 	h := &Edit{
 		cmd:    cmd,
 		router: r,
@@ -35,13 +36,20 @@ func (c Edit) GetRouter() *mux.Router {
 }
 
 func (c Edit) Handler(w http.ResponseWriter, r *http.Request) {
-	if err := c.cmd.Invoke(category.Edit{
+	target, err := strconv.ParseInt(r.URL.Query().Get("target_time"), 10, 64)
+	if err != nil {
+		target = 0
+	}
+
+	if err = c.cmd.Invoke(category.UpdateCommand{
 		Ctx:         r.Context(),
 		ID:          mux.Vars(r)["id"],
-		Title:       r.PostFormValue("title"),
-		Description: r.PostFormValue("description"),
-		Theme:       r.PostFormValue("theme"),
-		Image:       r.PostFormValue("image"),
+		UserID:      r.URL.Query().Get("user_id"),
+		Name:        r.URL.Query().Get("name"),
+		Description: r.URL.Query().Get("description"),
+		TargetTime:  target,
+		Picture:     r.URL.Query().Get("picture"),
+		State:       r.URL.Query().Get("state"),
 	}); err != nil {
 		httputil.RespondErrorJSON(err, w)
 		return

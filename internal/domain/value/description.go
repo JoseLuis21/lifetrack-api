@@ -1,56 +1,74 @@
 package value
 
 import (
-	"strings"
-
 	"github.com/alexandria-oss/common-go/exception"
 )
 
-// Description is an extended text which describes an entity
+// Description text formatted using specific standards used to describe an aggregate/entity
 type Description struct {
-	value     string
+	value string
+
 	fieldName string
 }
 
-func NewDescription(fieldName, d string) (*Description, error) {
-	desc := new(Description)
-	desc.SetFieldName(fieldName)
-	if err := desc.Set(d); err != nil {
+// NewDescription creates a valid Description
+func NewDescription(field, description string) (*Description, error) {
+	d := new(Description)
+	d.setFieldName(field)
+	if err := d.Change(description); err != nil {
 		return nil, err
 	}
 
-	return desc, nil
+	return d, nil
 }
 
-func (d Description) Get() string {
-	return d.value
+// NewDescriptionFromPrimitive creates a Description without validating for marshaling purposes
+func NewDescriptionFromPrimitive(field, description string) *Description {
+	d := &Description{
+		value: description,
+	}
+	d.setFieldName(field)
+	return d
 }
 
-func (d *Description) Set(description string) error {
-	memo := d.value
+// Change sets the current Description value
+func (d *Description) Change(description string) error {
+	memoized := d.value
 	d.value = description
-
 	if err := d.IsValid(); err != nil {
-		d.value = memo
+		d.value = memoized
 		return err
 	}
 
 	return nil
 }
 
+// IsValid validates the current Description value(s)
 func (d Description) IsValid() error {
-	// - Range from 1 to 512
-	if d.value != "" && len(d.value) > 512 {
-		return exception.NewFieldRange(d.fieldName, "1", "512")
+	//	rules
+	//	a.	max length 1024 characters
+	if len(d.value) > 1024 {
+		return exception.NewFieldRange(d.fieldName, "1", "1024")
 	}
 
 	return nil
 }
 
-func (d *Description) SetFieldName(fieldName string) {
-	if fieldName != "" {
-		strings.ToLower(fieldName)
+//	--	UTILS	--
+
+// setFieldName sanitizes the given field name, if field empty then sets "description" by default
+func (d *Description) setFieldName(f string) {
+	if f == "" {
+		d.fieldName = "description"
+		return
 	}
 
-	d.fieldName = "description"
+	d.fieldName = f
+}
+
+//	--	PRIMITIVES	--
+
+// String returns the current Description value
+func (d Description) String() string {
+	return d.value
 }

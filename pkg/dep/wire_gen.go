@@ -6,137 +6,62 @@
 package dep
 
 import (
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/google/wire"
 	"github.com/neutrinocorp/life-track-api/internal/application/category"
 	"github.com/neutrinocorp/life-track-api/internal/domain/event"
 	"github.com/neutrinocorp/life-track-api/internal/domain/repository"
-	"github.com/neutrinocorp/life-track-api/internal/infrastructure"
-	"github.com/neutrinocorp/life-track-api/internal/infrastructure/awsutil"
+	"github.com/neutrinocorp/life-track-api/internal/infrastructure/configuration"
 	"github.com/neutrinocorp/life-track-api/internal/infrastructure/eventbus"
-	"github.com/neutrinocorp/life-track-api/internal/infrastructure/logging"
-	category2 "github.com/neutrinocorp/life-track-api/internal/infrastructure/persistence/category"
-	"go.uber.org/zap"
+	"github.com/neutrinocorp/life-track-api/internal/infrastructure/persistence/inmemcategory"
 )
 
 // Injectors from wire.go:
 
-func InjectAddCategoryHandler() (*category.AddHandler, func(), error) {
-	session := awsutil.NewSession()
-	configuration, err := infrastructure.NewConfiguration()
-	if err != nil {
-		return nil, nil, err
-	}
-	logger, cleanup, err := logging.NewZapProd()
-	if err != nil {
-		return nil, nil, err
-	}
-	repositoryCategory := provideCategoryRepository(session, configuration, logger)
-	bus := provideEventBus(session, configuration, logger)
-	addHandler := category.NewAddHandler(repositoryCategory, bus)
-	return addHandler, func() {
-		cleanup()
+func InjectAddCategoryHandler() (*category.AddCommandHandler, func(), error) {
+	inMemory := inmemcategory.NewInMemory()
+	configurationConfiguration := configuration.NewConfiguration()
+	bus := provideEventBus(configurationConfiguration)
+	addCommandHandler := category.NewAddCommandHandler(inMemory, bus)
+	return addCommandHandler, func() {
 	}, nil
 }
 
-func InjectGetCategoryQuery() (*category.Get, func(), error) {
-	session := awsutil.NewSession()
-	configuration, err := infrastructure.NewConfiguration()
-	if err != nil {
-		return nil, nil, err
-	}
-	logger, cleanup, err := logging.NewZapProd()
-	if err != nil {
-		return nil, nil, err
-	}
-	repositoryCategory := provideCategoryRepository(session, configuration, logger)
-	get := category.NewGet(repositoryCategory)
-	return get, func() {
-		cleanup()
+func InjectGetCategoryQuery() (*category.GetQuery, func(), error) {
+	inMemory := inmemcategory.NewInMemory()
+	getQuery := category.NewGetQuery(inMemory)
+	return getQuery, func() {
 	}, nil
 }
 
-func InjectListCategoriesQuery() (*category.List, func(), error) {
-	session := awsutil.NewSession()
-	configuration, err := infrastructure.NewConfiguration()
-	if err != nil {
-		return nil, nil, err
-	}
-	logger, cleanup, err := logging.NewZapProd()
-	if err != nil {
-		return nil, nil, err
-	}
-	repositoryCategory := provideCategoryRepository(session, configuration, logger)
-	list := category.NewList(repositoryCategory)
-	return list, func() {
-		cleanup()
+func InjectListCategoriesQuery() (*category.ListQuery, func(), error) {
+	inMemory := inmemcategory.NewInMemory()
+	listQuery := category.NewListQuery(inMemory)
+	return listQuery, func() {
 	}, nil
 }
 
-func InjectChangeCategoryState() (*category.ChangeStateHandler, func(), error) {
-	session := awsutil.NewSession()
-	configuration, err := infrastructure.NewConfiguration()
-	if err != nil {
-		return nil, nil, err
-	}
-	logger, cleanup, err := logging.NewZapProd()
-	if err != nil {
-		return nil, nil, err
-	}
-	repositoryCategory := provideCategoryRepository(session, configuration, logger)
-	bus := provideEventBus(session, configuration, logger)
-	changeStateHandler := category.NewChangeStateHandler(repositoryCategory, bus)
-	return changeStateHandler, func() {
-		cleanup()
+func InjectEditCategory() (*category.UpdateCommandHandler, func(), error) {
+	inMemory := inmemcategory.NewInMemory()
+	configurationConfiguration := configuration.NewConfiguration()
+	bus := provideEventBus(configurationConfiguration)
+	updateCommandHandler := category.NewUpdateCommandHandler(inMemory, bus)
+	return updateCommandHandler, func() {
 	}, nil
 }
 
-func InjectEditCategory() (*category.EditHandler, func(), error) {
-	session := awsutil.NewSession()
-	configuration, err := infrastructure.NewConfiguration()
-	if err != nil {
-		return nil, nil, err
-	}
-	logger, cleanup, err := logging.NewZapProd()
-	if err != nil {
-		return nil, nil, err
-	}
-	repositoryCategory := provideCategoryRepository(session, configuration, logger)
-	bus := provideEventBus(session, configuration, logger)
-	editHandler := category.NewEditHandler(repositoryCategory, bus)
-	return editHandler, func() {
-		cleanup()
-	}, nil
-}
-
-func InjectRemoveCategory() (*category.RemoveHandler, func(), error) {
-	session := awsutil.NewSession()
-	configuration, err := infrastructure.NewConfiguration()
-	if err != nil {
-		return nil, nil, err
-	}
-	logger, cleanup, err := logging.NewZapProd()
-	if err != nil {
-		return nil, nil, err
-	}
-	repositoryCategory := provideCategoryRepository(session, configuration, logger)
-	bus := provideEventBus(session, configuration, logger)
-	removeHandler := category.NewRemoveHandler(repositoryCategory, bus)
-	return removeHandler, func() {
-		cleanup()
+func InjectRemoveCategory() (*category.RemoveCommandHandler, func(), error) {
+	inMemory := inmemcategory.NewInMemory()
+	configurationConfiguration := configuration.NewConfiguration()
+	bus := provideEventBus(configurationConfiguration)
+	removeCommandHandler := category.NewRemoveCommandHandler(inMemory, bus)
+	return removeCommandHandler, func() {
 	}, nil
 }
 
 // wire.go:
 
-var infraSet = wire.NewSet(infrastructure.NewConfiguration, awsutil.NewSession, logging.NewZapProd, provideCategoryRepository,
-	provideEventBus, eventbus.NewAWS,
-)
+var infraSet = wire.NewSet(configuration.NewConfiguration, wire.Bind(new(repository.Category), new(*inmemcategory.InMemory)), inmemcategory.NewInMemory, provideEventBus, eventbus.NewInMemory)
 
-func provideCategoryRepository(s *session.Session, cfg infrastructure.Configuration, logger *zap.Logger) repository.Category {
-	return category2.NewCategory(category2.NewDynamoRepository(s, cfg), logger)
-}
-
-func provideEventBus(s *session.Session, cfg infrastructure.Configuration, logger *zap.Logger) event.Bus {
-	return eventbus.NewEventBus(eventbus.NewAWS(s, cfg), logger)
+func provideEventBus(cfg configuration.Configuration) event.Bus {
+	return eventbus.NewInMemory(cfg)
 }

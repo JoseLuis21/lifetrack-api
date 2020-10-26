@@ -1,15 +1,12 @@
 package event
 
-import (
-	"context"
-)
+import "context"
 
-// TODO: Add resiliency (retry, circuit breaker) and observability (monitoring, logging, distributed tracing) using CoR pattern
-
-// Bus Event Bus abstraction, represents a message broker
+// 	Bus connects a module to the LifeTrack ecosystem through domain and
+//	integration events
 type Bus interface {
-	// Publish produces and push an domain event into the Bus
+	// Publish sends a group of Domain events to all subscribers
 	Publish(ctx context.Context, e ...Domain) error
-	// SubscribeTo consumes asynchronously domain events from the Bus
-	SubscribeTo(ctx context.Context, t Topic) (chan *Domain, error)
+	// SubscribeTo adds a new subscription to an specific topic, returns a channel of Domain if exists
+	SubscribeTo(ctx context.Context, topic string) (chan Domain, error)
 }

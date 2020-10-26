@@ -1,81 +1,65 @@
 package eventfactory
 
 import (
-	"github.com/neutrinocorp/life-track-api/internal/domain/adapter"
-	"github.com/neutrinocorp/life-track-api/internal/domain/aggregate"
 	"github.com/neutrinocorp/life-track-api/internal/domain/event"
-	"github.com/neutrinocorp/life-track-api/internal/domain/value"
+	"github.com/neutrinocorp/life-track-api/internal/domain/model"
 )
 
-// Activity is the event factory for aggregate.Activity
 type Activity struct{}
 
-// NewActivityCreated returns a pre-build Domain event for aggregate.Activity creation
-func (a Activity) NewActivityCreated(ag aggregate.Activity) event.Domain {
-	e, _ := event.NewDomain(event.DomainArgs{
-		Service:       "activity",
-		Action:        "created",
-		AggregateID:   ag.Get().ID.Get(),
-		AggregateName: "activity",
-		Body:          adapter.ActivityAdapter{}.ToModel(ag),
-		Snapshot:      nil,
-	})
+var activityName = "activity"
 
-	return *e
+// Added triggered when a new aggregate.Activity has been added to a Category
+func (a Activity) Added(activity model.Activity) event.Domain {
+	return *event.NewDomainEvent(event.DomainArgs{
+		Caller:        tracker,
+		AggregateName: activityName,
+		Action:        create,
+		AggregateID:   activity.ID,
+		Body:          activity,
+	})
 }
 
-// NewActivityUpdated returns a pre-build Domain event for aggregate.Activity mutations
-func (a Activity) NewActivityUpdated(ag, snapshot aggregate.Activity) event.Domain {
-	e, _ := event.NewDomain(event.DomainArgs{
-		Service:       "activity",
-		Action:        "updated",
-		AggregateID:   ag.Get().ID.Get(),
-		AggregateName: "activity",
-		Body:          adapter.ActivityAdapter{}.ToModel(ag),
-		Snapshot:      adapter.ActivityAdapter{}.ToModel(snapshot),
+// Updated triggered when an existing aggregate.Activity has been updated
+func (a Activity) Updated(activity model.Activity) event.Domain {
+	return *event.NewDomainEvent(event.DomainArgs{
+		Caller:        tracker,
+		AggregateName: activityName,
+		Action:        update,
+		AggregateID:   activity.ID,
+		Body:          activity,
 	})
-
-	return *e
 }
 
-// NewActivityRemoved returns a pre-build Domain event for aggregate.Activity removal
-func (a Activity) NewActivityRemoved(id value.CUID) event.Domain {
-	e, _ := event.NewDomain(event.DomainArgs{
-		Service:       "activity",
-		Action:        "removed",
-		AggregateID:   id.Get(),
-		AggregateName: "activity",
+// Restored triggered when an existing aggregate.Activity has been restored
+func (a Activity) Restored(activityID string) event.Domain {
+	return *event.NewDomainEvent(event.DomainArgs{
+		Caller:        tracker,
+		AggregateName: activityName,
+		Action:        restore,
+		AggregateID:   activityID,
 		Body:          nil,
-		Snapshot:      nil,
 	})
-
-	return *e
 }
 
-// NewActivityRestored returns a pre-build Domain event for aggregate.Activity removal
-func (a Activity) NewActivityRestored(id value.CUID) event.Domain {
-	e, _ := event.NewDomain(event.DomainArgs{
-		Service:       "activity",
-		Action:        "restored",
-		AggregateID:   id.Get(),
-		AggregateName: "activity",
+// Removed triggered when an existing aggregate.Activity has been removed softly
+func (a Activity) Removed(activityID string) event.Domain {
+	return *event.NewDomainEvent(event.DomainArgs{
+		Caller:        tracker,
+		AggregateName: activityName,
+		Action:        remove,
+		AggregateID:   activityID,
 		Body:          nil,
-		Snapshot:      nil,
 	})
-
-	return *e
 }
 
-// NewActivityHardRemoved returns a pre-build Domain event for aggregate.Activity permanently removal
-func (a Activity) NewActivityHardRemoved(ag aggregate.Activity) event.Domain {
-	e, _ := event.NewDomain(event.DomainArgs{
-		Service:       "activity",
-		Action:        "hard_removed",
-		AggregateID:   ag.Get().ID.Get(),
-		AggregateName: "activity",
+// HardRemoved triggered when an existing aggregate.Activity has been removed permanently
+func (a Activity) HardRemoved(activityID string) event.Domain {
+	return *event.NewDomainEvent(event.DomainArgs{
+		Caller:        tracker,
+		AggregateName: activityName,
+		Action:        hardRemove,
+		AggregateID:   activityID,
 		Body:          nil,
-		Snapshot:      ag,
 	})
-
-	return *e
 }

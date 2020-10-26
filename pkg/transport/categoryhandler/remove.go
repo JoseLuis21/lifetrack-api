@@ -11,12 +11,12 @@ import (
 )
 
 type Remove struct {
-	cmd *category.RemoveHandler
+	cmd *category.RemoveCommandHandler
 	r   *mux.Router
 }
 
 // NewRemove creates a Remove handler with routing
-func NewRemove(cmd *category.RemoveHandler, r *mux.Router) *Remove {
+func NewRemove(cmd *category.RemoveCommandHandler, r *mux.Router) *Remove {
 	h := &Remove{
 		cmd: cmd,
 		r:   r,
@@ -35,7 +35,7 @@ func (c Remove) GetRouter() *mux.Router {
 }
 
 func (c Remove) Handler(w http.ResponseWriter, r *http.Request) {
-	if err := c.cmd.Invoke(category.Remove{
+	if err := c.cmd.Invoke(category.RemoveCommand{
 		Ctx: r.Context(),
 		ID:  mux.Vars(r)["id"],
 	}); err != nil {

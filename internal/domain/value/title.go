@@ -1,57 +1,74 @@
 package value
 
 import (
-	"strings"
-
 	"github.com/alexandria-oss/common-go/exception"
 )
 
-// Title is the main text header of an entity
+// Title text formatted using specific standards
 type Title struct {
-	value     string
+	value string
+
 	fieldName string
 }
 
-// NewTitle create a new title
-func NewTitle(fieldName, title string) (*Title, error) {
+// NewTitle creates a valid Title
+func NewTitle(field, title string) (*Title, error) {
 	t := new(Title)
-	t.SetFieldName(fieldName)
-	if err := t.Set(title); err != nil {
+	t.setFieldName(field)
+	if err := t.Rename(title); err != nil {
 		return nil, err
 	}
 
 	return t, nil
 }
 
-func (t Title) Get() string {
-	return t.value
+// NewTitleFromPrimitive creates a Title without validating for marshaling purposes
+func NewTitleFromPrimitive(field, title string) *Title {
+	t := &Title{
+		value: title,
+	}
+	t.setFieldName(field)
+	return t
 }
 
-func (t *Title) Set(title string) error {
-	memo := t.value
-	t.value = strings.Title(title)
-
+// Rename sets the current Title value
+func (t *Title) Rename(title string) error {
+	memoized := t.value
+	t.value = title
 	if err := t.IsValid(); err != nil {
-		t.value = memo
+		t.value = memoized
 		return err
 	}
 
 	return nil
 }
 
+// IsValid validates the current Title value(s)
 func (t Title) IsValid() error {
-	// - Range from 1 to 256
-	if t.value != "" && len(t.value) > 256 {
-		return exception.NewFieldRange(t.fieldName, "1", "256")
+	//	rules
+	//	a.	max length 512 characters
+	if len(t.value) > 512 {
+		return exception.NewFieldRange(t.fieldName, "1", "512")
 	}
 
 	return nil
 }
 
-func (t *Title) SetFieldName(field string) {
-	if field != "" {
-		t.fieldName = strings.ToLower(field)
+//	--	UTILS	--
+
+// setFieldName sanitizes the given field name, if field empty then sets "title" by default
+func (t *Title) setFieldName(f string) {
+	if f == "" {
+		t.fieldName = "title"
+		return
 	}
 
-	t.fieldName = "title"
+	t.fieldName = f
+}
+
+//	--	PRIMITIVES	--
+
+// String returns the current Title value
+func (t Title) String() string {
+	return t.value
 }

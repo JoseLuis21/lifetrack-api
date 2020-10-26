@@ -39,14 +39,6 @@ func main() {
 
 	_ = categoryhandler.NewAdd(addCategory, r)
 
-	changeCategory, cleanCState, err := dep.InjectChangeCategoryState()
-	if err != nil {
-		panic(err)
-	}
-	defer cleanCState()
-
-	_ = categoryhandler.NewChangeState(changeCategory, r)
-
 	editCategory, cleanECat, err := dep.InjectEditCategory()
 	if err != nil {
 		panic(err)

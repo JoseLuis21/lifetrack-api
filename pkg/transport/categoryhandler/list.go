@@ -3,6 +3,7 @@ package categoryhandler
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/neutrinocorp/life-track-api/internal/application/category"
 
@@ -12,12 +13,12 @@ import (
 )
 
 type List struct {
-	q      *category.List
+	q      *category.ListQuery
 	router *mux.Router
 }
 
 // NewList creates a new List handler with routing
-func NewList(q *category.List, r *mux.Router) *List {
+func NewList(q *category.ListQuery, r *mux.Router) *List {
 	h := &List{
 		q:      q,
 		router: r,
@@ -36,10 +37,16 @@ func (c List) GetRouter() *mux.Router {
 }
 
 func (c *List) Handler(w http.ResponseWriter, r *http.Request) {
-	categories, nextPage, err := c.q.Query(r.Context(), r.URL.Query().Get("next_page"), r.URL.Query().Get("page_size"), map[string]string{
-		"user":  r.URL.Query().Get("user"),
-		"query": r.URL.Query().Get("query"),
-		"order": r.URL.Query().Get("order"),
+	limit, err := strconv.ParseInt(r.URL.Query().Get("page_size"), 10, 64)
+	if err != nil {
+		limit = 100
+	}
+	categories, nextPage, err := c.q.Query(r.Context(), category.Filter{
+		UserID:  r.URL.Query().Get("user"),
+		Name:    r.URL.Query().Get("name"),
+		Keyword: r.URL.Query().Get("query"),
+		Limit:   limit,
+		Token:   r.URL.Query().Get("next_page"),
 	})
 	if err != nil {
 		httputil.RespondErrorJSON(err, w)

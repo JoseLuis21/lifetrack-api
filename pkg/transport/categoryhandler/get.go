@@ -12,12 +12,12 @@ import (
 )
 
 type Get struct {
-	q      *category.Get
+	q      *category.GetQuery
 	router *mux.Router
 }
 
 // NewGet creates a Get handler with routing
-func NewGet(q *category.Get, r *mux.Router) *Get {
+func NewGet(q *category.GetQuery, r *mux.Router) *Get {
 	h := &Get{
 		q:      q,
 		router: r,

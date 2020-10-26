@@ -4,16 +4,23 @@ import (
 	"strings"
 
 	"github.com/alexandria-oss/common-go/exception"
-
-	"github.com/neutrinocorp/life-track-api/internal/domain/shared"
 )
 
+// Image URL link to a remote bitmap file, likely to be stored in LifeTrack CDN bucket
 type Image struct {
 	value string
+
+	fieldName string
 }
 
-func NewImage(image string) (*Image, error) {
-	i := &Image{value: image}
+// NewImage creates a valid Image
+func NewImage(field, image string) (*Image, error) {
+	i := &Image{
+		value:     image,
+		fieldName: "",
+	}
+	i.setFieldName(field)
+
 	if err := i.IsValid(); err != nil {
 		return nil, err
 	}
@@ -21,11 +28,15 @@ func NewImage(image string) (*Image, error) {
 	return i, nil
 }
 
-func (i Image) Get() string {
-	return i.value
+// NewImageFromPrimitive creates an Image without validating for marshaling purposes
+func NewImageFromPrimitive(field, image string) *Image {
+	i := &Image{value: image, fieldName: ""}
+	i.setFieldName(field)
+	return i
 }
 
-func (i *Image) Set(image string) error {
+// Save stores the given image URL
+func (i *Image) Save(image string) error {
 	memoized := i.value
 	i.value = image
 	if err := i.IsValid(); err != nil {
@@ -36,27 +47,44 @@ func (i *Image) Set(image string) error {
 	return nil
 }
 
+// IsValid validates the current Image value(s)
 func (i Image) IsValid() error {
-	// rules
-	// 1.	valid domain (e.g. prefix = "https://cdn.damascus-engineering.com/lifetrack/static/")
-	// 2.	valid image extension (e.g. suffix [.jpeg, .jpg, .webp)
+	//	rules
+	//	a.	https-only
+	//	b.	max range 2048 characters
+	//	c.	.jpeg, .jpg, .png and .webp image formats only
 
-	domain := shared.CDNDomain + "/lifetrack/static/"
+	// business boolean expression(s)
+	validImage := !strings.HasSuffix(i.value, ".jpeg") && !strings.HasSuffix(i.value, ".jpg") &&
+		!strings.HasSuffix(i.value, ".png") && !strings.HasSuffix(i.value, ".webp")
 
-	// boolean operators/expressions
-	isDomain := i.value != "" && !strings.HasPrefix(i.value, domain)
-
-	// state machine
-	if isDomain {
-		return exception.NewFieldFormat("image", "valid domain ("+domain+")")
-	} else if i.isImage() {
-		return exception.NewFieldFormat("image", "valid picture format [.jpeg, .jpg, .webp)")
+	switch {
+	case i.value != "" && !strings.HasPrefix(strings.ToLower(i.value), "https://"):
+		return exception.NewFieldFormat(i.fieldName, "https link")
+	case len(i.value) > 2048:
+		return exception.NewFieldRange(i.fieldName, "1", "2048")
+	case i.value != "" && validImage:
+		return exception.NewFieldFormat(i.fieldName, "[jpeg, jpg, png, webp)")
 	}
 
 	return nil
 }
 
-func (i Image) isImage() bool {
-	return i.value != "" && (!strings.HasSuffix(i.value, ".jpg") && !strings.HasSuffix(i.value, ".jpeg") &&
-		!strings.HasSuffix(i.value, ".webp"))
+//	--	UTILS	--
+
+// setFieldName sanitizes the given field name, if field empty then sets "image" by default
+func (i *Image) setFieldName(f string) {
+	if f == "" {
+		i.fieldName = "image"
+		return
+	}
+
+	i.fieldName = strings.ToLower(f)
+}
+
+//	--	PRIMITIVES	--
+
+// String returns the current Image value
+func (i Image) String() string {
+	return i.value
 }

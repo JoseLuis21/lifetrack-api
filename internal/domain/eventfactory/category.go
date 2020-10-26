@@ -1,81 +1,65 @@
 package eventfactory
 
 import (
-	"github.com/neutrinocorp/life-track-api/internal/domain/adapter"
-	"github.com/neutrinocorp/life-track-api/internal/domain/aggregate"
 	"github.com/neutrinocorp/life-track-api/internal/domain/event"
-	"github.com/neutrinocorp/life-track-api/internal/domain/value"
+	"github.com/neutrinocorp/life-track-api/internal/domain/model"
 )
 
-// Category is the event factory for aggregate.Category
 type Category struct{}
 
-// NewCategoryCreated returns a pre-build Domain event for category creation
-func (c Category) NewCategoryCreated(ag aggregate.Category) event.Domain {
-	e, _ := event.NewDomain(event.DomainArgs{
-		Service:       "category",
-		Action:        "added",
-		AggregateID:   ag.Get().ID.Get(),
-		AggregateName: "category",
-		Body:          adapter.CategoryAdapter{}.ToModel(ag),
-		Snapshot:      nil,
-	})
+var categoryName = "category"
 
-	return *e
+// Added triggered when c new aggregate.Category has been added to a Category
+func (c Category) Added(category model.Category) event.Domain {
+	return *event.NewDomainEvent(event.DomainArgs{
+		Caller:        tracker,
+		AggregateName: categoryName,
+		Action:        create,
+		AggregateID:   category.ID,
+		Body:          category,
+	})
 }
 
-// NewCategoryUpdated returns a pre-build Domain event for category mutations
-func (c Category) NewCategoryUpdated(ag, snapshot aggregate.Category) event.Domain {
-	e, _ := event.NewDomain(event.DomainArgs{
-		Service:       "category",
-		Action:        "updated",
-		AggregateID:   ag.Get().ID.Get(),
-		AggregateName: "category",
-		Body:          adapter.CategoryAdapter{}.ToModel(ag),
-		Snapshot:      adapter.CategoryAdapter{}.ToModel(snapshot),
+// Updated triggered when an existing aggregate.Category has been updated
+func (c Category) Updated(category model.Category) event.Domain {
+	return *event.NewDomainEvent(event.DomainArgs{
+		Caller:        tracker,
+		AggregateName: categoryName,
+		Action:        update,
+		AggregateID:   category.ID,
+		Body:          category,
 	})
-
-	return *e
 }
 
-// NewCategoryRemoved returns a pre-build Domain event for category removal
-func (c Category) NewCategoryRemoved(id value.CUID) event.Domain {
-	e, _ := event.NewDomain(event.DomainArgs{
-		Service:       "category",
-		Action:        "removed",
-		AggregateID:   id.Get(),
-		AggregateName: "category",
+// Restored triggered when an existing aggregate.Category has been restored
+func (c Category) Restored(activityID string) event.Domain {
+	return *event.NewDomainEvent(event.DomainArgs{
+		Caller:        tracker,
+		AggregateName: categoryName,
+		Action:        restore,
+		AggregateID:   activityID,
 		Body:          nil,
-		Snapshot:      nil,
 	})
-
-	return *e
 }
 
-// NewCategoryRestored returns a pre-build Domain event for category removal
-func (c Category) NewCategoryRestored(id value.CUID) event.Domain {
-	e, _ := event.NewDomain(event.DomainArgs{
-		Service:       "category",
-		Action:        "restored",
-		AggregateID:   id.Get(),
-		AggregateName: "category",
+// Removed triggered when an existing aggregate.Category has been removed softly
+func (c Category) Removed(activityID string) event.Domain {
+	return *event.NewDomainEvent(event.DomainArgs{
+		Caller:        tracker,
+		AggregateName: categoryName,
+		Action:        remove,
+		AggregateID:   activityID,
 		Body:          nil,
-		Snapshot:      nil,
 	})
-
-	return *e
 }
 
-// NewCategoryHardRemoved returns a pre-build Domain event for category permanently removal
-func (c Category) NewCategoryHardRemoved(ag aggregate.Category) event.Domain {
-	e, _ := event.NewDomain(event.DomainArgs{
-		Service:       "category",
-		Action:        "hard_removed",
-		AggregateID:   ag.Get().ID.Get(),
-		AggregateName: "category",
+// HardRemoved triggered when an existing aggregate.Category has been removed permanently
+func (c Category) HardRemoved(activityID string) event.Domain {
+	return *event.NewDomainEvent(event.DomainArgs{
+		Caller:        tracker,
+		AggregateName: categoryName,
+		Action:        hardRemove,
+		AggregateID:   activityID,
 		Body:          nil,
-		Snapshot:      ag,
 	})
-
-	return *e
 }
