@@ -9,18 +9,15 @@ import (
 func NewCassandra(cfg configuration.Configuration) (*gocql.Session, func(), error) {
 	cluster := gocql.NewCluster(cfg.Cassandra.Cluster...)
 	cluster.Authenticator = gocql.PasswordAuthenticator{
-		Username: "cassandra",
-		Password: "cassandra",
+		Username: cfg.Cassandra.Username,
+		Password: cfg.Cassandra.Password,
 	}
 	cluster.Keyspace = cfg.Cassandra.Keyspace
-	cluster.Consistency = gocql.Any
+	cluster.Consistency = gocql.LocalQuorum
 	session, err := cluster.CreateSession()
 	if err != nil {
 		return nil, nil, err
 	}
-	cleanup := func() {
-		session.Close()
-	}
 
-	return session, cleanup, nil
+	return session, session.Close, nil
 }

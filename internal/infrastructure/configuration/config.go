@@ -18,4 +18,6 @@ type dynamoTable struct {
 type cassandra struct {
 	Keyspace string   `json:"keyspace"`
 	Cluster  []string `json:"cluster"`
+	Username string   `json:"username"`
+	Password string   `json:"password"`
 }

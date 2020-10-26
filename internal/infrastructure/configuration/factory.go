@@ -13,6 +13,8 @@ func NewConfiguration() Configuration {
 		Cassandra: cassandra{
 			Keyspace: "lifetrack_" + stage,
 			Cluster:  []string{"127.0.0.1"},
+			Username: "cassandra",
+			Password: "cassandra",
 		},
 	}
 }

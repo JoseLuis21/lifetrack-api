@@ -5,7 +5,7 @@ CREATE KEYSPACE lifetrack_dev
 
 USE lifetrack_dev;
 
-CREATE TABLE category (
+CREATE TABLE IF NOT EXISTS category (
   id text,
   user_id text,
   name text,
@@ -18,7 +18,7 @@ CREATE TABLE category (
   PRIMARY KEY(id, user_id)
 );
 
-CREATE TABLE activity (
+CREATE TABLE IF NOT EXISTS activity (
   id text,
   category_id text,
   title text,
@@ -29,7 +29,7 @@ CREATE TABLE activity (
   PRIMARY KEY(id, category_id)
 );
 
-CREATE TABLE occurrence (
+CREATE TABLE IF NOT EXISTS occurrence (
   id text,
   activity_id text,
   start_time timestamp,
