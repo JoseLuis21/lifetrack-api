@@ -23,7 +23,6 @@ func main() {
 		log.Fatal(exception.GetDescription(err))
 	}
 	_ = c.ModifyDescription("This is a sample")
-	// c := cAg.MarshalPrimitive()
 
 	if err = s.Query(`INSERT INTO category (id, user_id, name, description,
     target_time, picture, create_time, update_time, active) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
