@@ -2,7 +2,7 @@ package dbpool
 
 import (
 	"github.com/gocql/gocql"
-	"github.com/neutrinocorp/life-track-api/internal/infrastructure/configuration"
+	"github.com/neutrinocorp/lifetrack-api/internal/infrastructure/configuration"
 )
 
 // NewCassandra creates an Apache Cassandra session

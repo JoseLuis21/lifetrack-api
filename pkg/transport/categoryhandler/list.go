@@ -5,11 +5,11 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/neutrinocorp/life-track-api/internal/application/category"
+	"github.com/neutrinocorp/lifetrack-api/internal/application/category"
 
 	"github.com/alexandria-oss/common-go/httputil"
 	"github.com/gorilla/mux"
-	"github.com/neutrinocorp/life-track-api/internal/domain/model"
+	"github.com/neutrinocorp/lifetrack-api/internal/domain/model"
 )
 
 type List struct {

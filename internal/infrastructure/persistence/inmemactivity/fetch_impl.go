@@ -4,9 +4,9 @@ import (
 	"context"
 	"strings"
 
-	"github.com/neutrinocorp/life-track-api/internal/domain/aggregate"
-	"github.com/neutrinocorp/life-track-api/internal/domain/exceptions"
-	"github.com/neutrinocorp/life-track-api/internal/domain/repository"
+	"github.com/neutrinocorp/lifetrack-api/internal/domain/aggregate"
+	"github.com/neutrinocorp/lifetrack-api/internal/domain/exceptions"
+	"github.com/neutrinocorp/lifetrack-api/internal/domain/repository"
 )
 
 // fetchIDInMemory strategy when criteria contains an ID

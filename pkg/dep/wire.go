@@ -4,12 +4,12 @@ package dep
 
 import (
 	"github.com/google/wire"
-	"github.com/neutrinocorp/life-track-api/internal/application/category"
-	"github.com/neutrinocorp/life-track-api/internal/domain/event"
-	"github.com/neutrinocorp/life-track-api/internal/domain/repository"
-	"github.com/neutrinocorp/life-track-api/internal/infrastructure/configuration"
-	"github.com/neutrinocorp/life-track-api/internal/infrastructure/eventbus"
-	"github.com/neutrinocorp/life-track-api/internal/infrastructure/persistence/inmemcategory"
+	"github.com/neutrinocorp/lifetrack-api/internal/application/category"
+	"github.com/neutrinocorp/lifetrack-api/internal/domain/event"
+	"github.com/neutrinocorp/lifetrack-api/internal/domain/repository"
+	"github.com/neutrinocorp/lifetrack-api/internal/infrastructure/configuration"
+	"github.com/neutrinocorp/lifetrack-api/internal/infrastructure/eventbus"
+	"github.com/neutrinocorp/lifetrack-api/internal/infrastructure/persistence/inmemcategory"
 )
 
 var infraSet = wire.NewSet(

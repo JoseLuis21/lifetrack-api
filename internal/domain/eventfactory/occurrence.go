@@ -1,8 +1,8 @@
 package eventfactory
 
 import (
-	"github.com/neutrinocorp/life-track-api/internal/domain/event"
-	"github.com/neutrinocorp/life-track-api/internal/domain/model"
+	"github.com/neutrinocorp/lifetrack-api/internal/domain/event"
+	"github.com/neutrinocorp/lifetrack-api/internal/domain/model"
 )
 
 type Occurrence struct{}

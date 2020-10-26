@@ -2,8 +2,8 @@ package dbpool
 
 import (
 	"github.com/aws/aws-sdk-go/service/dynamodb"
-	"github.com/neutrinocorp/life-track-api/internal/infrastructure/configuration"
-	"github.com/neutrinocorp/life-track-api/internal/infrastructure/remote"
+	"github.com/neutrinocorp/lifetrack-api/internal/infrastructure/configuration"
+	"github.com/neutrinocorp/lifetrack-api/internal/infrastructure/remote"
 )
 
 // NewDynamoDBPool creates a new AWS DynamoDB connection pool

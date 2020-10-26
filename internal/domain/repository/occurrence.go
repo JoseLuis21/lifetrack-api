@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 
-	"github.com/neutrinocorp/life-track-api/internal/domain/aggregate"
+	"github.com/neutrinocorp/lifetrack-api/internal/domain/aggregate"
 )
 
 // OccurrenceCriteria sets the Occurrence fetching strategy

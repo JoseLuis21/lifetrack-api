@@ -5,9 +5,9 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
-	"github.com/neutrinocorp/life-track-api/internal/domain/aggregate"
-	"github.com/neutrinocorp/life-track-api/internal/domain/model"
-	"github.com/neutrinocorp/life-track-api/internal/infrastructure/persistence/dynamoutils"
+	"github.com/neutrinocorp/lifetrack-api/internal/domain/aggregate"
+	"github.com/neutrinocorp/lifetrack-api/internal/domain/model"
+	"github.com/neutrinocorp/lifetrack-api/internal/infrastructure/persistence/dynamoutils"
 )
 
 // categoryDynamo custom AWS DynamoDB model for model.Category/aggregate.Category

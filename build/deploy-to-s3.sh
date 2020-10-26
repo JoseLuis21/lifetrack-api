@@ -35,7 +35,7 @@ function upload_to_s3() {
 
   if [ "$1" != "" ] || [ "$2" != "" ]; then
     FILE_NAME="$1/$2"
-    LT_PATH="$GOPATH/src/github.com/neutrinocorp/life-track-api"
+    LT_PATH="$GOPATH/src/github.com/neutrinocorp/lifetrack-api"
     /bin/bash "$LT_PATH/build/build.sh" "$1" "$2"
     aws s3 cp "$LT_PATH/build/release/$FILE_NAME".zip s3://"$BUCKET_NAME/$APP_VERSION/$FILE_NAME".zip
     else

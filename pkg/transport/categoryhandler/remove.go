@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/neutrinocorp/life-track-api/internal/application/category"
+	"github.com/neutrinocorp/lifetrack-api/internal/application/category"
 
 	"github.com/alexandria-oss/common-go/httputil"
 	"github.com/gorilla/mux"

@@ -4,10 +4,10 @@ import (
 	"context"
 
 	"github.com/alexandria-oss/common-go/exception"
-	"github.com/neutrinocorp/life-track-api/internal/domain/aggregate"
-	"github.com/neutrinocorp/life-track-api/internal/domain/event"
-	"github.com/neutrinocorp/life-track-api/internal/domain/eventfactory"
-	"github.com/neutrinocorp/life-track-api/internal/domain/repository"
+	"github.com/neutrinocorp/lifetrack-api/internal/domain/aggregate"
+	"github.com/neutrinocorp/lifetrack-api/internal/domain/event"
+	"github.com/neutrinocorp/lifetrack-api/internal/domain/eventfactory"
+	"github.com/neutrinocorp/lifetrack-api/internal/domain/repository"
 )
 
 // RemoveCommand requests a permanent removal of an aggregate.Activity

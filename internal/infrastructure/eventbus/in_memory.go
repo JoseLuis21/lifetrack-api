@@ -5,8 +5,8 @@ import (
 	"sync"
 
 	"github.com/asaskevich/EventBus"
-	"github.com/neutrinocorp/life-track-api/internal/domain/event"
-	"github.com/neutrinocorp/life-track-api/internal/infrastructure/configuration"
+	"github.com/neutrinocorp/lifetrack-api/internal/domain/event"
+	"github.com/neutrinocorp/lifetrack-api/internal/infrastructure/configuration"
 )
 
 var (

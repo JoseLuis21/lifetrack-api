@@ -3,8 +3,8 @@ package category
 import (
 	"context"
 
-	"github.com/neutrinocorp/life-track-api/internal/domain/model"
-	"github.com/neutrinocorp/life-track-api/internal/domain/repository"
+	"github.com/neutrinocorp/lifetrack-api/internal/domain/model"
+	"github.com/neutrinocorp/lifetrack-api/internal/domain/repository"
 )
 
 // GetQuery requests a single model.Category

@@ -6,10 +6,10 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
-	"github.com/neutrinocorp/life-track-api/internal/domain/aggregate"
-	"github.com/neutrinocorp/life-track-api/internal/domain/repository"
-	"github.com/neutrinocorp/life-track-api/internal/infrastructure/configuration"
-	"github.com/neutrinocorp/life-track-api/internal/infrastructure/persistence/dynamoutils"
+	"github.com/neutrinocorp/lifetrack-api/internal/domain/aggregate"
+	"github.com/neutrinocorp/lifetrack-api/internal/domain/repository"
+	"github.com/neutrinocorp/lifetrack-api/internal/infrastructure/configuration"
+	"github.com/neutrinocorp/lifetrack-api/internal/infrastructure/persistence/dynamoutils"
 )
 
 // fetchByID strategy when criteria contains a category ID (ID)

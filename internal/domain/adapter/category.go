@@ -1,8 +1,8 @@
 package adapter
 
 import (
-	"github.com/neutrinocorp/life-track-api/internal/domain/aggregate"
-	"github.com/neutrinocorp/life-track-api/internal/domain/model"
+	"github.com/neutrinocorp/lifetrack-api/internal/domain/aggregate"
+	"github.com/neutrinocorp/lifetrack-api/internal/domain/model"
 )
 
 // BulkUnmarshalPrimitiveCategory parses given aggregate.Category slice into a read model slice

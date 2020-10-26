@@ -7,7 +7,7 @@ import (
 
 	"github.com/alexandria-oss/common-go/httputil"
 	"github.com/gorilla/mux"
-	"github.com/neutrinocorp/life-track-api/internal/application/category"
+	"github.com/neutrinocorp/lifetrack-api/internal/application/category"
 )
 
 type Add struct {

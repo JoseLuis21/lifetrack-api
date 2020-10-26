@@ -3,7 +3,7 @@ To build an AWS Lambda function, just run the `build.sh` file with two required 
 of the Lambda function_.
 
 The shell script will use your `GOPATH` _environment variable_ and will lookup for Neutrino's _Life 
-Track_ API project. For example, a correct path would be `~/go/src/github.com/neutrinocorp/life-track-api`.
+Track_ API project. For example, a correct path would be `~/go/src/github.com/neutrinocorp/lifetrack-api`.
 
 _E.g._ `/bin/bash ./build.sh category add-category`
 

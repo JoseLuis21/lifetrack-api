@@ -5,9 +5,9 @@ import (
 
 	"github.com/alexandria-oss/common-go/exception"
 	"github.com/google/uuid"
-	"github.com/neutrinocorp/life-track-api/internal/domain/aggregate"
-	"github.com/neutrinocorp/life-track-api/internal/infrastructure/configuration"
-	"github.com/neutrinocorp/life-track-api/internal/infrastructure/persistence/dbpool"
+	"github.com/neutrinocorp/lifetrack-api/internal/domain/aggregate"
+	"github.com/neutrinocorp/lifetrack-api/internal/infrastructure/configuration"
+	"github.com/neutrinocorp/lifetrack-api/internal/infrastructure/persistence/dbpool"
 )
 
 func main() {

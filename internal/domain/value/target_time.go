@@ -3,7 +3,7 @@ package value
 import (
 	"time"
 
-	"github.com/neutrinocorp/life-track-api/internal/domain/exceptions"
+	"github.com/neutrinocorp/lifetrack-api/internal/domain/exceptions"
 )
 
 const (

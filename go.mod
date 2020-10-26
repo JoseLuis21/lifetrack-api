@@ -1,4 +1,4 @@
-module github.com/neutrinocorp/life-track-api
+module github.com/neutrinocorp/lifetrack-api
 
 go 1.15
 

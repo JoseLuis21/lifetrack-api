@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/neutrinocorp/life-track-api/internal/domain/exceptions"
+	"github.com/neutrinocorp/lifetrack-api/internal/domain/exceptions"
 )
 
 // Domain is an action that has happened inside the ecosystem business contexts

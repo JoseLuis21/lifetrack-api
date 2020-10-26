@@ -5,8 +5,8 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/neutrinocorp/life-track-api/pkg/dep"
-	"github.com/neutrinocorp/life-track-api/pkg/transport/categoryhandler"
+	"github.com/neutrinocorp/lifetrack-api/pkg/dep"
+	"github.com/neutrinocorp/lifetrack-api/pkg/transport/categoryhandler"
 )
 
 func main() {

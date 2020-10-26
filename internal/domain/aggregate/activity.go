@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/neutrinocorp/life-track-api/internal/domain/event"
-	"github.com/neutrinocorp/life-track-api/internal/domain/eventfactory"
-	"github.com/neutrinocorp/life-track-api/internal/domain/exceptions"
-	"github.com/neutrinocorp/life-track-api/internal/domain/model"
-	"github.com/neutrinocorp/life-track-api/internal/domain/value"
+	"github.com/neutrinocorp/lifetrack-api/internal/domain/event"
+	"github.com/neutrinocorp/lifetrack-api/internal/domain/eventfactory"
+	"github.com/neutrinocorp/lifetrack-api/internal/domain/exceptions"
+	"github.com/neutrinocorp/lifetrack-api/internal/domain/model"
+	"github.com/neutrinocorp/lifetrack-api/internal/domain/value"
 )
 
 // Activity is a task/habit a LifeTrack user wants and will do in further time

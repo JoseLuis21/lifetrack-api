@@ -9,8 +9,8 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/awslabs/aws-lambda-go-api-proxy/gorillamux"
 	"github.com/gorilla/mux"
-	"github.com/neutrinocorp/life-track-api/pkg/dep"
-	"github.com/neutrinocorp/life-track-api/pkg/transport/categoryhandler"
+	"github.com/neutrinocorp/lifetrack-api/pkg/dep"
+	"github.com/neutrinocorp/lifetrack-api/pkg/transport/categoryhandler"
 )
 
 var muxLambda *gorillamux.GorillaMuxAdapter

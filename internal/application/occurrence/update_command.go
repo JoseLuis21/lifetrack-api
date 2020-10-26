@@ -5,9 +5,9 @@ import (
 	"time"
 
 	"github.com/alexandria-oss/common-go/exception"
-	"github.com/neutrinocorp/life-track-api/internal/domain/aggregate"
-	"github.com/neutrinocorp/life-track-api/internal/domain/event"
-	"github.com/neutrinocorp/life-track-api/internal/domain/repository"
+	"github.com/neutrinocorp/lifetrack-api/internal/domain/aggregate"
+	"github.com/neutrinocorp/lifetrack-api/internal/domain/event"
+	"github.com/neutrinocorp/lifetrack-api/internal/domain/repository"
 )
 
 // UpdateCommand requests an update of an specific Occurrence

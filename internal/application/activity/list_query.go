@@ -3,9 +3,9 @@ package activity
 import (
 	"context"
 
-	"github.com/neutrinocorp/life-track-api/internal/domain/adapter"
-	"github.com/neutrinocorp/life-track-api/internal/domain/model"
-	"github.com/neutrinocorp/life-track-api/internal/domain/repository"
+	"github.com/neutrinocorp/lifetrack-api/internal/domain/adapter"
+	"github.com/neutrinocorp/lifetrack-api/internal/domain/model"
+	"github.com/neutrinocorp/lifetrack-api/internal/domain/repository"
 )
 
 // ListQuery requests a set of model.Activity

@@ -4,8 +4,8 @@ import (
 	"github.com/alexandria-oss/common-go/exception"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
-	"github.com/neutrinocorp/life-track-api/internal/domain/exceptions"
-	"github.com/neutrinocorp/life-track-api/internal/infrastructure/configuration"
+	"github.com/neutrinocorp/lifetrack-api/internal/domain/exceptions"
+	"github.com/neutrinocorp/lifetrack-api/internal/infrastructure/configuration"
 )
 
 // getDomainError returns a valid domain error from awserr.Error dynamodb exceptions
