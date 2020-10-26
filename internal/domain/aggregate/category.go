@@ -177,7 +177,7 @@ func (c Category) MarshalJSON() ([]byte, error) {
 	return j, nil
 }
 
-// MarshalPrimitive parses the current Category into c primitive-only model
+// MarshalPrimitive parses the current Category into a primitive-only model
 func (c Category) MarshalPrimitive() *model.Category {
 	return &model.Category{
 		ID:          c.id.String(),
