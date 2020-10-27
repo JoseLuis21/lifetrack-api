@@ -1,20 +1,43 @@
 package configuration
 
+import (
+	"encoding/json"
+	"log"
+
+	"github.com/spf13/viper"
+)
+
 // NewConfiguration reads and returns a kernel configuration
 func NewConfiguration() Configuration {
-	stage := "dev"
+	cfg := &Configuration{
+		Cassandra:   &cassandra{},
+		DynamoTable: &dynamoTable{},
+	}
+	if err := cfg.LoadEnv(); err != nil {
+		return getDefault()
+	}
+	cfg.Read()
+
+	cfgJSON, _ := json.Marshal(cfg)
+	log.Print(string(cfgJSON))
+
+	return *cfg
+}
+
+func getDefault() Configuration {
+	stage := viper.GetString("stage")
 	return Configuration{
-		Version: "0.1.0-alpha",
+		Version: viper.GetString("version"),
 		Stage:   stage,
-		DynamoTable: dynamoTable{
-			Name:   "lifetrack-" + stage,
-			Region: "us-east-1",
+		DynamoTable: &dynamoTable{
+			Name:   setResourceStage(viper.GetString("dynamodb.table"), stage),
+			Region: viper.GetString("dynamodb.region"),
 		},
-		Cassandra: cassandra{
-			Keyspace: "lifetrack_" + stage,
-			Cluster:  []string{"127.0.0.1"},
-			Username: "cassandra",
-			Password: "cassandra",
+		Cassandra: &cassandra{
+			Keyspace: setResourceStage(viper.GetString("cassandra.keyspace"), stage),
+			Cluster:  viper.GetStringSlice("cassandra.cluster"),
+			Username: viper.GetString("cassandra.username"),
+			Password: viper.GetString("cassandra.password"),
 		},
 	}
 }

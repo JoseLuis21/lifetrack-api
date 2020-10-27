@@ -36,7 +36,7 @@ func (c Edit) GetRouter() *mux.Router {
 }
 
 func (c Edit) Handler(w http.ResponseWriter, r *http.Request) {
-	target, err := strconv.ParseInt(r.URL.Query().Get("target_time"), 10, 64)
+	target, err := strconv.ParseInt(r.PostFormValue("target_time"), 10, 64)
 	if err != nil {
 		target = 0
 	}
@@ -44,12 +44,12 @@ func (c Edit) Handler(w http.ResponseWriter, r *http.Request) {
 	if err = c.cmd.Invoke(category.UpdateCommand{
 		Ctx:         r.Context(),
 		ID:          mux.Vars(r)["id"],
-		UserID:      r.URL.Query().Get("user_id"),
-		Name:        r.URL.Query().Get("name"),
-		Description: r.URL.Query().Get("description"),
+		UserID:      r.PostFormValue("user_id"),
+		Name:        r.PostFormValue("name"),
+		Description: r.PostFormValue("description"),
 		TargetTime:  target,
-		Picture:     r.URL.Query().Get("picture"),
-		State:       r.URL.Query().Get("state"),
+		Picture:     r.PostFormValue("picture"),
+		State:       r.PostFormValue("state"),
 	}); err != nil {
 		httputil.RespondErrorJSON(err, w)
 		return
