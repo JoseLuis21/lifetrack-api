@@ -11,12 +11,12 @@ type cassandra struct {
 }
 
 func init() {
-	viper.SetDefault("persistence.cassandra.keyspace", "lifetrack_dev")
-	viper.SetDefault("persistence.cassandra.cluster", []string{"127.0.0.1"})
+	viper.SetDefault("cassandra.keyspace", "lifetrack_dev")
+	viper.SetDefault("cassandra.cluster", []string{"127.0.0.1"})
 
 	// TODO: Migrate secrets to AWS Secrets Manager or Hashicorp Vault
-	viper.SetDefault("persistence.cassandra.username", "cassandra")
-	viper.SetDefault("persistence.cassandra.password", "cassandra")
+	viper.SetDefault("cassandra.username", "cassandra")
+	viper.SetDefault("cassandra.password", "cassandra")
 }
 
 func (c *cassandra) Load(stage string) {

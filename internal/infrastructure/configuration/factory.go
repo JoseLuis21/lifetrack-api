@@ -1,9 +1,6 @@
 package configuration
 
 import (
-	"encoding/json"
-	"log"
-
 	"github.com/spf13/viper"
 )
 
@@ -17,9 +14,6 @@ func NewConfiguration() Configuration {
 		return getDefault()
 	}
 	cfg.Read()
-
-	cfgJSON, _ := json.Marshal(cfg)
-	log.Print(string(cfgJSON))
 
 	return *cfg
 }

@@ -9,8 +9,8 @@ type dynamoTable struct {
 }
 
 func init() {
-	viper.SetDefault("persistence.dynamodb.table", "lifetrack-dev")
-	viper.SetDefault("persistence.dynamodb.region", "us-east-1")
+	viper.SetDefault("dynamodb.table", "lifetrack-dev")
+	viper.SetDefault("dynamodb.region", "us-east-1")
 }
 
 func (d *dynamoTable) Load(stage string) {
