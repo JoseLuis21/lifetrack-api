@@ -1,6 +1,8 @@
 package configuration
 
 import (
+	"log"
+
 	"github.com/spf13/viper"
 )
 
@@ -11,6 +13,7 @@ func NewConfiguration() Configuration {
 		DynamoTable: &dynamoTable{},
 	}
 	if err := cfg.LoadEnv(); err != nil {
+		log.Printf("failed to load configuration: %+v", err)
 		return getDefault()
 	}
 	cfg.Read()
