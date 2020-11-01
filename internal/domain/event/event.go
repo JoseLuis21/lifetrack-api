@@ -32,6 +32,8 @@ type Domain struct {
 	// Stage application/function development stage
 	//	if empty, value will be set to "prod"
 	Stage string `json:"stage"`
+	// SpanContext required tracing context for remote distributed tracing ops
+	SpanContext interface{} `json:"span_context,omitempty"`
 }
 
 // DomainArgs arguments required to create a domain event
@@ -66,6 +68,7 @@ func NewDomainEvent(args DomainArgs) *Domain {
 		Body:        args.Body,
 		Version:     "1.0.0",
 		Stage:       "prod",
+		SpanContext: nil,
 	}
 }
 

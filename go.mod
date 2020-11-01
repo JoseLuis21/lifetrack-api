@@ -16,6 +16,7 @@ require (
 	github.com/onsi/ginkgo v1.14.2 // indirect
 	github.com/onsi/gomega v1.10.3 // indirect
 	github.com/spf13/viper v1.7.1
+	go.opencensus.io v0.22.5
 	go.uber.org/fx v1.13.1
 	go.uber.org/zap v1.16.0
 )
