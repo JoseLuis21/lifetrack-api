@@ -6,7 +6,10 @@ import "context"
 //	integration events
 type Bus interface {
 	// Publish sends a group of Domain events to all subscribers
-	Publish(ctx context.Context, e ...Domain) error
-	// SubscribeTo adds a new subscription to an specific topic, returns a channel of Domain if exists
-	SubscribeTo(ctx context.Context, topic string) (chan Domain, error)
+	Publish(ctx context.Context, events ...Domain) error
+	// SubscribeTo adds a new subscription and a handler to an specific topic
+	SubscribeTo(ctx context.Context, topic string, handler Handler) error
 }
+
+// Handler function which handles stream events, acts like a consumer
+type Handler func(ctx context.Context, e Domain)

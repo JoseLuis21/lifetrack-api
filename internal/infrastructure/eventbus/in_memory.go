@@ -35,9 +35,6 @@ func (b *InMemory) Publish(_ context.Context, events ...event.Domain) error {
 	defer b.mu.Unlock()
 
 	for _, e := range events {
-		e.Version = b.cfg.Version
-		e.Stage = b.cfg.Stage
-
 		eJSON, err := e.MarshalBinary()
 		if err != nil {
 			return err
@@ -48,9 +45,9 @@ func (b *InMemory) Publish(_ context.Context, events ...event.Domain) error {
 }
 
 // SubscribeTo adds a new subscription to an specific topic, returns a channel of Domain if exists
-func (b *InMemory) SubscribeTo(_ context.Context, topic string) (chan event.Domain, error) {
-	eventStream := make(chan event.Domain)
+func (b *InMemory) SubscribeTo(ctx context.Context, topic string, handler event.Handler) error {
 	err := make(chan error)
+	ctxC, cancel := context.WithCancel(ctx)
 	go func() {
 		if errS := b.bus.SubscribeAsync(topic, func(incomeEvent []byte) {
 			e := new(event.Domain)
@@ -59,11 +56,12 @@ func (b *InMemory) SubscribeTo(_ context.Context, topic string) (chan event.Doma
 				return
 			}
 
-			eventStream <- *e
+			handler(ctxC, *e)
 		}, false); err != nil {
 			err <- errS
+			cancel()
 		}
 	}()
 
-	return eventStream, <-err
+	return <-err
 }
