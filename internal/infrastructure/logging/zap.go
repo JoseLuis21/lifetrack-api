@@ -4,12 +4,13 @@ import (
 	"context"
 	"log"
 
+	"github.com/neutrinocorp/lifetrack-api/internal/infrastructure/configuration"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 )
 
-func NewZap(lc fx.Lifecycle) *zap.Logger {
-	logger, err := zap.NewProduction()
+func NewZap(lc fx.Lifecycle, cfg configuration.Configuration) *zap.Logger {
+	logger, err := getZapLogger(cfg)
 	if err != nil {
 		log.Printf("can't initialize zap logger %+v", err)
 	}
@@ -25,4 +26,12 @@ func NewZap(lc fx.Lifecycle) *zap.Logger {
 	})
 
 	return logger
+}
+
+func getZapLogger(cfg configuration.Configuration) (*zap.Logger, error) {
+	if cfg.Stage == "dev" {
+		return zap.NewDevelopment()
+	}
+
+	return zap.NewProduction()
 }
