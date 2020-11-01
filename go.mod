@@ -13,7 +13,9 @@ require (
 	github.com/google/wire v0.4.0
 	github.com/gorilla/mux v1.8.0
 	github.com/matoous/go-nanoid v1.5.0
+	github.com/onsi/ginkgo v1.14.2 // indirect
+	github.com/onsi/gomega v1.10.3 // indirect
 	github.com/spf13/viper v1.7.1
 	go.uber.org/fx v1.13.1
-	go.uber.org/zap v1.16.0 // indirect
+	go.uber.org/zap v1.16.0
 )
