@@ -51,6 +51,8 @@ func NewCategory(userID, name string) (*Category, error) {
 	if err = cat.IsValid(); err != nil {
 		return nil, err
 	}
+	cat.RecordEvents(eventfactory.Category{}.Added(*cat.MarshalPrimitive()))
+
 	return cat, nil
 }
 

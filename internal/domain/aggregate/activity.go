@@ -45,6 +45,8 @@ func NewActivity(categoryID, title string) (*Activity, error) {
 	if err = act.IsValid(); err != nil {
 		return nil, err
 	}
+	act.RecordEvents(eventfactory.Activity{}.Added(*act.MarshalPrimitive()))
+
 	return act, nil
 }
 
