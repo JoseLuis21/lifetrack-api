@@ -16,7 +16,7 @@ type Configuration struct {
 
 func init() {
 	viper.SetDefault("version", "0.1.0-alpha")
-	viper.SetDefault("stage", "dev")
+	viper.SetDefault("stage", "prod")
 }
 
 func (c Configuration) LoadEnv() error {
