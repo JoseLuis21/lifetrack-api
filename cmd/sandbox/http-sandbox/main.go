@@ -5,22 +5,18 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/neutrinocorp/lifetrack-api/internal/infrastructure/logging"
-	"go.uber.org/zap"
-
-	"github.com/neutrinocorp/lifetrack-api/internal/infrastructure/persistence"
-
+	"github.com/gorilla/mux"
+	"github.com/neutrinocorp/lifetrack-api/internal/application/category"
 	"github.com/neutrinocorp/lifetrack-api/internal/domain/event"
 	"github.com/neutrinocorp/lifetrack-api/internal/domain/repository"
-	"github.com/neutrinocorp/lifetrack-api/internal/infrastructure/persistence/inmemcategory"
-
-	"github.com/neutrinocorp/lifetrack-api/internal/application/category"
 	"github.com/neutrinocorp/lifetrack-api/internal/infrastructure/configuration"
 	"github.com/neutrinocorp/lifetrack-api/internal/infrastructure/eventbus"
+	"github.com/neutrinocorp/lifetrack-api/internal/infrastructure/logging"
+	"github.com/neutrinocorp/lifetrack-api/internal/infrastructure/persistence"
+	"github.com/neutrinocorp/lifetrack-api/internal/infrastructure/persistence/inmemcategory"
 	"github.com/neutrinocorp/lifetrack-api/pkg/transport/categoryhandler"
 	"go.uber.org/fx"
-
-	"github.com/gorilla/mux"
+	"go.uber.org/zap"
 )
 
 func main() {
