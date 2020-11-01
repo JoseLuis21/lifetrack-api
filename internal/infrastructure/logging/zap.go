@@ -22,7 +22,8 @@ func NewZap(lc fx.Lifecycle, cfg configuration.Configuration) *zap.Logger {
 		},
 		OnStop: func(ctx context.Context) error {
 			logger.Info("closing zap logger")
-			return logger.Sync()
+			_ = logger.Sync()
+			return nil
 		},
 	})
 

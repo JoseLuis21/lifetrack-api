@@ -41,7 +41,6 @@ func main() {
 			categoryhandler.NewRemove,
 		),
 	)
-
 	app.Run()
 
 	select {

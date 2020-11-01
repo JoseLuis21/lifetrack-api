@@ -15,5 +15,5 @@ jaeger:
   agent: localhost:6831
   collector: http://localhost:14268/api/traces
 service: tracker
-stage: prod
+stage: dev
 version: 0.1.0-alpha

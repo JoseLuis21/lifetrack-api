@@ -1,4 +1,4 @@
-package tracing
+package observability
 
 import (
 	"contrib.go.opencensus.io/exporter/jaeger"
@@ -7,8 +7,8 @@ import (
 	"go.uber.org/zap"
 )
 
-// NewJaegerHTTP register a Jaeger trace exporter to the current OpenCensus implementation
-func NewJaegerHTTP(logger *zap.Logger, cfg configuration.Configuration) {
+// newJaegerHTTP register a Jaeger trace exporter to the current OpenCensus implementation
+func newJaegerHTTP(logger *zap.Logger, cfg configuration.Configuration) {
 	je, err := jaeger.NewExporter(jaeger.Options{
 		AgentEndpoint:     cfg.Jaeger.AgentEndpoint,
 		CollectorEndpoint: cfg.Jaeger.CollectorEndpoint,
