@@ -6,8 +6,10 @@ import (
 	"net/http"
 	"time"
 
+	muxhandlers "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/neutrinocorp/lifetrack-api/internal/infrastructure/configuration"
+	"github.com/neutrinocorp/lifetrack-api/pkg/transport/resiliency"
 	"github.com/neutrinocorp/lifetrack-api/pkg/transport/tracing"
 	"go.opencensus.io/plugin/ochttp"
 	"go.opencensus.io/trace"
@@ -19,6 +21,7 @@ import (
 func NewMux(lc fx.Lifecycle, logger *zap.Logger, cfg configuration.Configuration) *mux.Router {
 	r := mux.NewRouter()
 	r = r.PathPrefix(cfg.HTTP.Endpoint).Subrouter()
+	setMiddlewares(r)
 	addr := fmt.Sprintf("%s:%d", cfg.HTTP.Address, cfg.HTTP.Port)
 	server := &http.Server{
 		Addr:         addr,
@@ -28,7 +31,6 @@ func NewMux(lc fx.Lifecycle, logger *zap.Logger, cfg configuration.Configuration
 		Handler:      &ochttp.Handler{Handler: r},
 	}
 	setObservability(logger, cfg)
-	trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
 
 	lc.Append(fx.Hook{
 		OnStart: func(context.Context) error {
@@ -57,9 +59,30 @@ func setObservability(logger *zap.Logger, cfg configuration.Configuration) {
 	switch {
 	case cfg.IsDevEnv() || cfg.IsTestEnv():
 		tracing.NewJaegerHTTP(logger, cfg)
+		trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
 		// TODO: Add Prometheus
 	default:
+		tracing.NewJaegerHTTP(logger, cfg)
 		// TODO: Add AWS X-Ray
+		// 1: 1,000 samples exported
+		trace.ApplyConfig(trace.Config{DefaultSampler: trace.ProbabilitySampler(1 / 1000.0)})
 		break
 	}
+}
+
+func setMiddlewares(router *mux.Router) {
+	// router.Use(muxhandlers.RecoveryHandler(muxhandlers.RecoveryLogger(logger)))
+	router.Use(muxhandlers.CORS(
+		muxhandlers.AllowedMethods([]string{
+			http.MethodGet,
+			http.MethodPost,
+			http.MethodPatch,
+			http.MethodPut,
+			http.MethodDelete,
+			http.MethodOptions,
+		}),
+		muxhandlers.AllowedOrigins([]string{"*"}),
+	))
+	router.Use(muxhandlers.CompressHandler)
+	router.Use(resiliency.HTTPRateLimit)
 }

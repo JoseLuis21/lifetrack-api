@@ -13,6 +13,7 @@ require (
 	github.com/gocql/gocql v0.0.0-20201024154641-5913df4d474e
 	github.com/google/uuid v1.1.2
 	github.com/google/wire v0.4.0
+	github.com/gorilla/handlers v1.5.1
 	github.com/gorilla/mux v1.8.0
 	github.com/matoous/go-nanoid v1.5.0
 	github.com/onsi/ginkgo v1.14.2 // indirect
@@ -21,4 +22,5 @@ require (
 	go.opencensus.io v0.22.5
 	go.uber.org/fx v1.13.1
 	go.uber.org/zap v1.16.0
+	golang.org/x/time v0.0.0-20191024005414-555d28b269f0
 )
