@@ -6,12 +6,13 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/neutrinocorp/lifetrack-api/internal/infrastructure/configuration"
-
-	"go.uber.org/zap"
-
 	"github.com/gorilla/mux"
+	"github.com/neutrinocorp/lifetrack-api/internal/infrastructure/configuration"
+	"github.com/neutrinocorp/lifetrack-api/pkg/transport/tracing"
+	"go.opencensus.io/plugin/ochttp"
+	"go.opencensus.io/trace"
 	"go.uber.org/fx"
+	"go.uber.org/zap"
 )
 
 // NewMux creates a preconfigured mux.Router, eventually routes must be injected to the instance
@@ -19,14 +20,15 @@ func NewMux(lc fx.Lifecycle, logger *zap.Logger, cfg configuration.Configuration
 	r := mux.NewRouter()
 	r = r.PathPrefix(cfg.HTTP.Endpoint).Subrouter()
 	addr := fmt.Sprintf("%s:%d", cfg.HTTP.Address, cfg.HTTP.Port)
-
 	server := &http.Server{
 		Addr:         addr,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 		IdleTimeout:  120 * time.Second,
-		Handler:      r,
+		Handler:      &ochttp.Handler{Handler: r},
 	}
+	setObservability(logger, cfg)
+	trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
 
 	lc.Append(fx.Hook{
 		OnStart: func(context.Context) error {
@@ -47,14 +49,17 @@ func NewMux(lc fx.Lifecycle, logger *zap.Logger, cfg configuration.Configuration
 	return r
 }
 
-func setExportStrategy(cfg configuration.Configuration) {
+// setObservability handles observability depending on the current development stage, strategy pattern applied
+func setObservability(logger *zap.Logger, cfg configuration.Configuration) {
 	//	rules
 	//	a.	if stage == dev or test, then use jaeger and prometheus OpenCensus exporters
 	//	b.	if stage != dev or test, then use production config (AWS X-Ray and CloudWatch)
 	switch {
 	case cfg.IsDevEnv() || cfg.IsTestEnv():
-		break
+		tracing.NewJaegerHTTP(logger, cfg)
+		// TODO: Add Prometheus
 	default:
+		// TODO: Add AWS X-Ray
 		break
 	}
 }

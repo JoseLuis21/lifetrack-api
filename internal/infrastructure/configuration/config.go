@@ -9,14 +9,17 @@ import (
 
 // Configuration kernel configuration
 type Configuration struct {
+	Service     string       `json:"service"`
 	Version     string       `json:"version"`
 	Stage       string       `json:"stage"`
 	HTTP        *httpServer  `json:"http"`
 	DynamoTable *dynamoTable `json:"dynamo_table"`
 	Cassandra   *cassandra   `json:"cassandra"`
+	Jaeger      *jaeger      `json:"jaeger"`
 }
 
 func init() {
+	viper.SetDefault("service", "tracker")
 	viper.SetDefault("version", "0.1.0-alpha")
 	viper.SetDefault("stage", DevelopmentStage)
 }
@@ -72,11 +75,13 @@ func (c Configuration) loadFromFile() error {
 }
 
 func (c *Configuration) Read() {
+	c.Service = strings.ToLower(viper.GetString("service"))
 	c.Version = strings.ToLower(viper.GetString("version"))
 	c.Stage = c.getStage()
 	c.HTTP.Load(c.Version)
 	c.DynamoTable.Load(c.Stage)
 	c.Cassandra.Load(c.Stage)
+	c.Jaeger.Load()
 }
 
 func (c Configuration) getStage() string {

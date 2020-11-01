@@ -12,6 +12,7 @@ func NewConfiguration() Configuration {
 		HTTP:        &httpServer{},
 		Cassandra:   &cassandra{},
 		DynamoTable: &dynamoTable{},
+		Jaeger:      &jaeger{},
 	}
 	if err := cfg.LoadEnv(); err != nil {
 		log.Printf("failed to load configuration: %+v", err)
@@ -25,6 +26,7 @@ func NewConfiguration() Configuration {
 func getDefault() Configuration {
 	stage := viper.GetString("stage")
 	return Configuration{
+		Service: viper.GetString("service"),
 		Version: viper.GetString("version"),
 		Stage:   stage,
 		HTTP: &httpServer{
@@ -41,6 +43,10 @@ func getDefault() Configuration {
 			Cluster:  viper.GetStringSlice("cassandra.cluster"),
 			Username: viper.GetString("cassandra.username"),
 			Password: viper.GetString("cassandra.password"),
+		},
+		Jaeger: &jaeger{
+			AgentEndpoint:     viper.GetString("jaeger.agent"),
+			CollectorEndpoint: viper.GetString("jaeger.collector"),
 		},
 	}
 }

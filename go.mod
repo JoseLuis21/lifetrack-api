@@ -3,6 +3,7 @@ module github.com/neutrinocorp/lifetrack-api
 go 1.15
 
 require (
+	contrib.go.opencensus.io/exporter/jaeger v0.2.1
 	github.com/alexandria-oss/common-go v0.3.0-alpha
 	github.com/asaskevich/EventBus v0.0.0-20200907212545-49d423059eef
 	github.com/aws/aws-lambda-go v1.19.1
