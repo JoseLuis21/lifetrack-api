@@ -19,7 +19,7 @@ function build() {
     FILE_NAME="$1/$2"
     echo "building go binary file for module: $FILE_NAME"
     LT_PATH="$GOPATH/src/github.com/neutrinocorp/lifetrack-api"
-    GOOS=linux GOARCH=amd64 go build -o "$LT_PATH/build/bin/$FILE_NAME" "$LT_PATH/cmd/$FILE_NAME/main.go"
+    GOOS=linux GOARCH=amd64 go build -o "$LT_PATH/build/bin/server/$FILE_NAME" "$LT_PATH/cmd/serverless/$FILE_NAME/main.go"
     echo "binary was successfully built"
   else
     err "empty argument(s)"
