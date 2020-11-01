@@ -9,6 +9,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// NewZap creates a preconfigured zap.Logger
 func NewZap(lc fx.Lifecycle, cfg configuration.Configuration) *zap.Logger {
 	logger, err := getZapLogger(cfg)
 	if err != nil {
