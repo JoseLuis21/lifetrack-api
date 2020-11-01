@@ -60,7 +60,7 @@ func (r *InMemory) Remove(_ context.Context, id string) error {
 }
 
 // setFetchStrategy chooses a fetching strategy depending on criteria values, if none returns nil
-func (r InMemory) setFetchStrategy(criteria repository.CategoryCriteria) fetchStrategy {
+func (r *InMemory) setFetchStrategy(criteria repository.CategoryCriteria) fetchStrategy {
 	switch {
 	case criteria.ID != "":
 		return fetchIDInMemory{db: r.db}
