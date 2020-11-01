@@ -19,7 +19,10 @@ func New(b event.Bus, cfg configuration.Configuration, logger *zap.Logger) event
 		Next: logBus{
 			Logger: logger,
 			Next: tracingBus{
-				Next: b,
+				Next: resiliencyBus{
+					Logger: logger,
+					Next:   b,
+				},
 			},
 		},
 	}

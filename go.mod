@@ -8,6 +8,7 @@ require (
 	github.com/aws/aws-lambda-go v1.19.1
 	github.com/aws/aws-sdk-go v1.35.14
 	github.com/awslabs/aws-lambda-go-api-proxy v0.8.0
+	github.com/eapache/go-resiliency v1.2.0
 	github.com/gocql/gocql v0.0.0-20201024154641-5913df4d474e
 	github.com/google/uuid v1.1.2
 	github.com/google/wire v0.4.0
