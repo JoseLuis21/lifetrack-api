@@ -5,6 +5,11 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/neutrinocorp/lifetrack-api/internal/infrastructure/logging"
+	"go.uber.org/zap"
+
+	"github.com/neutrinocorp/lifetrack-api/internal/infrastructure/persistence"
+
 	"github.com/neutrinocorp/lifetrack-api/internal/domain/event"
 	"github.com/neutrinocorp/lifetrack-api/internal/domain/repository"
 	"github.com/neutrinocorp/lifetrack-api/internal/infrastructure/persistence/inmemcategory"
@@ -19,15 +24,15 @@ import (
 )
 
 func main() {
-	// logger, _ := zap.NewProduction()
 	app := fx.New(
 		fx.Provide(
-			func() repository.Category {
-				return inmemcategory.NewInMemory()
-			},
 			configuration.NewConfiguration,
-			func(cfg configuration.Configuration) event.Bus {
-				return eventbus.NewInMemory(cfg)
+			logging.NewZap,
+			func(logger *zap.Logger) repository.Category {
+				return persistence.NewCategory(inmemcategory.NewInMemory(), logger)
+			},
+			func(cfg configuration.Configuration, logger *zap.Logger) event.Bus {
+				return eventbus.New(eventbus.NewInMemory(cfg), cfg, logger)
 			},
 			NewMux,
 			category.NewGetQuery,
@@ -51,53 +56,6 @@ func main() {
 	case <-app.Done():
 		log.Print("stop")
 	}
-	// Add middlewares
-
-	// Known code-smell, ignore
-	/*
-		getCategory, cleanCGet, err := dep.InjectGetCategoryQuery()
-		if err != nil {
-			panic(err)
-		}
-		defer cleanCGet()
-
-		_ = categoryhandler.NewGet(getCategory, r)
-
-		listCategory, cleanLCat, err := dep.InjectListCategoriesQuery()
-		if err != nil {
-			panic(err)
-		}
-		defer cleanLCat()
-
-		_ = categoryhandler.NewList(listCategory, r)
-
-		addCategory, cleanACat, err := dep.InjectAddCategoryHandler()
-		if err != nil {
-			panic(err)
-		}
-		defer cleanACat()
-
-		_ = categoryhandler.NewAdd(addCategory, r)
-
-		editCategory, cleanECat, err := dep.InjectEditCategory()
-		if err != nil {
-			panic(err)
-		}
-		defer cleanECat()
-
-		_ = categoryhandler.NewEdit(editCategory, r)
-
-		removeCategory, cleanRCat, err := dep.InjectRemoveCategory()
-		if err != nil {
-			panic(err)
-		}
-		defer cleanRCat()
-
-		_ = categoryhandler.NewRemove(removeCategory, r)
-
-		log.Print("starting http sandbox")
-
-		panic(http.ListenAndServe(":8080", r))*/
 }
 
 func NewMux(lc fx.Lifecycle) *mux.Router {
