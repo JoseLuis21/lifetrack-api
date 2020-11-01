@@ -30,7 +30,7 @@ func NewZap(lc fx.Lifecycle, cfg configuration.Configuration) *zap.Logger {
 }
 
 func getZapLogger(cfg configuration.Configuration) (*zap.Logger, error) {
-	if cfg.Stage == "dev" {
+	if cfg.IsDevEnv() || cfg.IsTestEnv() {
 		return zap.NewDevelopment()
 	}
 

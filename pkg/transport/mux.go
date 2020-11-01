@@ -46,3 +46,15 @@ func NewMux(lc fx.Lifecycle, logger *zap.Logger, cfg configuration.Configuration
 
 	return r
 }
+
+func setExportStrategy(cfg configuration.Configuration) {
+	//	rules
+	//	a.	if stage == dev or test, then use jaeger and prometheus OpenCensus exporters
+	//	b.	if stage != dev or test, then use production config (AWS X-Ray and CloudWatch)
+	switch {
+	case cfg.IsDevEnv() || cfg.IsTestEnv():
+		break
+	default:
+		break
+	}
+}

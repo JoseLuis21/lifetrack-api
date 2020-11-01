@@ -18,14 +18,15 @@ type Configuration struct {
 
 func init() {
 	viper.SetDefault("version", "0.1.0-alpha")
-	viper.SetDefault("stage", "dev")
+	viper.SetDefault("stage", DevelopmentStage)
 }
 
-func (c Configuration) LoadEnv() error {
+func (c *Configuration) LoadEnv() error {
 	//	rule
 	//	if stage is development (dev) then use config file
 	//	else use environment variables
-	if c.isDevEnv() {
+	c.Stage = os.Getenv("LT_STAGE")
+	if c.IsDevEnv() || c.IsTestEnv() {
 		return c.loadFromFile()
 	}
 
@@ -34,9 +35,20 @@ func (c Configuration) LoadEnv() error {
 	return nil
 }
 
-func (c Configuration) isDevEnv() bool {
-	stage := os.Getenv("LT_STAGE")
-	return stage == "dev"
+func (c Configuration) IsDevEnv() bool {
+	return c.Stage == DevelopmentStage
+}
+
+func (c Configuration) IsTestEnv() bool {
+	return c.Stage == TestingStage
+}
+
+func (c Configuration) IsStagingEnv() bool {
+	return c.Stage == StagingStage
+}
+
+func (c Configuration) IsProdEnv() bool {
+	return c.Stage == ProductionStage
 }
 
 func (c Configuration) loadFromFile() error {
@@ -61,8 +73,19 @@ func (c Configuration) loadFromFile() error {
 
 func (c *Configuration) Read() {
 	c.Version = strings.ToLower(viper.GetString("version"))
-	c.Stage = strings.ToLower(viper.GetString("stage"))
+	c.Stage = c.getStage()
 	c.HTTP.Load(c.Version)
 	c.DynamoTable.Load(c.Stage)
 	c.Cassandra.Load(c.Stage)
+}
+
+func (c Configuration) getStage() string {
+	stage := strings.ToLower(viper.GetString("stage"))
+	isValidStage := stage == DevelopmentStage || stage == TestingStage || stage == StagingStage ||
+		stage == ProductionStage
+	if !isValidStage {
+		return DevelopmentStage
+	}
+
+	return stage
 }
