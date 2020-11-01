@@ -2,6 +2,7 @@ package configuration
 
 import (
 	"os"
+	"strings"
 
 	"github.com/spf13/viper"
 )
@@ -10,18 +11,19 @@ import (
 type Configuration struct {
 	Version     string       `json:"version"`
 	Stage       string       `json:"stage"`
+	HTTP        *httpServer  `json:"http"`
 	DynamoTable *dynamoTable `json:"dynamo_table"`
 	Cassandra   *cassandra   `json:"cassandra"`
 }
 
 func init() {
 	viper.SetDefault("version", "0.1.0-alpha")
-	viper.SetDefault("stage", "prod")
+	viper.SetDefault("stage", "dev")
 }
 
 func (c Configuration) LoadEnv() error {
 	//	rule
-	//	if stage is development (dev) then use config file (lifetrack.yaml)
+	//	if stage is development (dev) then use config file
 	//	else use environment variables
 	if c.isDevEnv() {
 		return c.loadFromFile()
@@ -58,8 +60,9 @@ func (c Configuration) loadFromFile() error {
 }
 
 func (c *Configuration) Read() {
-	c.Version = viper.GetString("version")
-	c.Stage = viper.GetString("stage")
+	c.Version = strings.ToLower(viper.GetString("version"))
+	c.Stage = strings.ToLower(viper.GetString("stage"))
+	c.HTTP.Load(c.Version)
 	c.DynamoTable.Load(c.Stage)
 	c.Cassandra.Load(c.Stage)
 }

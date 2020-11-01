@@ -1,11 +1,6 @@
 package main
 
 import (
-	"context"
-	"log"
-	"net/http"
-
-	"github.com/gorilla/mux"
 	"github.com/neutrinocorp/lifetrack-api/internal/application/category"
 	"github.com/neutrinocorp/lifetrack-api/internal/domain/event"
 	"github.com/neutrinocorp/lifetrack-api/internal/domain/repository"
@@ -14,6 +9,7 @@ import (
 	"github.com/neutrinocorp/lifetrack-api/internal/infrastructure/logging"
 	"github.com/neutrinocorp/lifetrack-api/internal/infrastructure/persistence"
 	"github.com/neutrinocorp/lifetrack-api/internal/infrastructure/persistence/inmemcategory"
+	"github.com/neutrinocorp/lifetrack-api/pkg/transport"
 	"github.com/neutrinocorp/lifetrack-api/pkg/transport/categoryhandler"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
@@ -30,7 +26,7 @@ func main() {
 			func(cfg configuration.Configuration, logger *zap.Logger) event.Bus {
 				return eventbus.New(eventbus.NewInMemory(cfg), cfg, logger)
 			},
-			NewMux,
+			transport.NewMux,
 			category.NewGetQuery,
 			category.NewAddCommandHandler,
 			category.NewListQuery,
@@ -50,31 +46,5 @@ func main() {
 
 	select {
 	case <-app.Done():
-		log.Print("stop")
 	}
-}
-
-func NewMux(lc fx.Lifecycle) *mux.Router {
-	r := mux.NewRouter()
-	r = r.PathPrefix("/live").Subrouter()
-	server := &http.Server{
-		Addr:    ":8080",
-		Handler: r,
-	}
-
-	lc.Append(fx.Hook{
-		OnStart: func(context.Context) error {
-			go func() {
-				log.Print("starting http server")
-				_ = server.ListenAndServe()
-			}()
-			return nil
-		},
-		OnStop: func(ctx context.Context) error {
-			log.Print("stopping http server")
-			return server.Shutdown(ctx)
-		},
-	})
-
-	return r
 }

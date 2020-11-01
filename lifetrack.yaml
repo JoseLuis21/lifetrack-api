@@ -1,0 +1,15 @@
+cassandra:
+  cluster:
+  - 127.0.0.1
+  keyspace: lifetrack_dev
+  password: cassandra
+  username: cassandra
+dynamodb:
+  region: us-east-1
+  table: lifetrack-dev
+http:
+  address: ""
+  endpoint: /live
+  port: 8080
+stage: dev
+version: 0.1.0-alpha

@@ -9,6 +9,7 @@ import (
 // NewConfiguration reads and returns a kernel configuration
 func NewConfiguration() Configuration {
 	cfg := &Configuration{
+		HTTP:        &httpServer{},
 		Cassandra:   &cassandra{},
 		DynamoTable: &dynamoTable{},
 	}
@@ -26,6 +27,11 @@ func getDefault() Configuration {
 	return Configuration{
 		Version: viper.GetString("version"),
 		Stage:   stage,
+		HTTP: &httpServer{
+			Address:  viper.GetString("http.address"),
+			Port:     viper.GetInt("http.port"),
+			Endpoint: viper.GetString("http.endpoint"),
+		},
 		DynamoTable: &dynamoTable{
 			Name:   setResourceStage(viper.GetString("dynamodb.table"), stage),
 			Region: viper.GetString("dynamodb.region"),
